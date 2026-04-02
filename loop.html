@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 반복문 - 세영코딩연구소</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg2: #131929;
+    --bg3: #1a2235;
+    --card: #1c2640;
+    --border: #273045;
+    --accent: #22d3ee;
+    --accent2: #818cf8;
+    --accent3: #34d399;
+    --accent4: #fb923c;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #4b5878;
+    --code-bg: #080c14;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34,211,238,0.07) 0%, transparent 60%),
+      linear-gradient(rgba(34,211,238,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,0.025) 1px, transparent 1px);
+    background-size: 100% 100%, 48px 48px, 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 38px 0 26px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+
+  .lab-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34,211,238,0.08);
+    border: 1px solid rgba(34,211,238,0.3);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 11.5px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .lab-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+  header h1 {
+    font-family: 'Gmarket Sans', 'Noto Sans KR', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 20%, var(--accent) 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  header h1 span {
+    display: block;
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--accent);
+    -webkit-text-fill-color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-top: 6px;
+  }
+
+  .author-line {
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* NAV */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 10px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text2);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px rgba(34,211,238,0.3);
+  }
+
+  .tab-btn:hover:not(.active) { background: var(--bg3); color: var(--text); }
+
+  /* SECTIONS */
+  .section { display: none; animation: fadeUp 0.28s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* CONCEPT BOX */
+  .concept-box {
+    background: linear-gradient(135deg, rgba(34,211,238,0.06), rgba(129,140,248,0.05));
+    border: 1px solid rgba(34,211,238,0.2);
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+  }
+
+  .concept-box h2 {
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .concept-box p { color: var(--text2); line-height: 1.85; font-size: 0.9rem; }
+
+  /* TWO PILL */
+  .pill-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+
+  .pill {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .pill .icon { font-size: 1.6rem; margin-bottom: 5px; }
+  .pill .name { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--accent); }
+  .pill .desc { font-size: 0.76rem; color: var(--text3); margin-top: 3px; }
+
+  /* CODE CARD */
+  .code-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+
+  .code-card:hover { border-color: rgba(34,211,238,0.35); }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-title {
+    font-size: 0.82rem;
+    color: var(--text);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  .t-for   { background: rgba(34,211,238,0.12);  color: var(--accent);  border: 1px solid rgba(34,211,238,0.3); }
+  .t-while { background: rgba(129,140,248,0.12); color: var(--accent2); border: 1px solid rgba(129,140,248,0.3); }
+  .t-break { background: rgba(248,113,113,0.12); color: var(--red);    border: 1px solid rgba(248,113,113,0.3); }
+  .t-cont  { background: rgba(251,191,36,0.1);   color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .t-nest  { background: rgba(52,211,153,0.1);   color: var(--accent3);border: 1px solid rgba(52,211,153,0.3); }
+  .t-range { background: rgba(251,146,60,0.1);   color: var(--accent4);border: 1px solid rgba(251,146,60,0.3); }
+
+  .dot-group { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+
+  .code-body { padding: 16px 18px; }
+
+  pre.cblock {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.78;
+    color: #e2e8f0;
+    overflow-x: auto;
+    white-space: pre;
+    margin-bottom: 10px;
+  }
+
+  .kw  { color: #22d3ee; }
+  .fn  { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .num { color: #f78c6c; }
+  .var { color: #ffcb6b; }
+  .op  { color: #89ddff; }
+  .cm  { color: #3a4a5e; }
+
+  .oblock {
+    background: rgba(52,211,153,0.06);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.79rem;
+    color: var(--accent3);
+    white-space: pre-wrap;
+  }
+
+  .oblock::before {
+    content: '▶ 출력';
+    display: block;
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 5px;
+    letter-spacing: 0.06em;
+  }
+
+  /* TABLE */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 0.86rem;
+    margin-bottom: 18px;
+  }
+
+  .info-table th {
+    background: var(--bg2);
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 10.5px;
+    color: var(--text3);
+    letter-spacing: 0.07em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .info-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(39,48,69,0.6);
+    color: var(--text2);
+  }
+
+  .info-table tr:last-child td { border-bottom: none; }
+
+  .info-table code {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    background: rgba(34,211,238,0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  /* GRID 2-COL */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* RANGE VISUALIZER */
+  .range-viz {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .range-viz label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+
+  .range-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+
+  .range-controls input[type="number"] {
+    width: 62px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+
+  .range-controls input[type="number"]:focus { outline: none; border-color: var(--accent); }
+
+  .range-controls span { color: var(--text3); font-size: 12px; }
+
+  .range-result {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 34px;
+  }
+
+  .rnum {
+    background: rgba(34,211,238,0.1);
+    border: 1px solid rgba(34,211,238,0.25);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    animation: popIn 0.2s ease;
+  }
+
+  @keyframes popIn { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+
+  .viz-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    padding: 7px 14px;
+    color: var(--bg);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .viz-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 12px rgba(34,211,238,0.4); }
+
+  /* LOOP ANIMATOR */
+  .loop-anim {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+
+  .anim-title { font-size: 12px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; }
+
+  .anim-steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+
+  .anim-step {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text3);
+    transition: all 0.3s;
+  }
+
+  .anim-step.active {
+    background: rgba(34,211,238,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(34,211,238,0.3);
+  }
+
+  .anim-step.done {
+    background: rgba(52,211,153,0.1);
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+
+  .anim-controls { display: flex; gap: 8px; align-items: center; }
+
+  .anim-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: var(--text2);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .anim-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .anim-btn.play { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+
+  .anim-status { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); margin-left: 4px; }
+
+  /* PATTERN CARDS */
+  .pattern-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* SIMULATOR */
+  .simulator {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 22px;
+  }
+
+  .sim-header {
+    padding: 12px 20px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sim-header .dot-group { margin-right: auto; }
+  .sim-title { font-size: 12px; color: var(--text2); font-family: 'JetBrains Mono', monospace; }
+
+  .sim-body { padding: 18px 20px; }
+
+  .sim-body label {
+    display: block;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.07em;
+    margin-bottom: 5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .sim-body input[type="text"] {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 13px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83rem;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+
+  .sim-body input[type="text"]:focus { outline: none; border-color: var(--accent); }
+
+  .sim-body textarea {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.72;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.2s;
+    margin-bottom: 10px;
+  }
+
+  .sim-body textarea:focus { outline: none; border-color: var(--accent); }
+
+  .run-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    color: #fff;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .run-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(34,211,238,0.35); }
+
+  .sim-output {
+    margin-top: 14px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.79rem;
+    min-height: 52px;
+    color: var(--accent3);
+    white-space: pre-wrap;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .sim-output.error { color: var(--red); }
+  .sim-output::before { content: '$ '; color: var(--text3); }
+
+  /* QUICK EXAMPLES for simulator */
+  .quick-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+
+  .qbtn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .qbtn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* SUMMARY TABLE */
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 26px 0 18px;
+    border-top: 1px solid var(--border);
+    color: var(--text3);
+    font-size: 11.5px;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.9;
+  }
+
+  footer span { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.8rem; }
+    .grid2, .pattern-grid { grid-template-columns: 1fr; }
+    .pill-row { grid-template-columns: 1fr 1fr; }
+    .tab-btn { font-size: 11px; padding: 8px 6px; }
+    pre.cblock { font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="lab-badge">세영코딩연구소 · SEYYOUNG CODING LAB</div>
+    <h1>파이썬 반복문<span>Python Loop Statements</span></h1>
+    <div class="author-line">저자: ph.D kim &nbsp;|&nbsp; Python 3.x &nbsp;|&nbsp; for / while / break / continue</div>
+  </header>
+
+  <!-- TABS -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('개념',this)">📘 개념</button>
+    <button class="tab-btn" onclick="switchTab('for',this)">🔁 for문</button>
+    <button class="tab-btn" onclick="switchTab('range',this)">🎯 range()</button>
+    <button class="tab-btn" onclick="switchTab('while',this)">🔄 while문</button>
+    <button class="tab-btn" onclick="switchTab('break',this)">⛔ break/continue</button>
+    <button class="tab-btn" onclick="switchTab('심화',this)">🔩 심화</button>
+    <button class="tab-btn" onclick="switchTab('패턴',this)">⚡ 패턴</button>
+    <button class="tab-btn" onclick="switchTab('시뮬',this)">▶ 시뮬레이터</button>
+  </div>
+
+  <!-- ① 개념 -->
+  <div id="tab-개념" class="section active">
+    <div class="concept-box">
+      <h2>💡 반복문이란?</h2>
+      <p>반복문은 같은 코드를 <strong style="color:var(--accent)">여러 번 반복</strong>해서 실행할 때 사용하는 문법입니다.<br>
+      "Hello를 100번 출력"처럼 동일 작업을 자동화할 수 있습니다.</p>
+      <div class="pill-row">
+        <div class="pill">
+          <div class="icon">🔁</div>
+          <div class="name">for</div>
+          <div class="desc">정해진 횟수 반복</div>
+        </div>
+        <div class="pill">
+          <div class="icon">🔄</div>
+          <div class="name">while</div>
+          <div class="desc">조건이 참인 동안 반복</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loop Animator -->
+    <div class="section-title">🎬 반복문 애니메이션</div>
+    <div class="loop-anim">
+      <div class="anim-title">for i in range(6): print(i) — 실행 흐름 시각화</div>
+      <div class="anim-steps" id="animSteps"></div>
+      <div class="anim-controls">
+        <button class="anim-btn play" id="playBtn" onclick="togglePlay()">▶ 재생</button>
+        <button class="anim-btn" onclick="resetAnim()">↩ 초기화</button>
+        <span class="anim-status" id="animStatus">i = —</span>
+      </div>
+    </div>
+
+    <div class="section-title">📋 핵심 문법 정리</div>
+    <table class="info-table">
+      <tr><th>문법</th><th>설명</th><th>예시</th></tr>
+      <tr><td><code>for</code></td><td>정해진 횟수 반복</td><td><code>for i in range(5):</code></td></tr>
+      <tr><td><code>while</code></td><td>조건 반복</td><td><code>while i &lt;= 5:</code></td></tr>
+      <tr><td><code>break</code></td><td>반복 강제 종료</td><td><code>if i==3: break</code></td></tr>
+      <tr><td><code>continue</code></td><td>현재 반복 건너뜀</td><td><code>if i==3: continue</code></td></tr>
+      <tr><td><code>range()</code></td><td>숫자 범위 생성</td><td><code>range(1, 11, 2)</code></td></tr>
+    </table>
+  </div>
+
+  <!-- ② for문 -->
+  <div id="tab-for" class="section">
+    <div class="section-title">🔁 for 문 기본 문법</div>
+    <div class="concept-box">
+      <h2>📌 핵심 구조</h2>
+      <p><code style="color:var(--accent);background:rgba(34,211,238,0.1);padding:2px 7px;border-radius:4px;font-family:JetBrains Mono">for 변수 in range(반복횟수):</code> 형태로 사용합니다.<br>
+      들여쓰기(4칸) 안의 코드가 반복 실행됩니다.</p>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-for">예제 1</span> 0~4 출력 (5회 반복)</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):
+    <span class="fn">print</span>(<span class="var">i</span>)</pre>
+        <div class="oblock">0
+1
+2
+3
+4</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-for">예제 2</span> 1~5 출력</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">6</span>):
+    <span class="fn">print</span>(<span class="var">i</span>)</pre>
+        <div class="oblock">1  2  3  4  5</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-for">예제 3</span> "Hello" 5번 출력</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):
+    <span class="fn">print</span>(<span class="str">"Hello"</span>)</pre>
+        <div class="oblock">Hello
+Hello
+Hello
+Hello
+Hello</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-for">예제 4</span> 1~10 합 구하기</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">total</span> <span class="op">=</span> <span class="num">0</span>
+
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">11</span>):
+    <span class="var">total</span> <span class="op">+=</span> <span class="var">i</span>
+
+<span class="fn">print</span>(<span class="var">total</span>)</pre>
+        <div class="oblock">55</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ range() -->
+  <div id="tab-range" class="section">
+    <div class="section-title">🎯 range() 다양한 사용법</div>
+
+    <div class="grid2">
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-range">range(n)</span> 0부터 n-1</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="fn">range</span>(<span class="num">5</span>)
+<span class="cm"># 0 1 2 3 4</span></pre>
+          <div class="oblock">0  1  2  3  4</div>
+        </div>
+      </div>
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-range">range(s,e)</span> s부터 e-1</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="fn">range</span>(<span class="num">1</span>, <span class="num">6</span>)
+<span class="cm"># 1 2 3 4 5</span></pre>
+          <div class="oblock">1  2  3  4  5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-range">range(s,e,step)</span> 시작, 끝, 간격</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">0</span>, <span class="num">10</span>, <span class="num">2</span>):   <span class="cm"># 0,2,4,6,8</span>
+    <span class="fn">print</span>(<span class="var">i</span>)</pre>
+        <div class="oblock">0  2  4  6  8</div>
+      </div>
+    </div>
+
+    <!-- Interactive Range Visualizer -->
+    <div class="section-title" style="margin-top:24px">🔬 range() 인터랙티브 시각화</div>
+    <div class="range-viz">
+      <label>파라미터를 바꿔서 range() 결과를 확인해보세요</label>
+      <div class="range-controls">
+        <span>range(</span>
+        <input type="number" id="rStart" value="0" placeholder="start">
+        <span>,</span>
+        <input type="number" id="rEnd" value="10" placeholder="end">
+        <span>,</span>
+        <input type="number" id="rStep" value="1" placeholder="step">
+        <span>)</span>
+        <button class="viz-btn" onclick="updateRange()">확인</button>
+      </div>
+      <div class="range-result" id="rangeResult"></div>
+    </div>
+  </div>
+
+  <!-- ④ while문 -->
+  <div id="tab-while" class="section">
+    <div class="section-title">🔄 while 문</div>
+    <div class="concept-box">
+      <h2>📌 핵심 개념</h2>
+      <p>조건이 <strong style="color:var(--accent2)">참(True)</strong>인 동안 계속 반복합니다.<br>
+      반드시 반복 변수를 직접 증가시켜야 무한 루프를 방지할 수 있습니다.</p>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-while">예제 1</span> 1~5 출력</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">i</span> <span class="op">=</span> <span class="num">1</span>
+
+<span class="kw">while</span> <span class="var">i</span> <span class="op"><=</span> <span class="num">5</span>:
+    <span class="fn">print</span>(<span class="var">i</span>)
+    <span class="var">i</span> <span class="op">+=</span> <span class="num">1</span>   <span class="cm"># 반드시 증가!</span></pre>
+        <div class="oblock">1
+2
+3
+4
+5</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-while">예제 2</span> Hello 3번 출력</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">i</span> <span class="op">=</span> <span class="num">0</span>
+
+<span class="kw">while</span> <span class="var">i</span> <span class="op"><</span> <span class="num">3</span>:
+    <span class="fn">print</span>(<span class="str">"Hello"</span>)
+    <span class="var">i</span> <span class="op">+=</span> <span class="num">1</span></pre>
+        <div class="oblock">Hello
+Hello
+Hello</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-while">예제 3</span> 1~10 합 (while)</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">i</span> <span class="op">=</span> <span class="num">1</span>
+<span class="var">s</span> <span class="op">=</span> <span class="num">0</span>
+
+<span class="kw">while</span> <span class="var">i</span> <span class="op"><=</span> <span class="num">10</span>:
+    <span class="var">s</span> <span class="op">+=</span> <span class="var">i</span>
+    <span class="var">i</span> <span class="op">+=</span> <span class="num">1</span>
+
+<span class="fn">print</span>(<span class="var">s</span>)</pre>
+        <div class="oblock">55</div>
+      </div>
+    </div>
+
+    <!-- for vs while comparison -->
+    <div class="section-title" style="margin-top:22px">⚖️ for vs while 비교</div>
+    <table class="info-table">
+      <tr><th>구분</th><th>for 문</th><th>while 문</th></tr>
+      <tr><td>반복 기준</td><td>정해진 횟수·범위</td><td>조건이 참인 동안</td></tr>
+      <tr><td>카운터</td><td>자동 (range)</td><td>직접 관리 필요</td></tr>
+      <tr><td>주 사용처</td><td>횟수 반복, 리스트 순회</td><td>조건 기반 반복</td></tr>
+      <tr><td>주의</td><td>—</td><td>무한 루프 주의</td></tr>
+    </table>
+  </div>
+
+  <!-- ⑤ break/continue -->
+  <div id="tab-break" class="section">
+    <div class="section-title">⛔ break 문</div>
+    <div class="concept-box">
+      <h2>📌 break</h2>
+      <p><code style="color:var(--red);background:rgba(248,113,113,0.1);padding:1px 6px;border-radius:4px;font-family:JetBrains Mono">break</code>는 반복문을 <strong style="color:var(--red)">강제로 종료</strong>합니다. 조건을 만족하면 즉시 루프를 빠져나옵니다.</p>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-break">break</span> i가 5가 되면 종료</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>):
+    <span class="kw">if</span> <span class="var">i</span> <span class="op">==</span> <span class="num">5</span>:
+        <span class="kw">break</span>        <span class="cm"># 여기서 종료!</span>
+    <span class="fn">print</span>(<span class="var">i</span>)</pre>
+        <div class="oblock">0
+1
+2
+3
+4</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:24px">⏭️ continue 문</div>
+    <div class="concept-box">
+      <h2>📌 continue</h2>
+      <p><code style="color:var(--yellow);background:rgba(251,191,36,0.1);padding:1px 6px;border-radius:4px;font-family:JetBrains Mono">continue</code>는 현재 반복을 <strong style="color:var(--yellow)">건너뛰고</strong> 다음 반복으로 이동합니다. 루프 자체는 계속됩니다.</p>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-cont">continue</span> i가 3이면 건너뜀</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">6</span>):
+    <span class="kw">if</span> <span class="var">i</span> <span class="op">==</span> <span class="num">3</span>:
+        <span class="kw">continue</span>     <span class="cm"># 3 건너뜀</span>
+    <span class="fn">print</span>(<span class="var">i</span>)</pre>
+        <div class="oblock">1
+2
+4
+5</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:22px">📊 break vs continue 비교</div>
+    <table class="info-table">
+      <tr><th>구문</th><th>동작</th><th>루프 상태</th></tr>
+      <tr><td><code>break</code></td><td>즉시 루프 탈출</td><td>종료</td></tr>
+      <tr><td><code>continue</code></td><td>현재 반복만 건너뜀</td><td>계속</td></tr>
+    </table>
+  </div>
+
+  <!-- ⑥ 심화 -->
+  <div id="tab-심화" class="section">
+    <div class="section-title">🔩 반복문 + 조건문</div>
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-for">for</span> 짝수만 출력</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">11</span>):
+    <span class="kw">if</span> <span class="var">i</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>:
+        <span class="fn">print</span>(<span class="var">i</span>)</pre>
+        <div class="oblock">2  4  6  8  10</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:22px">🔩 중첩 반복문</div>
+    <div class="concept-box">
+      <h2>📌 중첩 반복문</h2>
+      <p>반복문 안에 반복문을 넣을 수 있습니다. 바깥 루프 1회마다 안쪽 루프 전체가 실행됩니다.</p>
+    </div>
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-nest">중첩</span> i, j 쌍 출력</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">3</span>):
+    <span class="kw">for</span> <span class="var">j</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">3</span>):
+        <span class="fn">print</span>(<span class="var">i</span>, <span class="var">j</span>)</pre>
+        <div class="oblock">0 0 / 0 1 / 0 2
+1 0 / 1 1 / 1 2
+2 0 / 2 1 / 2 2</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:22px">⭐ 별찍기 예제</div>
+    <div class="grid2">
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-for">별</span> 5줄 출력</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):
+    <span class="fn">print</span>(<span class="str">"*"</span>)</pre>
+          <div class="oblock">*
+*
+*
+*
+*</div>
+        </div>
+      </div>
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-for">별</span> 삼각형</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">6</span>):
+    <span class="fn">print</span>(<span class="str">"*"</span> <span class="op">*</span> <span class="var">i</span>)</pre>
+          <div class="oblock">*
+**
+***
+****
+*****</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:22px">🔢 구구단 · 리스트 순회</div>
+    <div class="grid2">
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-for">구구단</span> 2단</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">10</span>):
+    <span class="fn">print</span>(<span class="str">"2 x"</span>, <span class="var">i</span>, <span class="str">"="</span>, <span class="num">2</span><span class="op">*</span><span class="var">i</span>)</pre>
+          <div class="oblock">2 x 1 = 2
+2 x 2 = 4
+2 x 3 = 6
+...</div>
+        </div>
+      </div>
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-for">리스트</span> 순회</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>]
+
+<span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">arr</span>:
+    <span class="fn">print</span>(<span class="var">x</span>)</pre>
+          <div class="oblock">10
+20
+30
+40</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-card" style="margin-top:14px">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-nest">enumerate</span> 인덱스 + 값</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> [<span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span>]
+
+<span class="kw">for</span> <span class="var">i</span>, <span class="var">v</span> <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="var">arr</span>):
+    <span class="fn">print</span>(<span class="var">i</span>, <span class="var">v</span>)</pre>
+        <div class="oblock">0 a
+1 b
+2 c</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑦ 패턴 -->
+  <div id="tab-패턴" class="section">
+    <div class="section-title">⚡ 자주 사용하는 패턴</div>
+    <div class="pattern-grid">
+
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-for">패턴 1</span> 합 구하기</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="var">s</span> <span class="op">=</span> <span class="num">0</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="var">n</span><span class="op">+</span><span class="num">1</span>):
+    <span class="var">s</span> <span class="op">+=</span> <span class="var">i</span>
+<span class="fn">print</span>(<span class="var">s</span>)</pre>
+        </div>
+      </div>
+
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-for">패턴 2</span> 개수 세기</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="var">cnt</span> <span class="op">=</span> <span class="num">0</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">11</span>):
+    <span class="kw">if</span> <span class="var">i</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>:
+        <span class="var">cnt</span> <span class="op">+=</span> <span class="num">1</span>
+<span class="fn">print</span>(<span class="var">cnt</span>)</pre>
+        </div>
+      </div>
+
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-for">패턴 3</span> 최대값 찾기</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="var">mx</span> <span class="op">=</span> <span class="num">0</span>
+<span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">arr</span>:
+    <span class="kw">if</span> <span class="var">x</span> <span class="op">></span> <span class="var">mx</span>:
+        <span class="var">mx</span> <span class="op">=</span> <span class="var">x</span>
+<span class="fn">print</span>(<span class="var">mx</span>)</pre>
+        </div>
+      </div>
+
+      <div class="code-card">
+        <div class="code-header">
+          <div class="code-title"><span class="tag t-for">패턴 4</span> 짝수 합</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="code-body">
+          <pre class="cblock"><span class="var">s</span> <span class="op">=</span> <span class="num">0</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">2</span>, <span class="num">11</span>, <span class="num">2</span>):
+    <span class="var">s</span> <span class="op">+=</span> <span class="var">i</span>
+<span class="fn">print</span>(<span class="var">s</span>)  <span class="cm"># 30</span></pre>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ⑧ 시뮬레이터 -->
+  <div id="tab-시뮬" class="section">
+    <div class="section-title">▶ 코드 시뮬레이터</div>
+
+    <div class="simulator">
+      <div class="sim-header">
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <span class="sim-title">loop_simulator.py</span>
+      </div>
+      <div class="sim-body">
+        <label>빠른 예제 불러오기</label>
+        <div class="quick-btns">
+          <button class="qbtn" onclick="loadExample('1~5출력')">1~5 출력</button>
+          <button class="qbtn" onclick="loadExample('1~10합')">1~10 합</button>
+          <button class="qbtn" onclick="loadExample('짝수출력')">짝수 출력</button>
+          <button class="qbtn" onclick="loadExample('삼각형')">별 삼각형</button>
+          <button class="qbtn" onclick="loadExample('구구단')">2단 구구단</button>
+          <button class="qbtn" onclick="loadExample('break예제')">break 예제</button>
+          <button class="qbtn" onclick="loadExample('continue예제')">continue 예제</button>
+          <button class="qbtn" onclick="loadExample('while합')">while 합</button>
+        </div>
+        <label>INPUT (입력값)</label>
+        <input type="text" id="simInput" placeholder="입력값이 필요한 경우 입력하세요">
+        <label>CODE (코드 입력)</label>
+        <textarea id="simCode" placeholder="코드를 입력하거나 위에서 예제를 불러오세요.
+
+예시:
+for i in range(1, 6):
+    print(i)"></textarea>
+        <button class="run-btn" onclick="runSim()">▶ 실행하기</button>
+        <div id="simOutput" class="sim-output" style="opacity:0.4">실행 결과가 여기에 표시됩니다.</div>
+      </div>
+    </div>
+
+    <div class="concept-box">
+      <h2>⚠️ 시뮬레이터 안내</h2>
+      <p>
+        <strong style="color:var(--accent)">지원:</strong> for / while / break / continue / if-elif-else / print / int / input / range / enumerate / 리스트<br>
+        <strong style="color:var(--red)">미지원:</strong> 함수 정의, 클래스, 복잡한 중첩 자료구조 등<br>
+        <strong style="color:var(--yellow)">주의:</strong> 무한 루프 방지를 위해 최대 500회 반복으로 제한됩니다.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span>세영코딩연구소</span> &nbsp;|&nbsp; 저자: <span>ph.D kim</span><br>
+    Python 3.x · 반복문 (for / while / break / continue / range)
+  </div>
+</footer>
+
+<script>
+// ── TAB ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── LOOP ANIMATOR ──
+let animTimer = null;
+let animIdx = -1;
+const animMax = 6;
+
+function buildAnimSteps() {
+  const wrap = document.getElementById('animSteps');
+  wrap.innerHTML = '';
+  for (let i = 0; i < animMax; i++) {
+    const el = document.createElement('div');
+    el.className = 'anim-step';
+    el.id = 'astep-' + i;
+    el.textContent = i;
+    wrap.appendChild(el);
+  }
+}
+
+function togglePlay() {
+  const btn = document.getElementById('playBtn');
+  if (animTimer) {
+    clearInterval(animTimer);
+    animTimer = null;
+    btn.textContent = '▶ 재생';
+  } else {
+    btn.textContent = '⏸ 일시정지';
+    animTimer = setInterval(stepAnim, 650);
+  }
+}
+
+function stepAnim() {
+  if (animIdx >= 0) {
+    const prev = document.getElementById('astep-' + animIdx);
+    if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
+  }
+  animIdx++;
+  if (animIdx >= animMax) {
+    clearInterval(animTimer); animTimer = null;
+    document.getElementById('playBtn').textContent = '▶ 재생';
+    document.getElementById('animStatus').textContent = '완료!';
+    animIdx = -1;
+    return;
+  }
+  const cur = document.getElementById('astep-' + animIdx);
+  if (cur) cur.classList.add('active');
+  document.getElementById('animStatus').textContent = 'i = ' + animIdx;
+}
+
+function resetAnim() {
+  clearInterval(animTimer); animTimer = null;
+  animIdx = -1;
+  document.getElementById('playBtn').textContent = '▶ 재생';
+  document.getElementById('animStatus').textContent = 'i = —';
+  buildAnimSteps();
+}
+
+buildAnimSteps();
+
+// ── RANGE VISUALIZER ──
+function updateRange() {
+  const s = parseInt(document.getElementById('rStart').value) || 0;
+  const e = parseInt(document.getElementById('rEnd').value) || 10;
+  const st = parseInt(document.getElementById('rStep').value) || 1;
+  const res = document.getElementById('rangeResult');
+  res.innerHTML = '';
+  if (st === 0) { res.textContent = 'step은 0이 될 수 없습니다.'; return; }
+  let nums = [];
+  if (st > 0) { for (let i = s; i < e; i += st) nums.push(i); }
+  else { for (let i = s; i > e; i += st) nums.push(i); }
+  if (nums.length > 50) { res.textContent = '결과가 너무 많습니다 (50개 초과)'; return; }
+  nums.forEach((n, i) => {
+    const el = document.createElement('div');
+    el.className = 'rnum';
+    el.textContent = n;
+    el.style.animationDelay = (i * 0.04) + 's';
+    res.appendChild(el);
+  });
+  if (nums.length === 0) res.textContent = '(결과 없음)';
+}
+
+updateRange();
+
+// ── QUICK EXAMPLES ──
+const examples = {
+  '1~5출력': ['', `for i in range(1, 6):\n    print(i)`],
+  '1~10합': ['', `total = 0\nfor i in range(1, 11):\n    total += i\nprint(total)`],
+  '짝수출력': ['', `for i in range(1, 11):\n    if i % 2 == 0:\n        print(i)`],
+  '삼각형': ['', `for i in range(1, 6):\n    print("*" * i)`],
+  '구구단': ['', `for i in range(1, 10):\n    print("2 x", i, "=", 2 * i)`],
+  'break예제': ['', `for i in range(10):\n    if i == 5:\n        break\n    print(i)`],
+  'continue예제': ['', `for i in range(1, 6):\n    if i == 3:\n        continue\n    print(i)`],
+  'while합': ['', `i = 1\ns = 0\nwhile i <= 10:\n    s += i\n    i += 1\nprint(s)`],
+};
+
+function loadExample(name) {
+  const [inp, code] = examples[name] || ['',''];
+  document.getElementById('simInput').value = inp;
+  document.getElementById('simCode').value = code;
+}
+
+// ── SIMULATOR ──
+function runSim() {
+  const code = document.getElementById('simCode').value;
+  const rawInput = document.getElementById('simInput').value;
+  const outEl = document.getElementById('simOutput');
+  outEl.style.opacity = '1';
+  outEl.className = 'sim-output';
+
+  try {
+    const inputLines = rawInput.split('\n');
+    let inputIdx = 0;
+    const output = [];
+    let totalIter = 0;
+    const MAX_ITER = 500;
+
+    function inp() { return (inputLines[inputIdx++] || '').trim(); }
+
+    function evalVal(expr, env) {
+      expr = expr.trim();
+      if (expr === 'True') return true;
+      if (expr === 'False') return false;
+      if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'")))
+        return expr.slice(1, -1);
+      if (/^-?\d+$/.test(expr)) return parseInt(expr);
+      if (/^-?\d+\.\d+$/.test(expr)) return parseFloat(expr);
+      if (/^\[/.test(expr)) {
+        const inner = expr.slice(1, -1).trim();
+        if (!inner) return [];
+        return splitCommas(inner).map(e => evalVal(e.trim(), env));
+      }
+      if (/^[a-zA-Z_]\w*$/.test(expr)) return env.hasOwnProperty(expr) ? env[expr] : 0;
+
+      let m;
+      if ((m = expr.match(/^int\(input\(\)\)$/))) return parseInt(inp());
+      if ((m = expr.match(/^input\(\)$/))) return inp();
+      if ((m = expr.match(/^input\(["'].*["']\)$/))) return inp();
+      if ((m = expr.match(/^int\((.+)\)$/))) return parseInt(evalVal(m[1], env));
+      if ((m = expr.match(/^str\((.+)\)$/))) return String(evalVal(m[1], env));
+      if ((m = expr.match(/^float\((.+)\)$/))) return parseFloat(evalVal(m[1], env));
+      if ((m = expr.match(/^len\((.+)\)$/))) { const v = evalVal(m[1], env); return Array.isArray(v) ? v.length : String(v).length; }
+      if ((m = expr.match(/^max\((.+),(.+)\)$/))) return Math.max(evalVal(m[1], env), evalVal(m[2], env));
+      if ((m = expr.match(/^min\((.+),(.+)\)$/))) return Math.min(evalVal(m[1], env), evalVal(m[2], env));
+      if ((m = expr.match(/^range\((.+)\)$/))) {
+        const args = splitCommas(m[1]).map(a => parseInt(evalVal(a.trim(), env)));
+        const [s, e, st] = args.length === 1 ? [0, args[0], 1] : args.length === 2 ? [args[0], args[1], 1] : args;
+        const arr = [];
+        if (st > 0) for (let i = s; i < e; i += st) arr.push(i);
+        else for (let i = s; i > e; i += st) arr.push(i);
+        return arr;
+      }
+      if ((m = expr.match(/^list\(map\(int,\s*input\(\)\.split\(\)\)\)$/))) return inp().split(/\s+/).map(Number);
+      if ((m = expr.match(/^enumerate\((.+)\)$/))) {
+        const arr = evalVal(m[1], env);
+        return Array.isArray(arr) ? arr.map((v, i) => [i, v]) : [];
+      }
+      if ((m = expr.match(/^(.+)\.split\(\)$/))) return String(evalVal(m[1], env)).split(/\s+/);
+      // string * n
+      if ((m = expr.match(/^["'](.*)["']\s*\*\s*(.+)$/))) return m[1].repeat(parseInt(evalVal(m[2], env)));
+      if ((m = expr.match(/^(.+)\s*\*\s*["'](.*)["']$/))) return m[2].repeat(parseInt(evalVal(m[1], env)));
+
+      // binary ops
+      for (const op of ['//', '%', '**', '*', '/', '+', '-', '>=', '<=', '>', '<', '==', '!=']) {
+        const oi = expr.lastIndexOf(op);
+        if (oi > 0) {
+          const L = expr.slice(0, oi).trim(), R = expr.slice(oi + op.length).trim();
+          if (L && R) {
+            const l = evalVal(L, env), r = evalVal(R, env);
+            if (op === '//') return Math.trunc(l / r);
+            if (op === '%') return ((l % r) + Math.abs(r)) % Math.abs(r);
+            if (op === '**') return Math.pow(l, r);
+            if (op === '*') return (typeof l === 'string') ? l.repeat(r) : (typeof r === 'string') ? r.repeat(l) : l * r;
+            if (op === '/') return l / r;
+            if (op === '+') return (typeof l === 'string' || typeof r === 'string') ? String(l) + String(r) : l + r;
+            if (op === '-') return l - r;
+            if (op === '>=') return l >= r;
+            if (op === '<=') return l <= r;
+            if (op === '>') return l > r;
+            if (op === '<') return l < r;
+            if (op === '==') return l == r;
+            if (op === '!=') return l != r;
+          }
+        }
+      }
+      return expr;
+    }
+
+    function evalCond(cond, env) {
+      if (cond.startsWith('not ')) return !evalCond(cond.slice(4).trim(), env);
+      const ands = cond.split(' and ');
+      if (ands.length > 1) return ands.every(p => evalCond(p.trim(), env));
+      const ors = cond.split(' or ');
+      if (ors.length > 1) return ors.some(p => evalCond(p.trim(), env));
+      return !!evalVal(cond, env);
+    }
+
+    function splitCommas(str) {
+      const parts = []; let depth = 0, cur = '';
+      for (const c of str) {
+        if ('([{'.includes(c)) depth++;
+        else if (')]}'.includes(c)) depth--;
+        else if (c === ',' && depth === 0) { parts.push(cur); cur = ''; continue; }
+        cur += c;
+      }
+      if (cur.trim()) parts.push(cur);
+      return parts;
+    }
+
+    function getIndent(line) {
+      return (line.match(/^(\s*)/) || ['', ''])[1].length;
+    }
+
+    function collectBody(lines, start, baseIndent) {
+      const body = [];
+      let j = start;
+      while (j < lines.length) {
+        const bl = lines[j];
+        if (!bl.trim()) { j++; continue; }
+        if (getIndent(bl) <= baseIndent) break;
+        body.push(bl);
+        j++;
+      }
+      return { body, end: j };
+    }
+
+    // Returns { output: bool (break/continue signal), type: 'break'|'continue'|null }
+    function runBlock(lines, env) {
+      let i = 0;
+      while (i < lines.length) {
+        if (totalIter++ > MAX_ITER * 10) throw new Error('무한 루프 감지 — 실행 중단');
+        const line = lines[i];
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) { i++; continue; }
+
+        if (trimmed === 'break') return { signal: 'break' };
+        if (trimmed === 'continue') return { signal: 'continue' };
+
+        // print
+        let m = trimmed.match(/^print\((.+)\)$/);
+        if (!m) m = trimmed.match(/^print\(\)$/);
+        if (m) {
+          if (trimmed === 'print()') { output.push(''); i++; continue; }
+          let args = m[1];
+          let sep = ' ', end = '\n';
+          const sepM = args.match(/,\s*sep\s*=\s*["'](.*)["']\s*(?:,|$)/);
+          if (sepM) { sep = sepM[1]; args = args.replace(/,\s*sep\s*=\s*["'].*?["']/, ''); }
+          const endM = args.match(/,\s*end\s*=\s*["'](.*)["']\s*(?:,|$)/);
+          if (endM) { end = endM[1]; args = args.replace(/,\s*end\s*=\s*["'].*?["']/, ''); }
+          args = args.trim().replace(/,$/, '').trim();
+          const parts = splitCommas(args).map(a => evalVal(a.trim(), env));
+          output.push(parts.join(sep));
+          i++; continue;
+        }
+
+        // map unpack: a, b = map(int, input().split())
+        const mapM = trimmed.match(/^([a-zA-Z_,\s]+)\s*=\s*map\(int,\s*input\(\)\.split\(\)\)$/);
+        if (mapM) {
+          const vars = mapM[1].split(',').map(v => v.trim());
+          const vals = inp().split(/\s+/).map(Number);
+          vars.forEach((v, j2) => { env[v] = vals[j2] ?? 0; });
+          i++; continue;
+        }
+
+        // augmented assign: x += ...
+        const augM = trimmed.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|\/\/=|%=)\s*(.+)$/);
+        if (augM) {
+          const [, vname, op, rhs] = augM;
+          const r = evalVal(rhs, env);
+          const l = env[vname] ?? 0;
+          if (op === '+=') env[vname] = (typeof l === 'string' || typeof r === 'string') ? String(l) + String(r) : l + r;
+          else if (op === '-=') env[vname] = l - r;
+          else if (op === '*=') env[vname] = l * r;
+          else if (op === '/=') env[vname] = l / r;
+          else if (op === '//=') env[vname] = Math.trunc(l / r);
+          else if (op === '%=') env[vname] = l % r;
+          i++; continue;
+        }
+
+        // for loop
+        if (/^for .+ in .+:$/.test(trimmed)) {
+          const baseIndent = getIndent(line);
+          const { body, end } = collectBody(lines, i + 1, baseIndent);
+
+          const loopM = trimmed.match(/^for (.+) in (.+):$/);
+          if (loopM) {
+            const varPart = loopM[1].trim();
+            const iterExpr = loopM[2].trim();
+            const iterVal = evalVal(iterExpr, env);
+            const iterable = Array.isArray(iterVal) ? iterVal : [];
+
+            let broken = false;
+            for (const item of iterable) {
+              if (totalIter++ > MAX_ITER) throw new Error('최대 반복 횟수(500) 초과');
+              // Unpack
+              if (varPart.includes(',')) {
+                const vars2 = varPart.split(',').map(v => v.trim());
+                if (Array.isArray(item)) vars2.forEach((v, j2) => { env[v] = item[j2]; });
+                else vars2.forEach((v, j2) => { env[v] = j2 === 0 ? item : undefined; });
+              } else {
+                env[varPart] = item;
+              }
+              const res = runBlock(body, env);
+              if (res && res.signal === 'break') { broken = true; break; }
+              // continue just restarts
+            }
+          }
+          i = end;
+          continue;
+        }
+
+        // while loop
+        if (/^while .+:$/.test(trimmed)) {
+          const baseIndent = getIndent(line);
+          const { body, end } = collectBody(lines, i + 1, baseIndent);
+          const condStr = trimmed.slice(6, -1).trim();
+          let loopCount = 0;
+          while (evalCond(condStr, env)) {
+            if (++loopCount > MAX_ITER || totalIter++ > MAX_ITER * 10) throw new Error('최대 반복 횟수(500) 초과');
+            const res = runBlock(body, env);
+            if (res && res.signal === 'break') break;
+          }
+          i = end;
+          continue;
+        }
+
+        // if/elif/else block
+        if (/^if .+:$/.test(trimmed) || /^elif .+:$/.test(trimmed) || /^else:$/.test(trimmed)) {
+          const baseIndent = getIndent(line);
+          const branches = [];
+          let j = i;
+          while (j < lines.length) {
+            const bl = lines[j].trim();
+            if (!bl) { j++; continue; }
+            const bi = getIndent(lines[j]);
+            if (bi < baseIndent) break;
+            if (bi === baseIndent) {
+              if (/^if .+:$/.test(bl) || /^elif .+:$/.test(bl)) {
+                const cond = bl.replace(/^(if|elif)\s+/, '').slice(0, -1).trim();
+                const { body, end } = collectBody(lines, j + 1, baseIndent);
+                branches.push({ cond, body });
+                j = end;
+              } else if (/^else:$/.test(bl)) {
+                const { body, end } = collectBody(lines, j + 1, baseIndent);
+                branches.push({ cond: '__else__', body });
+                j = end;
+              } else break;
+            } else break;
+          }
+          let executed = false;
+          for (const branch of branches) {
+            if (executed) break;
+            if (branch.cond === '__else__' || evalCond(branch.cond, env)) {
+              const res = runBlock(branch.body, env);
+              if (res && res.signal) return res;
+              executed = true;
+            }
+          }
+          i = j;
+          continue;
+        }
+
+        // assignment
+        const aM = trimmed.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+        if (aM) { env[aM[1]] = evalVal(aM[2], env); i++; continue; }
+
+        i++;
+      }
+      return { signal: null };
+    }
+
+    runBlock(code.split('\n'), {});
+    outEl.textContent = output.join('\n') || '(출력 없음)';
+
+  } catch (e) {
+    outEl.className = 'sim-output error';
+    outEl.textContent = '오류: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>

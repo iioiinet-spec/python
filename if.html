@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 조건문 - 세영코딩연구소</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1c2230;
+    --card: #1e2638;
+    --border: #2d3748;
+    --accent: #f97316;
+    --accent2: #ef4444;
+    --accent3: #10b981;
+    --accent4: #facc15;
+    --purple: #a78bfa;
+    --blue: #60a5fa;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --code-bg: #0a0e15;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(249,115,22,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249,115,22,0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 36px 0 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+
+  .lab-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(249,115,22,0.08);
+    border: 1px solid rgba(249,115,22,0.35);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 11.5px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .lab-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  header h1 {
+    font-family: 'Gmarket Sans', 'Noto Sans KR', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 20%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  header h1 span {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: var(--accent);
+    -webkit-text-fill-color: var(--accent);
+    letter-spacing: 0.18em;
+    margin-top: 6px;
+  }
+
+  .author-line {
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* TABS */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 88px;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text2);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px rgba(249,115,22,0.35);
+  }
+
+  .tab-btn:hover:not(.active) { background: var(--bg3); color: var(--text); }
+
+  /* SECTIONS */
+  .section { display: none; animation: fadeIn 0.28s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* CONCEPT BOX */
+  .concept-box {
+    background: linear-gradient(135deg, rgba(249,115,22,0.07), rgba(239,68,68,0.05));
+    border: 1px solid rgba(249,115,22,0.22);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+
+  .concept-box h2 {
+    font-size: 1rem;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .concept-box p {
+    color: var(--text2);
+    line-height: 1.85;
+    font-size: 0.92rem;
+  }
+
+  /* CODE CARD */
+  .code-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    transition: border-color 0.2s;
+  }
+
+  .code-card:hover { border-color: rgba(249,115,22,0.4); }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 18px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-title {
+    font-size: 0.83rem;
+    color: var(--text);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+
+  .tag-if   { background: rgba(249,115,22,0.12); color: var(--accent); border: 1px solid rgba(249,115,22,0.3); }
+  .tag-else { background: rgba(96,165,250,0.12); color: var(--blue);   border: 1px solid rgba(96,165,250,0.3); }
+  .tag-elif { background: rgba(167,139,250,0.12);color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
+  .tag-op   { background: rgba(250,204,21,0.1);  color: var(--accent4);border: 1px solid rgba(250,204,21,0.3); }
+  .tag-nest { background: rgba(16,185,129,0.1);  color: var(--accent3);border: 1px solid rgba(16,185,129,0.3); }
+  .tag-tern { background: rgba(239,68,68,0.1);   color: var(--accent2);border: 1px solid rgba(239,68,68,0.3); }
+
+  .dot-group { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+
+  .code-body { padding: 18px 20px; }
+
+  pre.code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.81rem;
+    line-height: 1.75;
+    color: #e2e8f0;
+    overflow-x: auto;
+    margin-bottom: 10px;
+    white-space: pre;
+  }
+
+  .kw  { color: #f97316; }
+  .fn  { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .num { color: #f78c6c; }
+  .var { color: #ffcb6b; }
+  .op  { color: #89ddff; }
+  .cm  { color: #546e7a; }
+  .bool{ color: #c792ea; }
+
+  .output-block {
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.22);
+    border-radius: 8px;
+    padding: 11px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.81rem;
+    color: var(--accent3);
+  }
+
+  .output-block::before {
+    content: '▶ 출력';
+    display: block;
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 5px;
+    letter-spacing: 0.06em;
+  }
+
+  /* TABLE */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    font-size: 0.87rem;
+  }
+
+  .info-table th {
+    background: var(--bg2);
+    padding: 11px 18px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.07em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .info-table td {
+    padding: 11px 18px;
+    border-bottom: 1px solid rgba(45,55,72,0.5);
+    color: var(--text2);
+  }
+
+  .info-table tr:last-child td { border-bottom: none; }
+
+  .info-table code {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    background: rgba(249,115,22,0.08);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.83rem;
+  }
+
+  /* PROBLEMS */
+  .progress-bar {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .progress-label { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .progress-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 100px; overflow: hidden; }
+  .progress-fill  { height: 100%; background: linear-gradient(90deg, var(--accent), #facc15); border-radius: 100px; transition: width 0.4s ease; }
+  .progress-count { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); white-space: nowrap; }
+
+  .problem-grid { display: grid; gap: 18px; }
+
+  .problem-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+
+  .problem-card:hover { border-color: rgba(249,115,22,0.45); transform: translateY(-2px); }
+
+  .problem-top {
+    display: flex;
+    align-items: center;
+    padding: 13px 20px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+
+  .problem-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .problem-title { font-size: 0.93rem; font-weight: 700; color: var(--text); flex: 1; }
+
+  .diff-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .diff-1 { background: rgba(16,185,129,0.14); color: var(--accent3); border: 1px solid rgba(16,185,129,0.3); }
+  .diff-2 { background: rgba(250,204,21,0.12); color: var(--accent4); border: 1px solid rgba(250,204,21,0.3); }
+  .diff-3 { background: rgba(239,68,68,0.12);  color: var(--accent2); border: 1px solid rgba(239,68,68,0.3); }
+
+  .problem-body { padding: 18px 20px; }
+  .problem-desc { color: var(--text2); font-size: 0.87rem; line-height: 1.75; margin-bottom: 14px; }
+
+  .io-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+
+  .io-box { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; }
+  .io-box-label { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-bottom: 5px; letter-spacing: 0.07em; }
+  .io-box-content { font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; color: var(--accent3); }
+
+  .answer-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(249,115,22,0.1);
+    border: 1px solid rgba(249,115,22,0.3);
+    border-radius: 8px;
+    padding: 9px 16px;
+    color: var(--accent);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .answer-btn:hover { background: rgba(249,115,22,0.2); border-color: rgba(249,115,22,0.5); }
+
+  .answer-area { display: none; margin-top: 12px; animation: fadeIn 0.22s ease; }
+  .answer-area.open { display: block; }
+
+  /* FLOWCHART AREA */
+  .flow-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    user-select: none;
+  }
+
+  .flow-box {
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .flow-start  { background: rgba(249,115,22,0.15); border: 2px solid var(--accent); color: var(--accent); border-radius: 50px; }
+  .flow-cond   { background: rgba(250,204,21,0.12); border: 2px solid var(--accent4); color: var(--accent4); transform: rotate(0deg); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); border-radius: 0; padding: 18px 30px; }
+  .flow-action { background: rgba(96,165,250,0.1);  border: 2px solid var(--blue);    color: var(--blue); }
+  .flow-end    { background: rgba(16,185,129,0.1);  border: 2px solid var(--accent3); color: var(--accent3); border-radius: 50px; }
+  .flow-arrow  { font-size: 1.2rem; color: var(--text3); line-height: 1; margin: 2px 0; }
+
+  .flow-branch {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .flow-branch-col { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .flow-label { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin: 2px 0; }
+
+  /* SIMULATOR */
+  .simulator {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .sim-header {
+    padding: 12px 20px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sim-header .dot-group { margin-right: auto; }
+  .sim-title { font-size: 12.5px; color: var(--text2); font-family: 'JetBrains Mono', monospace; }
+
+  .sim-body { padding: 20px; }
+
+  .sim-body label {
+    display: block;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.07em;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .sim-body textarea {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 13px 15px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.81rem;
+    line-height: 1.72;
+    resize: vertical;
+    min-height: 110px;
+    transition: border-color 0.2s;
+    margin-bottom: 12px;
+  }
+
+  .sim-body textarea:focus { outline: none; border-color: var(--accent); }
+
+  .sim-body input[type="text"] {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .sim-body input[type="text"]:focus { outline: none; border-color: var(--accent); }
+
+  .run-btn {
+    background: linear-gradient(135deg, var(--accent), #dc2626);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 26px;
+    color: white;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .run-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(249,115,22,0.4); }
+  .run-btn:active { transform: translateY(0); }
+
+  .sim-output {
+    margin-top: 16px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.81rem;
+    min-height: 54px;
+    color: var(--accent3);
+    white-space: pre-wrap;
+  }
+
+  .sim-output.error { color: var(--accent2); }
+  .sim-output::before { content: '$ '; color: var(--text3); }
+
+  footer {
+    text-align: center;
+    padding: 28px 0 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text3);
+    font-size: 11.5px;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.9;
+  }
+
+  footer span { color: var(--accent); }
+
+  @media (max-width: 580px) {
+    header h1 { font-size: 1.75rem; }
+    .io-row { grid-template-columns: 1fr; }
+    .tab-btn { font-size: 11px; padding: 8px 8px; }
+    pre.code-block { font-size: 0.76rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="lab-badge">세영코딩연구소 · SEYYOUNG CODING LAB</div>
+    <h1>파이썬 조건문<span>Python Conditional Statements</span></h1>
+    <div class="author-line">저자: ph.D kim &nbsp;|&nbsp; Python 3.x &nbsp;|&nbsp; if / elif / else</div>
+  </header>
+
+  <!-- TABS -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('개념', this)">📘 기본 개념</button>
+    <button class="tab-btn" onclick="switchTab('ifelse', this)">🔀 if-else</button>
+    <button class="tab-btn" onclick="switchTab('elif', this)">🔢 elif</button>
+    <button class="tab-btn" onclick="switchTab('연산자', this)">⚡ 연산자</button>
+    <button class="tab-btn" onclick="switchTab('심화', this)">🔩 중첩·삼항</button>
+    <button class="tab-btn" onclick="switchTab('연습', this)">🧩 연습문제</button>
+    <button class="tab-btn" onclick="switchTab('시뮬', this)">▶ 시뮬레이터</button>
+  </div>
+
+  <!-- 개념 -->
+  <div id="tab-개념" class="section active">
+    <div class="concept-box">
+      <h2>💡 조건문이란?</h2>
+      <p>
+        조건문은 어떤 <strong style="color:var(--accent)">조건이 참(True)</strong>일 때만 실행되는 문장입니다.<br>
+        예를 들어 "나이가 14세 이상이면 중학생입니다"처럼, 조건에 따라 다른 코드를 실행할 수 있습니다.
+      </p>
+    </div>
+
+    <div class="section-title">📐 기본 구조</div>
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-if">if</span> 기본 if 구조</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="kw">if</span> 조건:
+    실행할 코드  <span class="cm"># 들여쓰기(4칸) 필수!</span></pre>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-if">예제</span> 나이로 학생 구분</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="var">age</span> <span class="op">=</span> <span class="num">15</span>
+
+<span class="kw">if</span> <span class="var">age</span> <span class="op">>=</span> <span class="num">14</span>:
+    <span class="fn">print</span>(<span class="str">"중학생입니다"</span>)</pre>
+        <div class="output-block">중학생입니다</div>
+      </div>
+    </div>
+
+    <!-- 흐름도 -->
+    <div class="section-title">🔄 조건문 흐름도</div>
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-if">Flow</span> if 문 실행 흐름</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <div class="flow-wrap">
+          <div class="flow-box flow-start">시작 (START)</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box flow-cond">조건 판단</div>
+          <div style="display:flex;gap:60px;align-items:flex-start;margin-top:6px">
+            <div class="flow-branch-col">
+              <div class="flow-label" style="color:#facc15">참 (True)</div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-box flow-action">코드 실행</div>
+              <div class="flow-arrow">↓</div>
+            </div>
+            <div class="flow-branch-col">
+              <div class="flow-label" style="color:var(--accent2)">거짓 (False)</div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-box" style="background:rgba(239,68,68,0.08);border:2px solid var(--accent2);color:var(--accent2);border-radius:10px;padding:10px 22px;font-family:'Noto Sans KR';font-size:.82rem;font-weight:600;min-width:140px;text-align:center">건너뜀 (Skip)</div>
+              <div class="flow-arrow">↓</div>
+            </div>
+          </div>
+          <div class="flow-box flow-end">종료 (END)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- if-else -->
+  <div id="tab-ifelse" class="section">
+    <div class="section-title">🔀 if - else 문</div>
+    <div class="concept-box">
+      <h2>📌 핵심 개념</h2>
+      <p>조건이 <strong style="color:var(--accent)">참(True)</strong>이면 <code style="color:var(--accent);background:rgba(249,115,22,0.1);padding:1px 6px;border-radius:4px;font-family:JetBrains Mono">if</code> 블록이 실행되고,
+      <strong style="color:var(--blue)">거짓(False)</strong>이면 <code style="color:var(--blue);background:rgba(96,165,250,0.1);padding:1px 6px;border-radius:4px;font-family:JetBrains Mono">else</code> 블록이 실행됩니다.</p>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-if">if</span><span class="tag tag-else">else</span> 짝수 / 홀수 판별</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="var">n</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+
+<span class="kw">if</span> <span class="var">n</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>:
+    <span class="fn">print</span>(<span class="str">"짝수"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"홀수"</span>)</pre>
+        <div class="output-block">입력 4 → 짝수<br>입력 7 → 홀수</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-if">if</span><span class="tag tag-else">else</span> 양수 / 음수 판별</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="var">n</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+
+<span class="kw">if</span> <span class="var">n</span> <span class="op">></span> <span class="num">0</span>:
+    <span class="fn">print</span>(<span class="str">"양수입니다"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"양수가 아닙니다"</span>)</pre>
+        <div class="output-block">입력 5 → 양수입니다</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-if">if</span><span class="tag tag-else">else</span> 합격 / 불합격</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="var">score</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+
+<span class="kw">if</span> <span class="var">score</span> <span class="op">>=</span> <span class="num">60</span>:
+    <span class="fn">print</span>(<span class="str">"합격"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"불합격"</span>)</pre>
+        <div class="output-block">입력 75 → 합격<br>입력 40 → 불합격</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- elif -->
+  <div id="tab-elif" class="section">
+    <div class="section-title">🔢 if - elif - else 문</div>
+    <div class="concept-box">
+      <h2>📌 핵심 개념</h2>
+      <p>여러 조건을 순서대로 검사할 때 사용합니다.<br>
+      위에서부터 순서대로 조건을 확인하고, 처음으로 참이 되는 블록만 실행됩니다.</p>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-if">if</span><span class="tag tag-elif">elif</span><span class="tag tag-else">else</span> 성적 등급</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="var">score</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+
+<span class="kw">if</span> <span class="var">score</span> <span class="op">>=</span> <span class="num">90</span>:
+    <span class="fn">print</span>(<span class="str">"A"</span>)
+<span class="kw">elif</span> <span class="var">score</span> <span class="op">>=</span> <span class="num">80</span>:
+    <span class="fn">print</span>(<span class="str">"B"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"C"</span>)</pre>
+        <div class="output-block">입력 95 → A &nbsp;&nbsp; 입력 82 → B &nbsp;&nbsp; 입력 70 → C</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-elif">elif</span> 양수 / 0 / 음수 구분</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="var">n</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+
+<span class="kw">if</span> <span class="var">n</span> <span class="op">></span> <span class="num">0</span>:
+    <span class="fn">print</span>(<span class="str">"양수"</span>)
+<span class="kw">elif</span> <span class="var">n</span> <span class="op">==</span> <span class="num">0</span>:
+    <span class="fn">print</span>(<span class="str">"ZERO"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"음수"</span>)</pre>
+        <div class="output-block">입력 5 → 양수 &nbsp;&nbsp; 입력 0 → ZERO &nbsp;&nbsp; 입력 -3 → 음수</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연산자 -->
+  <div id="tab-연산자" class="section">
+    <div class="section-title">⚡ 비교 연산자</div>
+    <table class="info-table">
+      <tr><th>연산자</th><th>의미</th><th>예시</th></tr>
+      <tr><td><code>&gt;</code></td><td>크다</td><td><code>a &gt; 5</code> → a가 5보다 크면 True</td></tr>
+      <tr><td><code>&lt;</code></td><td>작다</td><td><code>a &lt; 10</code> → a가 10보다 작으면 True</td></tr>
+      <tr><td><code>&gt;=</code></td><td>크거나 같다</td><td><code>a &gt;= 0</code> → a가 0 이상이면 True</td></tr>
+      <tr><td><code>&lt;=</code></td><td>작거나 같다</td><td><code>a &lt;= 100</code> → a가 100 이하이면 True</td></tr>
+      <tr><td><code>==</code></td><td>같다</td><td><code>a == b</code> → a와 b가 같으면 True</td></tr>
+      <tr><td><code>!=</code></td><td>다르다</td><td><code>a != b</code> → a와 b가 다르면 True</td></tr>
+    </table>
+
+    <div class="section-title" style="margin-top:28px">🔗 논리 연산자</div>
+    <table class="info-table">
+      <tr><th>연산자</th><th>의미</th><th>설명</th></tr>
+      <tr><td><code>and</code></td><td>그리고</td><td>두 조건이 모두 참일 때 True</td></tr>
+      <tr><td><code>or</code></td><td>또는</td><td>두 조건 중 하나라도 참이면 True</td></tr>
+      <tr><td><code>not</code></td><td>부정</td><td>참이면 False, 거짓이면 True</td></tr>
+    </table>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-op">and / or</span> 논리 연산자 예제</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="var">age</span> <span class="op">=</span> <span class="num">15</span>
+
+<span class="cm"># and: 두 조건 모두 참</span>
+<span class="kw">if</span> <span class="var">age</span> <span class="op">>=</span> <span class="num">14</span> <span class="kw">and</span> <span class="var">age</span> <span class="op"><=</span> <span class="num">16</span>:
+    <span class="fn">print</span>(<span class="str">"중학생"</span>)
+
+<span class="cm"># or: 하나만 참이어도 실행</span>
+<span class="kw">if</span> <span class="var">age</span> <span class="op">==</span> <span class="num">13</span> <span class="kw">or</span> <span class="var">age</span> <span class="op">==</span> <span class="num">15</span>:
+    <span class="fn">print</span>(<span class="str">"특정 나이"</span>)</pre>
+        <div class="output-block">중학생<br>특정 나이</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 심화 -->
+  <div id="tab-심화" class="section">
+    <div class="section-title">🔩 중첩 if 문</div>
+    <div class="concept-box">
+      <h2>📌 중첩 if</h2>
+      <p>조건문 안에 또 다른 조건문을 넣을 수 있습니다. 들여쓰기로 계층을 구분합니다.</p>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-nest">중첩</span> 양수이면서 짝수인지 판별</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="var">n</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+
+<span class="kw">if</span> <span class="var">n</span> <span class="op">></span> <span class="num">0</span>:           <span class="cm"># 바깥 조건: 양수</span>
+    <span class="kw">if</span> <span class="var">n</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>:  <span class="cm"># 안쪽 조건: 짝수</span>
+        <span class="fn">print</span>(<span class="str">"양수 짝수"</span>)</pre>
+        <div class="output-block">입력 4 → 양수 짝수<br>입력 3 → (출력 없음)</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:28px">⚡ 삼항 연산 (한 줄 if)</div>
+    <div class="concept-box">
+      <h2>📌 삼항 연산자</h2>
+      <p>간단한 if-else를 <strong style="color:var(--accent)">한 줄</strong>로 표현하는 방법입니다.</p>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag tag-tern">삼항</span> 짝수/홀수 한 줄 표현</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="code-block"><span class="cm"># 일반 방식</span>
+<span class="var">n</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+<span class="kw">if</span> <span class="var">n</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>:
+    <span class="fn">print</span>(<span class="str">"짝수"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"홀수"</span>)
+
+<span class="cm"># 삼항 연산으로 한 줄</span>
+<span class="fn">print</span>(<span class="str">"짝수"</span> <span class="kw">if</span> <span class="var">n</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span> <span class="kw">else</span> <span class="str">"홀수"</span>)</pre>
+        <div class="output-block">입력 6 → 짝수</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연습문제 -->
+  <div id="tab-연습" class="section">
+    <div class="progress-bar">
+      <span class="progress-label">풀이 진행도</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <span class="progress-count" id="progressCount">0 / 19</span>
+    </div>
+    <div class="section-title">🧩 연습문제 19개</div>
+    <div class="problem-grid" id="problemGrid"></div>
+  </div>
+
+  <!-- 시뮬레이터 -->
+  <div id="tab-시뮬" class="section">
+    <div class="section-title">▶ 코드 시뮬레이터</div>
+    <div class="simulator">
+      <div class="sim-header">
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <span class="sim-title">if_simulator.py</span>
+      </div>
+      <div class="sim-body">
+        <label>INPUT (입력값)</label>
+        <input type="text" id="simInput" placeholder="예: 85   또는   3 8   또는   0">
+        <label>CODE (코드 입력)</label>
+        <textarea id="simCode" placeholder="코드를 입력하고 실행 버튼을 눌러보세요.
+
+예시:
+score = int(input())
+if score >= 90:
+    print(&quot;A&quot;)
+elif score >= 80:
+    print(&quot;B&quot;)
+else:
+    print(&quot;C&quot;)"></textarea>
+        <button class="run-btn" onclick="runSim()">▶ 실행하기</button>
+        <div id="simOutput" class="sim-output" style="opacity:0.4">실행 결과가 여기에 표시됩니다.</div>
+      </div>
+    </div>
+    <div class="concept-box">
+      <h2>⚠️ 시뮬레이터 안내</h2>
+      <p>
+        <strong style="color:var(--accent4)">지원:</strong> int(), input(), print(), if / elif / else, 비교·논리 연산자, %, //, max(), min()<br>
+        <strong style="color:var(--accent2)">미지원:</strong> 반복문, 함수 정의 등 고급 문법 (실제 Python 환경을 권장합니다)
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span>세영코딩연구소</span> &nbsp;|&nbsp; 저자: <span>ph.D kim</span><br>
+    Python 3.x · 조건문(if / elif / else) · 연습문제 19선
+  </div>
+</footer>
+
+<script>
+// TAB
+function switchTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// PROBLEMS
+const problems = [
+  { n:1,  title:"양수 판별",      desc:"정수 하나를 입력받아 양수이면 \"양수\"를 출력하시오.",                       sampleIn:"5",   sampleOut:"양수",     answer:`n = int(input())\nif n > 0:\n    print("양수")`,                                              diff:1 },
+  { n:2,  title:"짝수 판별",      desc:"정수를 입력받아 짝수이면 \"짝수\"를 출력하시오.",                            sampleIn:"4",   sampleOut:"짝수",     answer:`n = int(input())\nif n % 2 == 0:\n    print("짝수")`,                                           diff:1 },
+  { n:3,  title:"홀수 판별",      desc:"정수를 입력받아 홀수이면 \"홀수\"를 출력하시오.",                            sampleIn:"7",   sampleOut:"홀수",     answer:`n = int(input())\nif n % 2 != 0:\n    print("홀수")`,                                           diff:1 },
+  { n:4,  title:"두 수 중 큰 수", desc:"두 정수를 입력받아 큰 수를 출력하시오.",                                     sampleIn:"3 8", sampleOut:"8",        answer:`a, b = map(int, input().split())\nif a > b:\n    print(a)\nelse:\n    print(b)`,               diff:1 },
+  { n:5,  title:"ZERO 판별",      desc:"정수를 입력받아 0이면 \"ZERO\"를 출력하시오.",                              sampleIn:"0",   sampleOut:"ZERO",     answer:`n = int(input())\nif n == 0:\n    print("ZERO")`,                                             diff:1 },
+  { n:6,  title:"합격 판별",      desc:"점수를 입력받아 60점 이상이면 \"합격\"을 출력하시오.",                       sampleIn:"75",  sampleOut:"합격",     answer:`score = int(input())\nif score >= 60:\n    print("합격")`,                                      diff:1 },
+  { n:7,  title:"불합격 판별",    desc:"점수를 입력받아 60점 미만이면 \"불합격\"을 출력하시오.",                      sampleIn:"40",  sampleOut:"불합격",   answer:`score = int(input())\nif score < 60:\n    print("불합격")`,                                    diff:1 },
+  { n:8,  title:"음수 판별",      desc:"정수를 입력받아 음수이면 \"음수\"를 출력하시오.",                            sampleIn:"-5",  sampleOut:"음수",     answer:`n = int(input())\nif n < 0:\n    print("음수")`,                                             diff:1 },
+  { n:9,  title:"두 수 같은지",   desc:"두 정수를 입력받아 같으면 \"같다\"를 출력하시오.",                           sampleIn:"5 5", sampleOut:"같다",     answer:`a, b = map(int, input().split())\nif a == b:\n    print("같다")`,                             diff:1 },
+  { n:10, title:"성인 판별",      desc:"나이를 입력받아 20세 이상이면 \"성인\"을 출력하시오.",                       sampleIn:"25",  sampleOut:"성인",     answer:`age = int(input())\nif age >= 20:\n    print("성인")`,                                        diff:1 },
+  { n:11, title:"EVEN 출력",      desc:"정수를 입력받아 짝수이면 EVEN을 출력하시오.",                                sampleIn:"6",   sampleOut:"EVEN",     answer:`n = int(input())\nif n % 2 == 0:\n    print("EVEN")`,                                        diff:1 },
+  { n:12, title:"ODD 출력",       desc:"정수를 입력받아 홀수이면 ODD를 출력하시오.",                                 sampleIn:"3",   sampleOut:"ODD",      answer:`n = int(input())\nif n % 2 != 0:\n    print("ODD")`,                                         diff:1 },
+  { n:13, title:"두 수 중 작은 수",desc:"두 정수를 입력받아 작은 수를 출력하시오.",                                  sampleIn:"7 2", sampleOut:"2",        answer:`a, b = map(int, input().split())\nif a < b:\n    print(a)\nelse:\n    print(b)`,               diff:1 },
+  { n:14, title:"성적 등급 A/B/C",desc:"점수를 입력받아 90 이상→A, 80 이상→B, 나머지→C를 출력하시오.",              sampleIn:"85",  sampleOut:"B",        answer:`score = int(input())\nif score >= 90:\n    print("A")\nelif score >= 80:\n    print("B")\nelse:\n    print("C")`, diff:2 },
+  { n:15, title:"3의 배수",       desc:"정수를 입력받아 3의 배수이면 출력하시오.",                                   sampleIn:"9",   sampleOut:"9",        answer:`n = int(input())\nif n % 3 == 0:\n    print(n)`,                                             diff:1 },
+  { n:16, title:"100보다 큰 수",  desc:"정수를 입력받아 100보다 크면 \"100보다큼\"을 출력하시오.",                   sampleIn:"150", sampleOut:"100보다큼",answer:`n = int(input())\nif n > 100:\n    print("100보다큼")`,                                    diff:1 },
+  { n:17, title:"한 자리 수",     desc:"양의 정수를 입력받아 10보다 작을 때 \"한자리수\"를 출력하시오.",              sampleIn:"7",   sampleOut:"한자리수", answer:`n = int(input())\nif n < 10:\n    print("한자리수")`,                                       diff:1 },
+  { n:18, title:"두 수 중 큰 수 2",desc:"두 정수를 입력받아 큰 수를 출력하시오. (elif 버전)",                       sampleIn:"4 9", sampleOut:"9",        answer:`a, b = map(int, input().split())\nif a >= b:\n    print(a)\nelse:\n    print(b)`,             diff:2 },
+  { n:19, title:"5의 배수",       desc:"정수를 입력받아 5의 배수이면 출력하시오.",                                   sampleIn:"25",  sampleOut:"25",       answer:`n = int(input())\nif n % 5 == 0:\n    print(n)`,                                            diff:1 },
+];
+
+let solved = new Set();
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildProblems() {
+  const grid = document.getElementById('problemGrid');
+  grid.innerHTML = problems.map(p => `
+    <div class="problem-card" id="pcard-${p.n}">
+      <div class="problem-top">
+        <span class="problem-num">문제 ${p.n}</span>
+        <span class="problem-title">${p.title}</span>
+        <span class="diff-badge diff-${p.diff}">${p.diff===1?'★ 기초':p.diff===2?'★★ 초급':'★★★ 중급'}</span>
+      </div>
+      <div class="problem-body">
+        <p class="problem-desc">${p.desc}</p>
+        <div class="io-row">
+          <div class="io-box">
+            <div class="io-box-label">INPUT EXAMPLE</div>
+            <div class="io-box-content">${esc(p.sampleIn).replace(/\n/g,'<br>')}</div>
+          </div>
+          <div class="io-box">
+            <div class="io-box-label">OUTPUT EXAMPLE</div>
+            <div class="io-box-content">${esc(p.sampleOut)}</div>
+          </div>
+        </div>
+        <button class="answer-btn" onclick="toggleAnswer(${p.n}, this)">🔍 정답 보기</button>
+        <div class="answer-area" id="ans-${p.n}">
+          <pre class="code-block">${hlCode(p.answer)}</pre>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function hlCode(code) {
+  let s = esc(code);
+  s = s.replace(/\b(if|elif|else|and|or|not|print|int|map|input|max|min)\b/g, (m) => {
+    if (['if','elif','else','and','or','not'].includes(m)) return `<span class="kw">${m}</span>`;
+    return `<span class="fn">${m}</span>`;
+  });
+  s = s.replace(/&quot;([^&]*)&quot;/g, '<span class="str">"$1"</span>');
+  s = s.replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+  s = s.replace(/\b(-?\d+)\b/g, '<span class="num">$1</span>');
+  s = s.replace(/#.*/g, m => `<span class="cm">${m}</span>`);
+  return s;
+}
+
+function toggleAnswer(n, btn) {
+  const area = document.getElementById('ans-' + n);
+  const open = area.classList.toggle('open');
+  btn.textContent = open ? '🙈 정답 닫기' : '🔍 정답 보기';
+  if (open && !solved.has(n)) {
+    solved.add(n);
+    updateProgress();
+  }
+}
+
+function updateProgress() {
+  const pct = (solved.size / problems.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = `${solved.size} / ${problems.length}`;
+}
+
+// SIMULATOR
+function runSim() {
+  const code = document.getElementById('simCode').value;
+  const rawInput = document.getElementById('simInput').value;
+  const out = document.getElementById('simOutput');
+  out.style.opacity = '1';
+  out.className = 'sim-output';
+
+  try {
+    const inputLines = rawInput.split('\n');
+    let idx = 0;
+    const output = [];
+
+    function inp() { return (inputLines[idx++] || '').trim(); }
+
+    function evalVal(expr, env) {
+      expr = expr.trim();
+      if (expr === 'True') return true;
+      if (expr === 'False') return false;
+      if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'"))) return expr.slice(1,-1);
+      if (/^-?\d+$/.test(expr)) return parseInt(expr);
+      if (/^-?\d+\.\d+$/.test(expr)) return parseFloat(expr);
+      if (/^[a-zA-Z_]\w*$/.test(expr)) return env.hasOwnProperty(expr) ? env[expr] : 0;
+      let m;
+      if ((m = expr.match(/^int\(input\(\)\)$/))) return parseInt(inp());
+      if ((m = expr.match(/^input\(\)$/))) return inp();
+      if ((m = expr.match(/^input\(["'].*["']\)$/))) return inp();
+      if ((m = expr.match(/^int\((.+)\)$/))) return parseInt(evalVal(m[1],env));
+      if ((m = expr.match(/^str\((.+)\)$/))) return String(evalVal(m[1],env));
+      if ((m = expr.match(/^float\((.+)\)$/))) return parseFloat(evalVal(m[1],env));
+      if ((m = expr.match(/^max\((.+),(.+)\)$/))) return Math.max(evalVal(m[1],env), evalVal(m[2],env));
+      if ((m = expr.match(/^min\((.+),(.+)\)$/))) return Math.min(evalVal(m[1],env), evalVal(m[2],env));
+      if ((m = expr.match(/^list\(map\(int,\s*input\(\)\.split\(\)\)\)$/))) return inp().split(/\s+/).map(Number);
+      if ((m = expr.match(/^([a-zA-Z_,\s]+)\s*=\s*map\(int,\s*input\(\)\.split\(\)\)$/))) return null;
+      // binary ops
+      for (const op of ['//', '%', '*', '/', '+', '-', '>=', '<=', '>', '<', '==', '!=', ' and ', ' or ']) {
+        const i = expr.indexOf(op);
+        if (i > 0) {
+          const L = expr.slice(0,i).trim(), R = expr.slice(i+op.length).trim();
+          if (L && R) {
+            const l = evalVal(L,env), r = evalVal(R,env);
+            if (op==='//') return Math.trunc(l/r);
+            if (op==='%') return ((l%r)+r)%r;
+            if (op==='*') return l*r;
+            if (op==='/') return l/r;
+            if (op==='+') return (typeof l==='string'||typeof r==='string') ? String(l)+String(r) : l+r;
+            if (op==='-') return l-r;
+            if (op==='>=') return l>=r;
+            if (op==='<=') return l<=r;
+            if (op==='>') return l>r;
+            if (op==='<') return l<r;
+            if (op==='==') return l==r;
+            if (op==='!=') return l!=r;
+            if (op===' and ') return l&&r;
+            if (op===' or ')  return l||r;
+          }
+        }
+      }
+      return expr;
+    }
+
+    // Parse lines with indentation
+    const rawLines = code.split('\n');
+
+    function getIndent(line) {
+      const m = line.match(/^(\s*)/);
+      return m ? m[1].length : 0;
+    }
+
+    // Simple block-based interpreter
+    function runBlock(lines, env) {
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) { i++; continue; }
+
+        // map assignment: a, b = map(int, input().split())
+        const mapM = trimmed.match(/^([a-zA-Z_,\s]+)\s*=\s*map\(int,\s*input\(\)\.split\(\)\)$/);
+        if (mapM) {
+          const vars = mapM[1].split(',').map(v=>v.trim());
+          const vals = inp().split(/\s+/).map(Number);
+          vars.forEach((v,j) => { env[v] = vals[j]??0; });
+          i++; continue;
+        }
+
+        // print
+        const pm = trimmed.match(/^print\((.+)\)$/);
+        if (pm) {
+          let args = pm[1];
+          let sep = ' ';
+          const sepM = args.match(/,\s*sep\s*=\s*["'](.*)["']\s*$/);
+          if (sepM) { sep = sepM[1]; args = args.slice(0, args.lastIndexOf(',sep') > -1 ? args.lastIndexOf(',sep') : args.lastIndexOf(', sep')).trim(); }
+          args = args.replace(/,\s*end\s*=\s*["'].*["']\s*$/, '').trim();
+          const parts = splitCommas(args).map(a => evalVal(a.trim(), env));
+          output.push(parts.join(sep));
+          i++; continue;
+        }
+
+        // if / elif / else
+        if (/^if .+:$/.test(trimmed) || /^elif .+:$/.test(trimmed) || /^else:$/.test(trimmed)) {
+          // Collect the entire if-elif-else block
+          const baseIndent = getIndent(line);
+          const branches = []; // [{cond, bodyLines}]
+          let j = i;
+          while (j < lines.length) {
+            const bl = lines[j].trim();
+            if (!bl) { j++; continue; }
+            const bi = getIndent(lines[j]);
+            if (bi < baseIndent) break;
+            if (bi === baseIndent) {
+              if (/^if .+:$/.test(bl)) {
+                const cond = bl.slice(3, -1).trim();
+                const body = collectBody(lines, j+1, baseIndent);
+                branches.push({cond, body});
+                j += 1 + body.length;
+              } else if (/^elif .+:$/.test(bl)) {
+                const cond = bl.slice(5, -1).trim();
+                const body = collectBody(lines, j+1, baseIndent);
+                branches.push({cond, body});
+                j += 1 + body.length;
+              } else if (/^else:$/.test(bl)) {
+                const body = collectBody(lines, j+1, baseIndent);
+                branches.push({cond: '__else__', body});
+                j += 1 + body.length;
+              } else { break; }
+            } else { break; }
+          }
+          // Execute
+          let executed = false;
+          for (const branch of branches) {
+            if (executed) break;
+            if (branch.cond === '__else__') {
+              runBlock(branch.body, env);
+              executed = true;
+            } else {
+              const val = evalCond(branch.cond, env);
+              if (val) {
+                runBlock(branch.body, env);
+                executed = true;
+              }
+            }
+          }
+          i = j;
+          continue;
+        }
+
+        // assignment
+        const aM = trimmed.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+        if (aM) { env[aM[1]] = evalVal(aM[2], env); i++; continue; }
+
+        i++;
+      }
+    }
+
+    function collectBody(lines, start, baseIndent) {
+      const body = [];
+      let j = start;
+      while (j < lines.length) {
+        const bl = lines[j].trim();
+        if (!bl) { j++; continue; }
+        const bi = getIndent(lines[j]);
+        if (bi <= baseIndent) break;
+        body.push(lines[j]);
+        j++;
+      }
+      return body;
+    }
+
+    function evalCond(cond, env) {
+      // handle 'not'
+      if (cond.startsWith('not ')) return !evalCond(cond.slice(4).trim(), env);
+      // handle 'and' / 'or'
+      const andParts = cond.split(' and ');
+      if (andParts.length > 1) return andParts.every(p => evalCond(p.trim(), env));
+      const orParts = cond.split(' or ');
+      if (orParts.length > 1) return orParts.some(p => evalCond(p.trim(), env));
+      // compare
+      for (const op of ['>=','<=','>','<','==','!=']) {
+        const oi = cond.indexOf(op);
+        if (oi > 0) {
+          const l = evalVal(cond.slice(0,oi).trim(), env);
+          const r = evalVal(cond.slice(oi+op.length).trim(), env);
+          if (op==='>=') return l>=r;
+          if (op==='<=') return l<=r;
+          if (op==='>') return l>r;
+          if (op==='<') return l<r;
+          if (op==='==') return l==r;
+          if (op==='!=') return l!=r;
+        }
+      }
+      return !!evalVal(cond, env);
+    }
+
+    function splitCommas(str) {
+      const parts = []; let depth = 0, cur = '';
+      for (const c of str) {
+        if (c==='('||c==='[') depth++;
+        else if (c===')'||c===']') depth--;
+        else if (c===',' && depth===0) { parts.push(cur); cur=''; continue; }
+        cur += c;
+      }
+      if (cur.trim()) parts.push(cur);
+      return parts;
+    }
+
+    runBlock(rawLines, {});
+    out.textContent = output.join('\n') || '(출력 없음)';
+  } catch(e) {
+    out.className = 'sim-output error';
+    out.textContent = '오류: ' + e.message;
+  }
+}
+
+buildProblems();
+</script>
+</body>
+</html>

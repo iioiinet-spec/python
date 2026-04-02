@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Level 1 | 세영코딩연구소</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --py-blue: #3776ab;
+            --py-yellow: #ffd43b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            background: linear-gradient(135deg, var(--py-blue), #2b5b84);
+            color: white;
+            padding: 70px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1.5px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            margin-top: 15px;
+            opacity: 0.9;
+        }
+
+        .author-info {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 20px;
+            background: rgba(255, 212, 59, 0.2);
+            border-radius: 30px;
+            font-size: 0.95rem;
+            color: var(--py-yellow);
+            font-weight: 600;
+            border: 1px solid rgba(255, 212, 59, 0.3);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 50px 20px;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            border: 2px solid transparent;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--py-yellow);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: #f1f5f9;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+
+        .card:hover .card-icon {
+            background: var(--py-yellow);
+        }
+
+        .card-content h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: var(--py-blue);
+        }
+
+        .card-content p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 50px 20px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+            width: 100%;
+        }
+
+        .badge {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        @media (max-width: 600px) {
+            .container { grid-template-columns: 1fr; }
+            header h1 { font-size: 1.8rem; }
+            .card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Python Level 1: Foundation</h1>
+        <p>파이썬 프로그래밍의 기초를 탄탄하게 다지는 첫 걸음</p>
+        <div class="author-info">세영코딩연구소 | 저자: Ph.D Kim</div>
+    </header>
+
+    <div class="container">
+        
+        <a href="https://iioiinet-spec.github.io/python/io.html" target="_blank" class="card">
+            <div class="card-icon">⌨️</div>
+            <div class="card-content">
+                <span class="badge">Module 01</span>
+                <h3>입출력문 (I/O)</h3>
+                <p>데이터를 입력받고 출력하는 파이썬의 가장 기본적인 소통 방식을 학습합니다.</p>
+            </div>
+        </a>
+
+        <a href="https://iioiinet-spec.github.io/python/if.html" target="_blank" class="card">
+            <div class="card-icon">⚖️</div>
+            <div class="card-content">
+                <span class="badge">Module 02</span>
+                <h3>조건문 (Conditionals)</h3>
+                <p>if, else를 통해 프로그램이 상황에 따라 스스로 판단하고 결정하는 로직을 배웁니다.</p>
+            </div>
+        </a>
+
+        <a href="https://iioiinet-spec.github.io/python/loop.html" target="_blank" class="card">
+            <div class="card-icon">♻️</div>
+            <div class="card-content">
+                <span class="badge">Module 03</span>
+                <h3>반복문 (Loops)</h3>
+                <p>for와 while을 사용하여 복잡하고 반복적인 작업을 컴퓨터에게 효율적으로 시키는 방법을 익힙니다.</p>
+            </div>
+        </a>
+
+        <a href="https://iioiinet-spec.github.io/python/list.html" target="_blank" class="card">
+            <div class="card-icon">📦</div>
+            <div class="card-content">
+                <span class="badge">Module 04</span>
+                <h3>리스트 (Lists)</h3>
+                <p>여러 데이터를 하나의 꾸러미로 묶어 관리하는 파이썬의 강력한 자료구조인 리스트를 마스터합니다.</p>
+            </div>
+        </a>
+
+    </div>
+
+    <footer>
+        &copy; 2026 Seyeong Coding Research Institute. All rights reserved.<br>
+        본 페이지는 공학박사 Kim의 커리큘럼에 따라 설계된 파이썬 기초 교육 자료입니다.
+    </footer>
+
+</body>
+</html>

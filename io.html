@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 입출력 - 세영코딩연구소</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1c2230;
+    --card: #1e2638;
+    --border: #2d3748;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --warn: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --code-bg: #0d1117;
+    --glow: 0 0 20px rgba(0,229,255,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 36px 0 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .lab-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.3);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .lab-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  header h1 {
+    font-family: 'Gmarket Sans', 'Noto Sans KR', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  header h1 span {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: var(--accent);
+    -webkit-text-fill-color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-top: 6px;
+  }
+
+  .author-line {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 90px;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text2);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px rgba(0,229,255,0.3);
+  }
+
+  .tab-btn:hover:not(.active) {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  /* SECTIONS */
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* CONCEPT CARDS */
+  .concept-intro {
+    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(124,58,237,0.06));
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+
+  .concept-intro h2 {
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .concept-intro p {
+    color: var(--text2);
+    line-height: 1.8;
+    font-size: 0.95rem;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .concept-pill {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .concept-pill .icon { font-size: 1.8rem; margin-bottom: 6px; }
+  .concept-pill .label { font-size: 0.8rem; color: var(--text3); }
+  .concept-pill .name { font-size: 1rem; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+  /* CODE EXAMPLE CARDS */
+  .example-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .example-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .example-card:hover { border-color: rgba(0,229,255,0.4); }
+
+  .example-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .example-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .example-num {
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.3);
+    color: var(--accent);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .dot-group { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+
+  .example-body { padding: 18px; }
+
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #e2e8f0;
+    overflow-x: auto;
+    margin-bottom: 10px;
+  }
+
+  .code-block .kw { color: #c792ea; }
+  .code-block .fn { color: #82aaff; }
+  .code-block .str { color: #c3e88d; }
+  .code-block .num { color: #f78c6c; }
+  .code-block .var { color: #ffcb6b; }
+  .code-block .op { color: #89ddff; }
+  .code-block .cm { color: #546e7a; }
+
+  .output-block {
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--accent3);
+  }
+
+  .output-block::before {
+    content: '▶ 출력';
+    display: block;
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* PATTERN TABLE */
+  .pattern-table {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .pattern-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pattern-row:last-child { border-bottom: none; }
+  .pattern-row:first-child { background: var(--bg2); }
+
+  .pattern-cell {
+    padding: 14px 18px;
+    font-size: 0.85rem;
+    border-right: 1px solid var(--border);
+  }
+
+  .pattern-cell:last-child { border-right: none; }
+  .pattern-cell.header { color: var(--text2); font-size: 11px; letter-spacing: 0.08em; font-weight: 600; }
+  .pattern-cell code {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    background: rgba(0,229,255,0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+  .pattern-cell .desc { color: var(--text2); }
+
+  /* PROBLEMS */
+  .problem-grid { display: grid; gap: 20px; }
+
+  .problem-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+
+  .problem-card:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-2px); }
+
+  .problem-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .problem-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+
+  .problem-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    flex: 1;
+    margin: 0 12px;
+  }
+
+  .diff-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+
+  .diff-1 { background: rgba(16,185,129,0.15); color: var(--accent3); border: 1px solid rgba(16,185,129,0.3); }
+  .diff-2 { background: rgba(245,158,11,0.15); color: var(--warn); border: 1px solid rgba(245,158,11,0.3); }
+
+  .problem-body { padding: 20px; }
+
+  .io-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 14px 0;
+  }
+
+  .io-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .io-box-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 6px;
+    letter-spacing: 0.08em;
+  }
+
+  .io-box-content {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent3);
+  }
+
+  .problem-desc {
+    color: var(--text2);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  /* ANSWER TOGGLE */
+  .answer-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 8px;
+    padding: 9px 16px;
+    color: #a78bfa;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 6px;
+  }
+
+  .answer-btn:hover {
+    background: rgba(124,58,237,0.2);
+    border-color: rgba(124,58,237,0.5);
+  }
+
+  .answer-area {
+    display: none;
+    margin-top: 12px;
+    animation: fadeIn 0.25s ease;
+  }
+
+  .answer-area.open { display: block; }
+
+  /* INTERACTIVE SIMULATOR */
+  .simulator {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+
+  .sim-header {
+    padding: 14px 20px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sim-header .dot-group { margin-right: auto; }
+  .sim-title { font-size: 13px; color: var(--text2); font-family: 'JetBrains Mono', monospace; }
+
+  .sim-body { padding: 20px; }
+
+  .sim-body label {
+    display: block;
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .sim-body textarea {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.83rem;
+    line-height: 1.7;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.2s;
+  }
+
+  .sim-body textarea:focus {
+    outline: none;
+    border-color: var(--accent2);
+  }
+
+  .sim-body input[type="text"] {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+
+  .sim-body input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .run-btn {
+    background: linear-gradient(135deg, var(--accent2), #6366f1);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    color: white;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .run-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(124,58,237,0.4); }
+  .run-btn:active { transform: translateY(0); }
+
+  .sim-output {
+    margin-top: 16px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    min-height: 60px;
+    color: var(--accent3);
+    white-space: pre-wrap;
+  }
+
+  .sim-output.error { color: var(--red); }
+  .sim-output::before { content: '$ '; color: var(--text3); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 32px 0 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text3);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.8;
+  }
+
+  footer span { color: var(--accent); }
+
+  /* PROGRESS */
+  .progress-bar {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .progress-label { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 100px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-count { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); white-space: nowrap; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.7rem; }
+    .two-col, .io-row { grid-template-columns: 1fr; }
+    .nav-tabs { gap: 2px; }
+    .tab-btn { font-size: 12px; padding: 9px 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="lab-badge">세영코딩연구소 · SEYYOUNG CODING LAB</div>
+    <h1>파이썬 입출력문<span>Python Input / Output</span></h1>
+    <div class="author-line">저자: ph.D kim &nbsp;|&nbsp; Python 3.x &nbsp;|&nbsp; Beginner</div>
+  </header>
+
+  <!-- TABS -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('개념', this)">📘 기본 개념</button>
+    <button class="tab-btn" onclick="switchTab('print', this)">🖨️ print()</button>
+    <button class="tab-btn" onclick="switchTab('input', this)">⌨️ input()</button>
+    <button class="tab-btn" onclick="switchTab('패턴', this)">⚡ 자주 쓰는 패턴</button>
+    <button class="tab-btn" onclick="switchTab('연습', this)">🧩 연습문제</button>
+    <button class="tab-btn" onclick="switchTab('시뮬', this)">▶ 시뮬레이터</button>
+  </div>
+
+  <!-- 개념 -->
+  <div id="tab-개념" class="section active">
+    <div class="concept-intro">
+      <h2>💡 입출력이란?</h2>
+      <p>
+        파이썬에서 <strong style="color:var(--accent)">입력(Input)</strong>은 사용자가 키보드로 값을 넣는 것이고,
+        <strong style="color:var(--accent)">출력(Output)</strong>은 프로그램이 화면에 결과를 보여주는 것입니다.<br><br>
+        프로그램은 입력을 받아 → 처리하고 → 결과를 출력하는 흐름으로 동작합니다.
+      </p>
+      <div class="two-col">
+        <div class="concept-pill">
+          <div class="icon">⌨️</div>
+          <div class="label">사용자 → 프로그램</div>
+          <div class="name">input()</div>
+        </div>
+        <div class="concept-pill">
+          <div class="icon">🖥️</div>
+          <div class="label">프로그램 → 화면</div>
+          <div class="name">print()</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="example-card">
+      <div class="example-header">
+        <div class="example-title"><span class="example-num">기본 흐름</span> 입출력 프로그램 구조</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="example-body">
+        <div class="code-block"><span class="cm"># 1. 입력받기</span>
+<span class="var">name</span> <span class="op">=</span> <span class="fn">input</span>(<span class="str">"이름을 입력하세요: "</span>)
+
+<span class="cm"># 2. 처리하기</span>
+<span class="var">greeting</span> <span class="op">=</span> <span class="str">"안녕하세요, "</span> <span class="op">+</span> <span class="var">name</span>
+
+<span class="cm"># 3. 출력하기</span>
+<span class="fn">print</span>(<span class="var">greeting</span>)</div>
+        <div class="output-block">안녕하세요, 민수</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- print() -->
+  <div id="tab-print" class="section">
+    <div class="section-title">🖨️ print() 출력문 예시</div>
+    <div class="example-grid">
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 1</span> 기본 출력</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="fn">print</span>(<span class="str">"Hello Python"</span>)</div>
+          <div class="output-block">Hello Python</div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 2</span> 여러 값 출력</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="fn">print</span>(<span class="str">"나이:"</span>, <span class="num">13</span>)</div>
+          <div class="output-block">나이: 13</div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 3</span> 변수 출력</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="var">name</span> <span class="op">=</span> <span class="str">"민수"</span>
+<span class="fn">print</span>(<span class="var">name</span>)</div>
+          <div class="output-block">민수</div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 4</span> 여러 변수 한번에 출력</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="var">a</span> <span class="op">=</span> <span class="num">3</span>
+<span class="var">b</span> <span class="op">=</span> <span class="num">5</span>
+<span class="fn">print</span>(<span class="var">a</span>, <span class="var">b</span>)</div>
+          <div class="output-block">3 5</div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 5</span> sep 옵션 — 구분자 변경</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="fn">print</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, sep<span class="op">=</span><span class="str">"-"</span>)</div>
+          <div class="output-block">1-2-3</div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 6</span> end 옵션 — 줄바꿈 변경</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="fn">print</span>(<span class="str">"Hello"</span>, end<span class="op">=</span><span class="str">" "</span>)
+<span class="fn">print</span>(<span class="str">"Python"</span>)</div>
+          <div class="output-block">Hello Python</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- input() -->
+  <div id="tab-input" class="section">
+    <div class="section-title">⌨️ input() 입력문 예시</div>
+    <div class="example-grid">
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 1</span> 문자열 입력</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="var">name</span> <span class="op">=</span> <span class="fn">input</span>()
+<span class="fn">print</span>(<span class="var">name</span>)</div>
+          <div class="output-block">민수</div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 2</span> 안내문과 함께 입력</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="var">name</span> <span class="op">=</span> <span class="fn">input</span>(<span class="str">"이름을 입력하세요: "</span>)
+<span class="fn">print</span>(<span class="var">name</span>)</div>
+          <div class="output-block">이름을 입력하세요: 민수
+민수</div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 3</span> 정수 입력 — int() 변환</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="cm"># input()은 기본적으로 문자열!</span>
+<span class="cm"># 숫자로 쓰려면 int()로 변환</span>
+<span class="var">a</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+<span class="fn">print</span>(<span class="var">a</span>)</div>
+          <div class="output-block">7</div>
+        </div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-header">
+          <div class="example-title"><span class="example-num">예시 4</span> 두 숫자 입력 — map + split</div>
+          <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        </div>
+        <div class="example-body">
+          <div class="code-block"><span class="var">a</span>, <span class="var">b</span> <span class="op">=</span> <span class="fn">map</span>(<span class="fn">int</span>, <span class="fn">input</span>().split())
+<span class="fn">print</span>(<span class="var">a</span> <span class="op">+</span> <span class="var">b</span>)</div>
+          <div class="output-block">3 5 입력 시 → 8</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 패턴 -->
+  <div id="tab-패턴" class="section">
+    <div class="section-title">⚡ 자주 사용하는 입력 패턴</div>
+    <div class="pattern-table">
+      <div class="pattern-row">
+        <div class="pattern-cell header">패턴</div>
+        <div class="pattern-cell header">설명</div>
+      </div>
+      <div class="pattern-row">
+        <div class="pattern-cell"><code>n = int(input())</code></div>
+        <div class="pattern-cell desc">정수 1개 입력</div>
+      </div>
+      <div class="pattern-row">
+        <div class="pattern-cell"><code>s = input()</code></div>
+        <div class="pattern-cell desc">문자열 입력</div>
+      </div>
+      <div class="pattern-row">
+        <div class="pattern-cell"><code>a, b = map(int, input().split())</code></div>
+        <div class="pattern-cell desc">정수 여러 개 입력 (공백 구분)</div>
+      </div>
+      <div class="pattern-row">
+        <div class="pattern-cell"><code>arr = list(map(int, input().split()))</code></div>
+        <div class="pattern-cell desc">정수 리스트로 입력</div>
+      </div>
+    </div>
+    <div class="example-card">
+      <div class="example-header">
+        <div class="example-title"><span class="example-num">종합</span> 네 가지 패턴 한눈에 보기</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="example-body">
+        <div class="code-block"><span class="cm"># 1. 정수 1개</span>
+<span class="var">n</span> <span class="op">=</span> <span class="fn">int</span>(<span class="fn">input</span>())
+<span class="fn">print</span>(<span class="var">n</span>)
+
+<span class="cm"># 2. 문자열</span>
+<span class="var">s</span> <span class="op">=</span> <span class="fn">input</span>()
+<span class="fn">print</span>(<span class="var">s</span>)
+
+<span class="cm"># 3. 정수 여러 개</span>
+<span class="var">a</span>, <span class="var">b</span> <span class="op">=</span> <span class="fn">map</span>(<span class="fn">int</span>, <span class="fn">input</span>().split())
+<span class="fn">print</span>(<span class="var">a</span>, <span class="var">b</span>)
+
+<span class="cm"># 4. 리스트</span>
+<span class="var">arr</span> <span class="op">=</span> <span class="fn">list</span>(<span class="fn">map</span>(<span class="fn">int</span>, <span class="fn">input</span>().split()))
+<span class="fn">print</span>(<span class="var">arr</span>)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연습문제 -->
+  <div id="tab-연습" class="section">
+    <div class="progress-bar">
+      <span class="progress-label">풀이 진행도</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <span class="progress-count" id="progressCount">0 / 15</span>
+    </div>
+    <div class="section-title">🧩 연습문제 15개</div>
+    <div class="problem-grid" id="problemGrid"></div>
+  </div>
+
+  <!-- 시뮬레이터 -->
+  <div id="tab-시뮬" class="section">
+    <div class="section-title">▶ 코드 시뮬레이터</div>
+    <div class="simulator">
+      <div class="sim-header">
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <span class="sim-title">mini_python_runner.py</span>
+      </div>
+      <div class="sim-body">
+        <label>INPUT (입력값 — 여러 줄 가능)</label>
+        <input type="text" id="simInput" placeholder="예: 3 5   또는   민수">
+        <label>CODE (코드 입력)</label>
+        <textarea id="simCode" placeholder="여기에 파이썬 코드를 입력하세요...
+예:
+a, b = map(int, input().split())
+print(a + b)"></textarea>
+        <button class="run-btn" onclick="runSim()">▶ 실행하기</button>
+        <div id="simOutput" class="sim-output" style="opacity:0.4">실행 결과가 여기에 표시됩니다.</div>
+      </div>
+    </div>
+    <div class="concept-intro" style="margin-top:0">
+      <h2>⚠️ 시뮬레이터 안내</h2>
+      <p>이 시뮬레이터는 간단한 파이썬 입출력 패턴을 브라우저에서 모의 실행합니다.<br>
+      <strong style="color:var(--warn)">지원:</strong> int(), input(), print(), map(), list(), split(), +, -, *, //, %, max(), min()<br>
+      <strong style="color:var(--red)">미지원:</strong> 반복문, 조건문 등 고급 문법 (실제 파이썬 환경을 권장합니다)</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <span>세영코딩연구소</span> &nbsp;|&nbsp; 저자: <span>ph.D kim</span><br>
+    Python 3.x · 입출력문 기초 · 연습문제 15선
+  </div>
+</footer>
+
+<script>
+// TAB SWITCH
+function switchTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// PROBLEMS DATA
+const problems = [
+  { n:1, title:"이름 출력", desc:"이름을 입력받아 그대로 출력하는 프로그램을 작성하시오.", inputDesc:"이름이 한 줄로 입력된다.", outputDesc:"입력받은 이름을 출력한다.", sampleIn:"민수", sampleOut:"민수", answer:`name = input()\nprint(name)`, diff:1 },
+  { n:2, title:"정수 출력", desc:"정수 하나를 입력받아 출력하는 프로그램을 작성하시오.", inputDesc:"정수 하나가 입력된다.", outputDesc:"입력받은 정수를 출력한다.", sampleIn:"7", sampleOut:"7", answer:`n = int(input())\nprint(n)`, diff:1 },
+  { n:3, title:"두 수의 합", desc:"두 정수를 입력받아 합을 출력하시오.", inputDesc:"두 정수가 공백으로 구분되어 입력된다.", outputDesc:"두 수의 합을 출력한다.", sampleIn:"3 4", sampleOut:"7", answer:`a, b = map(int, input().split())\nprint(a + b)`, diff:1 },
+  { n:4, title:"두 수의 곱", desc:"두 정수를 입력받아 곱을 출력하시오.", inputDesc:"두 정수가 공백으로 입력된다.", outputDesc:"곱을 출력한다.", sampleIn:"3 5", sampleOut:"15", answer:`a, b = map(int, input().split())\nprint(a * b)`, diff:1 },
+  { n:5, title:"세 수 출력", desc:"세 정수를 입력받아 모두 출력하시오.", inputDesc:"세 정수가 공백으로 구분되어 입력된다.", outputDesc:"세 수를 공백으로 출력한다.", sampleIn:"1 2 3", sampleOut:"1 2 3", answer:`a, b, c = map(int, input().split())\nprint(a, b, c)`, diff:1 },
+  { n:6, title:"Hello + 문자열", desc:"문자열을 입력받아 \"Hello\"와 함께 출력하시오.", inputDesc:"문자열 한 줄", outputDesc:"Hello 문자열", sampleIn:"Python", sampleOut:"Hello Python", answer:`s = input()\nprint("Hello", s)`, diff:1 },
+  { n:7, title:"두 수의 차", desc:"두 정수를 입력받아 A-B를 출력하시오.", inputDesc:"두 정수", outputDesc:"A-B 값", sampleIn:"9 3", sampleOut:"6", answer:`a, b = map(int, input().split())\nprint(a - b)`, diff:1 },
+  { n:8, title:"정수 나눗셈", desc:"두 정수를 입력받아 몫을 출력하시오.", inputDesc:"두 정수", outputDesc:"정수 나눗셈 결과", sampleIn:"8 2", sampleOut:"4", answer:`a, b = map(int, input().split())\nprint(a // b)`, diff:1 },
+  { n:9, title:"나머지", desc:"두 정수를 입력받아 나머지를 출력하시오.", inputDesc:"두 정수", outputDesc:"나머지", sampleIn:"9 4", sampleOut:"1", answer:`a, b = map(int, input().split())\nprint(a % b)`, diff:1 },
+  { n:10, title:"세 수의 합", desc:"세 정수를 입력받아 합을 출력하시오.", inputDesc:"세 정수", outputDesc:"합", sampleIn:"1 2 3", sampleOut:"6", answer:`a, b, c = map(int, input().split())\nprint(a + b + c)`, diff:1 },
+  { n:11, title:"두 배", desc:"정수 하나를 입력받아 두 배를 출력하시오.", inputDesc:"정수 하나", outputDesc:"두 배 값", sampleIn:"5", sampleOut:"10", answer:`n = int(input())\nprint(n * 2)`, diff:1 },
+  { n:12, title:"세 배", desc:"정수 하나를 입력받아 세 배를 출력하시오.", inputDesc:"정수", outputDesc:"세 배", sampleIn:"4", sampleOut:"12", answer:`n = int(input())\nprint(n * 3)`, diff:1 },
+  { n:13, title:"두 문자열 출력", desc:"두 문자열을 입력받아 한 줄로 출력하시오.", inputDesc:"두 문자열 (각 한 줄)", outputDesc:"두 문자열을 공백으로 출력", sampleIn:"Hello\nPython", sampleOut:"Hello Python", answer:`a = input()\nb = input()\nprint(a, b)`, diff:2 },
+  { n:14, title:"큰 수 출력", desc:"정수 두 개를 입력받아 큰 수를 출력하시오.", inputDesc:"두 정수", outputDesc:"큰 수", sampleIn:"3 9", sampleOut:"9", answer:`a, b = map(int, input().split())\nprint(max(a, b))`, diff:2 },
+  { n:15, title:"세 수의 평균", desc:"세 정수를 입력받아 평균을 출력하시오.", inputDesc:"세 정수", outputDesc:"평균", sampleIn:"3 6 9", sampleOut:"6", answer:`a, b, c = map(int, input().split())\nprint((a + b + c) // 3)`, diff:2 },
+];
+
+let solved = new Set();
+
+function buildProblems() {
+  const grid = document.getElementById('problemGrid');
+  grid.innerHTML = problems.map(p => `
+    <div class="problem-card" id="pcard-${p.n}">
+      <div class="problem-top">
+        <span class="problem-num">문제 ${p.n}</span>
+        <span class="problem-title">${p.title}</span>
+        <span class="diff-badge diff-${p.diff}">${p.diff===1?'★ 기초':'★★ 초급'}</span>
+      </div>
+      <div class="problem-body">
+        <p class="problem-desc">${p.desc}</p>
+        <div class="io-row">
+          <div class="io-box">
+            <div class="io-box-label">INPUT EXAMPLE</div>
+            <div class="io-box-content">${p.sampleIn.replace(/\n/g,'<br>')}</div>
+          </div>
+          <div class="io-box">
+            <div class="io-box-label">OUTPUT EXAMPLE</div>
+            <div class="io-box-content">${p.sampleOut}</div>
+          </div>
+        </div>
+        <button class="answer-btn" onclick="toggleAnswer(${p.n}, this)">🔍 정답 보기</button>
+        <div class="answer-area" id="ans-${p.n}">
+          <div class="code-block">${highlight(p.answer)}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function highlight(code) {
+  return code
+    .replace(/\b(int|list|map|input|print|max|min|split)\b/g, '<span class="fn">$1</span>')
+    .replace(/"([^"]*)"/g, '<span class="str">"$1"</span>')
+    .replace(/\b(\d+)\b/g, '<span class="num">$1</span>')
+    .replace(/#.+/g, '<span class="cm">$&</span>');
+}
+
+function toggleAnswer(n, btn) {
+  const area = document.getElementById('ans-' + n);
+  const isOpen = area.classList.toggle('open');
+  btn.textContent = isOpen ? '🙈 정답 닫기' : '🔍 정답 보기';
+  if (isOpen && !solved.has(n)) {
+    solved.add(n);
+    updateProgress();
+  }
+}
+
+function updateProgress() {
+  const pct = (solved.size / 15) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = `${solved.size} / 15`;
+}
+
+// SIMULATOR
+function runSim() {
+  const code = document.getElementById('simCode').value.trim();
+  const rawInput = document.getElementById('simInput').value;
+  const out = document.getElementById('simOutput');
+  out.style.opacity = '1';
+  out.className = 'sim-output';
+
+  try {
+    const inputLines = rawInput.split('\n');
+    let inputIdx = 0;
+    let output = [];
+
+    function fakeInput() {
+      return inputLines[inputIdx++] || '';
+    }
+
+    // Safe interpreter for basic patterns
+    const lines = code.split('\n').filter(l => l.trim());
+    let env = {};
+
+    function evalExpr(expr, env) {
+      expr = expr.trim();
+      // string literal
+      if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'")))
+        return expr.slice(1, -1);
+      // number
+      if (/^-?\d+$/.test(expr)) return parseInt(expr);
+      // float
+      if (/^-?\d+\.\d+$/.test(expr)) return parseFloat(expr);
+      // variable
+      if (/^[a-zA-Z_]\w*$/.test(expr)) return env[expr] ?? 0;
+      // int(input())
+      if (/^int\(input\(\)\)$/.test(expr)) return parseInt(fakeInput());
+      // input()
+      if (/^input\(\)$/.test(expr)) return fakeInput();
+      // input("...")
+      if (/^input\(["'].*["']\)$/.test(expr)) return fakeInput();
+      // int(x)
+      let m = expr.match(/^int\((.+)\)$/);
+      if (m) return parseInt(evalExpr(m[1], env));
+      // float(x)
+      m = expr.match(/^float\((.+)\)$/);
+      if (m) return parseFloat(evalExpr(m[1], env));
+      // str(x)
+      m = expr.match(/^str\((.+)\)$/);
+      if (m) return String(evalExpr(m[1], env));
+      // max(a, b)
+      m = expr.match(/^max\((.+),(.+)\)$/);
+      if (m) return Math.max(evalExpr(m[1], env), evalExpr(m[2], env));
+      // min(a, b)
+      m = expr.match(/^min\((.+),(.+)\)$/);
+      if (m) return Math.min(evalExpr(m[1], env), evalExpr(m[2], env));
+      // list(map(int, input().split()))
+      if (/^list\(map\(int,\s*input\(\)\.split\(\)\)\)$/.test(expr)) {
+        return fakeInput().trim().split(/\s+/).map(Number);
+      }
+      // a + b, a - b, a * b, a // b, a % b
+      // Binary ops (simple left to right, no precedence)
+      let ops = ['//', '%', '*', '/', '+', '-'];
+      for (let op of ops) {
+        let idx = expr.lastIndexOf(op);
+        if (idx > 0) {
+          let left = expr.slice(0, idx).trim();
+          let right = expr.slice(idx + op.length).trim();
+          if (left && right) {
+            let l = evalExpr(left, env), r = evalExpr(right, env);
+            if (op === '+') return (typeof l === 'string' || typeof r === 'string') ? String(l) + String(r) : l + r;
+            if (op === '-') return l - r;
+            if (op === '*') return l * r;
+            if (op === '//') return Math.trunc(l / r);
+            if (op === '%') return l % r;
+            if (op === '/') return l / r;
+          }
+        }
+      }
+      return expr;
+    }
+
+    for (let line of lines) {
+      line = line.trim();
+      if (!line || line.startsWith('#')) continue;
+
+      // print(...)
+      let pm = line.match(/^print\((.+)\)$/);
+      if (pm) {
+        let args = pm[1];
+        // sep option
+        let sep = ' ';
+        let sepM = args.match(/,\s*sep\s*=\s*["'](.+)["']\s*$/);
+        if (sepM) { sep = sepM[1]; args = args.slice(0, args.lastIndexOf(',sep')).trim(); if (args.endsWith(',')) args = args.slice(0,-1); }
+        // end option (ignore for simplicity)
+        args = args.replace(/,\s*end\s*=\s*["'].*["']\s*$/, '').trim();
+        // split by top-level commas
+        let parts = splitArgs(args).map(a => evalExpr(a.trim(), env));
+        output.push(parts.join(sep));
+        continue;
+      }
+
+      // a, b = map(int, input().split())
+      let mapM = line.match(/^([a-zA-Z_,\s]+)\s*=\s*map\(int,\s*input\(\)\.split\(\)\)$/);
+      if (mapM) {
+        let vars = mapM[1].split(',').map(v => v.trim());
+        let vals = fakeInput().trim().split(/\s+/).map(Number);
+        vars.forEach((v, i) => { env[v] = vals[i] ?? 0; });
+        continue;
+      }
+
+      // a, b, c = map(int, input().split())  -- already handled above
+
+      // a = b (assignment)
+      let aM = line.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+      if (aM) {
+        env[aM[1]] = evalExpr(aM[2], env);
+        continue;
+      }
+    }
+
+    out.textContent = output.join('\n') || '(출력 없음)';
+  } catch(e) {
+    out.className = 'sim-output error';
+    out.textContent = '오류: ' + e.message;
+  }
+}
+
+function splitArgs(str) {
+  let parts = [], depth = 0, cur = '';
+  for (let c of str) {
+    if (c === '(' || c === '[') depth++;
+    else if (c === ')' || c === ']') depth--;
+    else if (c === ',' && depth === 0) { parts.push(cur); cur = ''; continue; }
+    cur += c;
+  }
+  if (cur.trim()) parts.push(cur);
+  return parts;
+}
+
+buildProblems();
+</script>
+</body>
+</html>
