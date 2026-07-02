@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 판다스(Pandas) - 세영코딩연구소</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080f0a;
+    --bg2: #0d1a10;
+    --bg3: #122016;
+    --card: #152419;
+    --border: #1e3526;
+    --accent: #4ade80;
+    --accent2: #fbbf24;
+    --accent3: #38bdf8;
+    --accent4: #f472b6;
+    --purple: #c084fc;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #2a4030;
+    --code-bg: #040a06;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      radial-gradient(ellipse 60% 35% at 50% -5%, rgba(74,222,128,0.1) 0%, transparent 60%),
+      linear-gradient(rgba(74,222,128,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,222,128,0.02) 1px, transparent 1px);
+    background-size:100% 100%, 44px 44px, 44px 44px;
+  }
+  .container { max-width:980px; margin:0 auto; padding:0 20px 60px; position:relative; z-index:1; }
+
+  header { padding:36px 0 24px; text-align:center; border-bottom:1px solid var(--border); margin-bottom:32px; }
+  .lab-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.28); border-radius:100px; padding:6px 18px; font-size:11.5px; color:var(--accent); letter-spacing:0.1em; margin-bottom:16px; font-family:'JetBrains Mono',monospace; }
+  .lab-badge::before { content:''; width:7px; height:7px; background:var(--accent); border-radius:50%; box-shadow:0 0 10px var(--accent); animation:blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.12} }
+  header h1 { font-family:'Gmarket Sans',sans-serif; font-size:2.5rem; font-weight:700; background:linear-gradient(135deg,#fff 20%,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  header h1 span { display:block; font-size:1rem; font-weight:300; color:var(--accent); -webkit-text-fill-color:var(--accent); letter-spacing:0.2em; margin-top:6px; }
+  .author-line { margin-top:12px; font-size:11.5px; color:var(--text3); font-family:'JetBrains Mono',monospace; }
+
+  .nav-tabs { display:flex; gap:4px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:6px; margin-bottom:28px; overflow-x:auto; scrollbar-width:none; }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .tab-btn { flex:1; min-width:70px; padding:9px 7px; background:transparent; border:none; border-radius:8px; color:var(--text2); font-family:'Noto Sans KR',sans-serif; font-size:11.5px; font-weight:500; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .tab-btn.active { background:var(--card); color:var(--accent); box-shadow:inset 0 0 0 1px rgba(74,222,128,0.28); }
+  .tab-btn:hover:not(.active) { background:var(--bg3); color:var(--text); }
+
+  .section { display:none; animation:fadeUp 0.26s ease; }
+  .section.active { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(9px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-title { font-family:'Gmarket Sans',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); }
+
+  .concept-box { background:linear-gradient(135deg,rgba(74,222,128,0.07),rgba(251,191,36,0.04)); border:1px solid rgba(74,222,128,0.2); border-radius:16px; padding:20px 24px; margin-bottom:20px; }
+  .concept-box h2 { font-size:0.93rem; color:var(--accent); margin-bottom:9px; display:flex; align-items:center; gap:8px; }
+  .concept-box p { color:var(--text2); line-height:1.85; font-size:0.88rem; }
+
+  .code-card { background:var(--card); border:1px solid var(--border); border-radius:13px; overflow:hidden; margin-bottom:13px; transition:border-color 0.2s; }
+  .code-card:hover { border-color:rgba(74,222,128,0.35); }
+  .code-header { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; background:var(--bg2); border-bottom:1px solid var(--border); }
+  .code-title { font-size:0.8rem; color:var(--text); font-weight:600; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .tag { font-size:10px; padding:2px 7px; border-radius:100px; font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .t-pd   { background:rgba(74,222,128,0.12);  color:var(--accent);  border:1px solid rgba(74,222,128,0.28); }
+  .t-df   { background:rgba(251,191,36,0.1);   color:var(--accent2); border:1px solid rgba(251,191,36,0.28); }
+  .t-fn   { background:rgba(56,189,248,0.1);   color:var(--accent3); border:1px solid rgba(56,189,248,0.28); }
+  .t-ex   { background:rgba(244,114,182,0.1);  color:var(--accent4); border:1px solid rgba(244,114,182,0.28); }
+  .t-quiz { background:rgba(192,132,252,0.1);  color:var(--purple);  border:1px solid rgba(192,132,252,0.28); }
+  .t-warn { background:rgba(248,113,113,0.1);  color:var(--red);     border:1px solid rgba(248,113,113,0.28); }
+  .dot-group { display:flex; gap:5px; }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+
+  .code-body { padding:14px 16px; }
+  pre.cblock { background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.75; color:#e2e8f0; overflow-x:auto; white-space:pre; margin-bottom:9px; }
+  .kw  { color:#4ade80; } .fn  { color:#82aaff; } .str { color:#c3e88d; }
+  .num { color:#f78c6c; } .var { color:#ffcb6b; } .op  { color:#89ddff; }
+  .cm  { color:#1e4030; } .mod { color:#f472b6; }
+
+  .oblock { background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.2); border-radius:8px; padding:9px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--accent3); white-space:pre-wrap; }
+  .oblock::before { content:'▶ 출력'; display:block; font-size:10px; color:var(--text3); margin-bottom:4px; letter-spacing:0.06em; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+
+  /* INTERACTIVE DATAFRAME */
+  .df-builder { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:20px; }
+  .df-builder-label { font-size:11px; color:var(--text3); font-family:'JetBrains Mono',monospace; margin-bottom:14px; }
+  .df-controls { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; align-items:flex-end; }
+  .df-controls input { background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:7px 11px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.79rem; width:120px; transition:border-color 0.2s; }
+  .df-controls input:focus { outline:none; border-color:var(--accent); }
+  .df-controls select { background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:7px 10px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.79rem; }
+  .viz-btn { background:var(--accent); border:none; border-radius:7px; padding:7px 16px; color:var(--bg); font-family:'Noto Sans KR',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .viz-btn:hover { transform:translateY(-1px); box-shadow:0 3px 12px rgba(74,222,128,0.4); }
+  .viz-btn.sec { background:var(--bg3); border:1px solid var(--border); color:var(--text2); }
+  .viz-btn.sec:hover { border-color:var(--accent); color:var(--accent); box-shadow:none; }
+
+  /* DATAFRAME TABLE */
+  .df-table-wrap { overflow-x:auto; margin-bottom:10px; }
+  table.df-table { border-collapse:collapse; width:100%; font-family:'JetBrains Mono',monospace; font-size:0.79rem; }
+  table.df-table th { background:rgba(74,222,128,0.12); color:var(--accent); border:1px solid var(--border); padding:8px 14px; text-align:center; font-weight:700; }
+  table.df-table td { background:var(--card); color:var(--text2); border:1px solid var(--border); padding:7px 14px; text-align:center; transition:background 0.2s; }
+  table.df-table tr:hover td { background:rgba(74,222,128,0.05); }
+  table.df-table td.idx { background:var(--bg2); color:var(--text3); font-size:0.72rem; }
+  table.df-table td.hl { background:rgba(251,191,36,0.1); color:var(--accent2); }
+  .df-stats { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .stat-pill { background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.2); border-radius:8px; padding:5px 12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent); }
+  .df-info { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent3); margin-top:8px; min-height:16px; }
+
+  /* FILTER ROW */
+  .filter-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; align-items:center; }
+  .filter-row input[type="number"] { width:80px; background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:6px 10px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.79rem; }
+  .filter-row input[type="number"]:focus { outline:none; border-color:var(--accent2); }
+  .filter-row select { background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:6px 10px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.79rem; }
+
+  /* TABLE */
+  .info-table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; font-size:0.84rem; margin-bottom:15px; }
+  .info-table th { background:var(--bg2); padding:9px 15px; text-align:left; font-size:10px; color:var(--text3); letter-spacing:0.07em; font-weight:600; border-bottom:1px solid var(--border); }
+  .info-table td { padding:9px 15px; border-bottom:1px solid rgba(30,53,38,0.5); color:var(--text2); }
+  .info-table tr:last-child td { border-bottom:none; }
+  .info-table code { font-family:'JetBrains Mono',monospace; color:var(--accent); background:rgba(74,222,128,0.09); padding:1px 6px; border-radius:4px; font-size:0.78rem; }
+
+  /* SIMULATOR */
+  .simulator { background:var(--card); border:1px solid var(--border); border-radius:15px; overflow:hidden; margin-bottom:18px; }
+  .sim-header { padding:11px 20px; background:var(--bg2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .sim-header .dot-group { margin-right:auto; }
+  .sim-title { font-size:12px; color:var(--text2); font-family:'JetBrains Mono',monospace; }
+  .sim-body { padding:17px 20px; }
+  .sim-body label { display:block; font-size:11px; color:var(--text3); letter-spacing:0.07em; margin-bottom:5px; font-family:'JetBrains Mono',monospace; }
+  .sim-body textarea { width:100%; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.7; resize:vertical; min-height:120px; transition:border-color 0.2s; margin-bottom:10px; }
+  .sim-body textarea:focus { outline:none; border-color:var(--accent); }
+  .quick-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:11px; }
+  .qbtn { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:5px 11px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:10.5px; cursor:pointer; transition:all 0.18s; }
+  .qbtn:hover { border-color:var(--accent); color:var(--accent); }
+  .run-btn { background:linear-gradient(135deg,var(--accent),var(--accent3)); border:none; border-radius:8px; padding:10px 22px; color:var(--bg); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px; }
+  .run-btn:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(74,222,128,0.35); }
+  .sim-output { margin-top:13px; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-family:'JetBrains Mono',monospace; font-size:0.79rem; min-height:48px; color:var(--accent3); white-space:pre-wrap; max-height:300px; overflow-y:auto; }
+  .sim-output.error { color:var(--red); }
+  .sim-output::before { content:'$ '; color:var(--text3); }
+
+  /* QUIZ */
+  .quiz-score { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:13px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; }
+  .quiz-score-label { font-size:12px; color:var(--text3); }
+  .score-track { flex:1; height:6px; background:var(--bg3); border-radius:100px; overflow:hidden; }
+  .score-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:100px; transition:width 0.4s ease; }
+  .score-count { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); white-space:nowrap; }
+  .quiz-card { background:var(--card); border:1px solid var(--border); border-radius:13px; padding:18px 20px; margin-bottom:13px; transition:border-color 0.2s; }
+  .quiz-card:hover { border-color:rgba(74,222,128,0.3); }
+  .quiz-q { font-size:0.88rem; color:var(--text); margin-bottom:12px; line-height:1.6; }
+  .quiz-q code { font-family:'JetBrains Mono',monospace; color:var(--accent3); background:rgba(56,189,248,0.08); padding:1px 6px; border-radius:4px; font-size:0.79rem; }
+  .quiz-opts { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .quiz-opt { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:7px 14px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:0.79rem; cursor:pointer; transition:all 0.18s; }
+  .quiz-opt:hover { border-color:var(--accent); color:var(--accent); }
+  .quiz-opt.correct { background:rgba(74,222,128,0.12); border-color:var(--accent); color:var(--accent); }
+  .quiz-opt.wrong { background:rgba(248,113,113,0.1); border-color:var(--red); color:var(--red); }
+  .quiz-feedback { font-size:0.79rem; color:var(--text3); min-height:18px; font-family:'JetBrains Mono',monospace; }
+
+  /* INSTALL */
+  .install-box { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:13px 18px; margin:10px 0; font-family:'JetBrains Mono',monospace; font-size:0.81rem; color:var(--accent3); display:flex; align-items:center; gap:12px; }
+  .install-box::before { content:'$'; color:var(--text3); }
+
+  footer { text-align:center; padding:24px 0 16px; border-top:1px solid var(--border); color:var(--text3); font-size:11.5px; font-family:'JetBrains Mono',monospace; line-height:1.9; }
+  footer span { color:var(--accent); }
+
+  @media (max-width:600px) {
+    header h1 { font-size:1.8rem; }
+    .grid2 { grid-template-columns:1fr; }
+    .tab-btn { font-size:10.5px; padding:8px 5px; }
+    pre.cblock { font-size:0.73rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="lab-badge">세영코딩연구소 · SEYYOUNG CODING LAB</div>
+  <h1>파이썬 판다스<span>Pandas — Data Analysis Library</span></h1>
+  <div class="author-line">저자: ph.D kim &nbsp;|&nbsp; Python 3.x &nbsp;|&nbsp; pandas · DataFrame · Series</div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('개념',this)">📘 개념</button>
+  <button class="tab-btn" onclick="switchTab('series',this)">📊 Series</button>
+  <button class="tab-btn" onclick="switchTab('dataframe',this)">📋 DataFrame</button>
+  <button class="tab-btn" onclick="switchTab('조작',this)">🔧 데이터조작</button>
+  <button class="tab-btn" onclick="switchTab('인터랙티브',this)">🎮 인터랙티브</button>
+  <button class="tab-btn" onclick="switchTab('예제',this)">📝 예제</button>
+  <button class="tab-btn" onclick="switchTab('시뮬',this)">▶ 시뮬</button>
+  <button class="tab-btn" onclick="switchTab('퀴즈',this)">🧩 퀴즈</button>
+</div>
+
+<!-- ① 개념 -->
+<div id="tab-개념" class="section active">
+  <div class="concept-box">
+    <h2>💡 판다스(Pandas)란?</h2>
+    <p>
+      판다스는 <strong style="color:var(--accent)">표 형태 데이터</strong>를 다루는 파이썬 라이브러리입니다.<br>
+      엑셀처럼 <strong style="color:var(--accent2)">행(row)</strong>과 <strong style="color:var(--accent2)">열(column)</strong>로 데이터를 관리할 수 있습니다.<br><br>
+      데이터 분석 · 통계 · AI · 웹 서비스에서 매우 많이 사용됩니다.
+    </p>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <div class="install-box">pip install pandas</div>
+      <div class="code-card" style="margin-top:10px">
+        <div class="code-header"><div class="code-title"><span class="tag t-pd">import</span> 기본 불러오기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+        <div class="code-body">
+          <pre class="cblock"><span class="kw">import</span> <span class="mod">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="cm"># pandas를 pd로 줄여서 사용</span>
+<span class="cm"># 모든 코드에서 이 방식 사용!</span></pre>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px">
+        <div style="font-size:11px;color:var(--accent);font-family:JetBrains Mono;margin-bottom:10px">📊 판다스 핵심 자료형</div>
+        <div style="font-size:0.84rem;color:var(--text2);line-height:2">
+          🔹 <strong style="color:var(--accent)">Series</strong> — 1차원 (한 줄 데이터)<br>
+          🔹 <strong style="color:var(--accent2)">DataFrame</strong> — 2차원 (표 형태)<br><br>
+          <span style="font-size:0.79rem">DataFrame이 가장 중요합니다!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">📋 핵심 문법 한눈에 보기</div>
+  <table class="info-table">
+    <tr><th>문법</th><th>역할</th></tr>
+    <tr><td><code>pd.DataFrame(data)</code></td><td>표 형태 데이터 생성</td></tr>
+    <tr><td><code>df["열"]</code></td><td>특정 열 선택</td></tr>
+    <tr><td><code>df[df["열"] > 값]</code></td><td>조건 필터링</td></tr>
+    <tr><td><code>df["열"].mean()</code></td><td>평균 계산</td></tr>
+    <tr><td><code>df.sort_values("열")</code></td><td>정렬</td></tr>
+    <tr><td><code>df["새열"] = 값</code></td><td>열 추가</td></tr>
+    <tr><td><code>df.head()</code></td><td>앞부분 확인</td></tr>
+    <tr><td><code>pd.read_csv("파일")</code></td><td>CSV 파일 읽기</td></tr>
+  </table>
+</div>
+
+<!-- ② Series -->
+<div id="tab-series" class="section">
+  <div class="section-title">📊 Series — 1차원 데이터</div>
+  <div class="concept-box">
+    <h2>📌 Series란?</h2>
+    <p>Series는 한 줄의 데이터입니다. 리스트처럼 보이지만 <strong style="color:var(--accent)">인덱스(번호)</strong>가 자동으로 붙습니다.</p>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-pd">기본</span> Series 만들기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="var">s</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">Series</span>([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>])
+<span class="fn">print</span>(<span class="var">s</span>)</pre>
+      <div class="oblock">0    10
+1    20
+2    30
+dtype: int64</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-pd">인덱스</span> 인덱스 직접 지정</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">s</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">Series</span>([<span class="num">90</span>, <span class="num">85</span>, <span class="num">88</span>],
+               index<span class="op">=</span>[<span class="str">"민수"</span>, <span class="str">"지아"</span>, <span class="str">"철수"</span>])
+<span class="fn">print</span>(<span class="var">s</span>)
+<span class="fn">print</span>(<span class="var">s</span>[<span class="str">"민수"</span>])</pre>
+      <div class="oblock">민수    90
+지아    85
+철수    88
+dtype: int64
+
+90</div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ DataFrame -->
+<div id="tab-dataframe" class="section">
+  <div class="section-title">📋 DataFrame — 표 형태 데이터</div>
+  <div class="concept-box">
+    <h2>📌 DataFrame이란?</h2>
+    <p>DataFrame은 행(row)과 열(column)로 구성된 <strong style="color:var(--accent2)">표</strong>입니다.<br>
+    엑셀 시트처럼 생각하면 됩니다. 판다스에서 <strong style="color:var(--accent)">가장 중요한 자료형</strong>입니다.</p>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-df">생성</span> 딕셔너리로 DataFrame 만들기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="var">data</span> <span class="op">=</span> {
+    <span class="str">"name"</span>:  [<span class="str">"민수"</span>, <span class="str">"지아"</span>, <span class="str">"철수"</span>],
+    <span class="str">"score"</span>: [<span class="num">90</span>, <span class="num">85</span>, <span class="num">88</span>]
+}
+
+<span class="var">df</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">DataFrame</span>(<span class="var">data</span>)
+<span class="fn">print</span>(<span class="var">df</span>)</pre>
+      <div class="oblock">  name  score
+0   민수     90
+1   지아     85
+2   철수     88</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">🔍 데이터 확인 메서드</div>
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-fn">head()</span> 앞부분 보기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">df</span>.<span class="fn">head</span>()      <span class="cm"># 앞 5행</span>
+<span class="var">df</span>.<span class="fn">head</span>(<span class="num">3</span>)     <span class="cm"># 앞 3행</span></pre>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-fn">info()</span> 구조 정보</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">df</span>.<span class="fn">info</span>()      <span class="cm"># 열·타입·개수</span>
+<span class="var">df</span>.<span class="fn">describe</span>()  <span class="cm"># 요약 통계</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 데이터 조작 -->
+<div id="tab-조작" class="section">
+  <div class="section-title">🔧 데이터 조작</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-df">열 선택</span> 특정 열만 가져오기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="fn">print</span>(<span class="var">df</span>[<span class="str">"score"</span>])        <span class="cm"># 열 하나</span>
+<span class="fn">print</span>(<span class="var">df</span>[[<span class="str">"name"</span>, <span class="str">"score"</span>]])  <span class="cm"># 여러 열</span></pre>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-df">조건 선택</span> 조건에 맞는 행만 필터링</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="cm"># 점수 85 초과인 학생만</span>
+<span class="fn">print</span>(<span class="var">df</span>[<span class="var">df</span>[<span class="str">"score"</span>] <span class="op">></span> <span class="num">85</span>])
+
+<span class="cm"># 90점 이상인 학생만</span>
+<span class="fn">print</span>(<span class="var">df</span>[<span class="var">df</span>[<span class="str">"score"</span>] <span class="op">>=</span> <span class="num">90</span>])</pre>
+      <div class="oblock">  name  score
+0   민수     90
+2   철수     88</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-df">열 추가</span> 새로운 열 만들기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">df</span>[<span class="str">"grade"</span>] <span class="op">=</span> [<span class="str">"A"</span>, <span class="str">"B"</span>, <span class="str">"A"</span>]
+<span class="fn">print</span>(<span class="var">df</span>)</pre>
+      <div class="oblock">  name  score grade
+0   민수     90     A
+1   지아     85     B
+2   철수     88     A</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-df">정렬</span> sort_values()</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="cm"># 오름차순 (기본)</span>
+<span class="var">df</span>.<span class="fn">sort_values</span>(<span class="str">"score"</span>)
+
+<span class="cm"># 내림차순</span>
+<span class="var">df</span>.<span class="fn">sort_values</span>(<span class="str">"score"</span>, ascending<span class="op">=</span><span class="kw">False</span>)</pre>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-fn">통계</span> mean · sum · max · min</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="fn">print</span>(<span class="var">df</span>[<span class="str">"score"</span>].<span class="fn">mean</span>())   <span class="cm"># 87.67</span>
+<span class="fn">print</span>(<span class="var">df</span>[<span class="str">"score"</span>].<span class="fn">sum</span>())    <span class="cm"># 263</span>
+<span class="fn">print</span>(<span class="var">df</span>[<span class="str">"score"</span>].<span class="fn">max</span>())    <span class="cm"># 90</span>
+<span class="fn">print</span>(<span class="var">df</span>[<span class="str">"score"</span>].<span class="fn">min</span>())    <span class="cm"># 85</span></pre>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-fn">CSV</span> 파일 읽기·저장</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="cm"># CSV 읽기</span>
+<span class="var">df</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">read_csv</span>(<span class="str">"data.csv"</span>)
+
+<span class="cm"># CSV 저장</span>
+<span class="var">df</span>.<span class="fn">to_csv</span>(<span class="str">"new_data.csv"</span>, index<span class="op">=</span><span class="kw">False</span>)</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 인터랙티브 -->
+<div id="tab-인터랙티브" class="section">
+  <div class="section-title">🎮 인터랙티브 DataFrame</div>
+
+  <div class="df-builder">
+    <div class="df-builder-label">학생 데이터를 직접 추가하고 필터링·정렬을 체험해보세요!</div>
+
+    <div class="df-controls">
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">이름</div>
+        <input type="text" id="addName" placeholder="예: 민수" maxlength="8">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">점수</div>
+        <input type="text" id="addScore" placeholder="예: 90" maxlength="5">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">과목</div>
+        <input type="text" id="addSubject" placeholder="예: 수학" maxlength="8">
+      </div>
+      <button class="viz-btn" onclick="dfAddRow()" style="align-self:flex-end">+ 행 추가</button>
+      <button class="viz-btn sec" onclick="dfReset()" style="align-self:flex-end">초기화</button>
+    </div>
+
+    <div style="margin-bottom:10px;font-size:11px;color:var(--text3);font-family:JetBrains Mono">🔍 필터 & 정렬</div>
+    <div class="filter-row">
+      <span style="font-size:11px;color:var(--text2)">점수</span>
+      <select id="filterOp">
+        <option value="gte">&gt;= (이상)</option>
+        <option value="gt">&gt; (초과)</option>
+        <option value="lte">&lt;= (이하)</option>
+        <option value="lt">&lt; (미만)</option>
+        <option value="eq">== (같음)</option>
+      </select>
+      <input type="number" id="filterVal" value="85" min="0" max="100">
+      <button class="viz-btn" onclick="dfFilter()" style="padding:6px 12px;font-size:11.5px">필터 적용</button>
+      <button class="viz-btn sec" onclick="dfSort('asc')" style="padding:6px 12px;font-size:11.5px">▲ 점수 오름</button>
+      <button class="viz-btn sec" onclick="dfSort('desc')" style="padding:6px 12px;font-size:11.5px">▼ 점수 내림</button>
+      <button class="viz-btn sec" onclick="dfShowAll()" style="padding:6px 12px;font-size:11.5px">전체 보기</button>
+    </div>
+
+    <div class="df-table-wrap">
+      <table class="df-table" id="dfTable"></table>
+    </div>
+    <div class="df-stats" id="dfStats"></div>
+    <div class="df-info" id="dfInfo"></div>
+  </div>
+</div>
+
+<!-- ⑥ 예제 -->
+<div id="tab-예제" class="section">
+  <div class="section-title">📝 실전 예제</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 1</span> 학생 점수 분석</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="var">data</span> <span class="op">=</span> {
+    <span class="str">"name"</span>:  [<span class="str">"민수"</span>, <span class="str">"지아"</span>, <span class="str">"철수"</span>, <span class="str">"영희"</span>],
+    <span class="str">"score"</span>: [<span class="num">90</span>, <span class="num">85</span>, <span class="num">88</span>, <span class="num">92</span>]
+}
+<span class="var">df</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">DataFrame</span>(<span class="var">data</span>)
+
+<span class="fn">print</span>(<span class="str">"데이터"</span>)
+<span class="fn">print</span>(<span class="var">df</span>)
+<span class="fn">print</span>(<span class="str">"평균:"</span>, <span class="var">df</span>[<span class="str">"score"</span>].<span class="fn">mean</span>())
+<span class="fn">print</span>(<span class="str">"최고점:"</span>, <span class="var">df</span>[<span class="str">"score"</span>].<span class="fn">max</span>())
+<span class="fn">print</span>(<span class="str">"최저점:"</span>, <span class="var">df</span>[<span class="str">"score"</span>].<span class="fn">min</span>())</pre>
+      <div class="oblock">데이터
+  name  score
+0   민수     90
+1   지아     85
+2   철수     88
+3   영희     92
+평균: 88.75
+최고점: 92
+최저점: 85</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 2</span> 조건 필터링</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="var">data</span> <span class="op">=</span> {
+    <span class="str">"name"</span>:  [<span class="str">"민수"</span>, <span class="str">"지아"</span>, <span class="str">"철수"</span>, <span class="str">"영희"</span>],
+    <span class="str">"score"</span>: [<span class="num">90</span>, <span class="num">85</span>, <span class="num">88</span>, <span class="num">92</span>]
+}
+<span class="var">df</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">DataFrame</span>(<span class="var">data</span>)
+
+<span class="var">high</span> <span class="op">=</span> <span class="var">df</span>[<span class="var">df</span>[<span class="str">"score"</span>] <span class="op">>=</span> <span class="num">90</span>]
+<span class="fn">print</span>(<span class="str">"90점 이상 학생"</span>)
+<span class="fn">print</span>(<span class="var">high</span>)</pre>
+      <div class="oblock">90점 이상 학생
+  name  score
+0   민수     90
+3   영희     92</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 3</span> 열 추가 + 정렬</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">pandas</span> <span class="kw">as</span> <span class="var">pd</span>
+
+<span class="var">data</span> <span class="op">=</span> {
+    <span class="str">"name"</span>:  [<span class="str">"민수"</span>, <span class="str">"지아"</span>, <span class="str">"철수"</span>],
+    <span class="str">"score"</span>: [<span class="num">90</span>, <span class="num">85</span>, <span class="num">88</span>]
+}
+<span class="var">df</span> <span class="op">=</span> <span class="var">pd</span>.<span class="fn">DataFrame</span>(<span class="var">data</span>)
+
+<span class="var">df</span>[<span class="str">"grade"</span>] <span class="op">=</span> [<span class="str">"A"</span>, <span class="str">"B"</span>, <span class="str">"B"</span>]
+<span class="var">df</span> <span class="op">=</span> <span class="var">df</span>.<span class="fn">sort_values</span>(<span class="str">"score"</span>, ascending<span class="op">=</span><span class="kw">False</span>)
+
+<span class="fn">print</span>(<span class="var">df</span>)</pre>
+      <div class="oblock">  name  score grade
+0   민수     90     A
+2   철수     88     B
+1   지아     85     B</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑦ 시뮬레이터 -->
+<div id="tab-시뮬" class="section">
+  <div class="section-title">▶ Pandas 시뮬레이터</div>
+  <div class="simulator">
+    <div class="sim-header">
+      <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      <span class="sim-title">pandas_simulator.py</span>
+    </div>
+    <div class="sim-body">
+      <label>빠른 예제 불러오기</label>
+      <div class="quick-btns">
+        <button class="qbtn" onclick="loadEx('basic')">DataFrame 기본</button>
+        <button class="qbtn" onclick="loadEx('series')">Series</button>
+        <button class="qbtn" onclick="loadEx('select')">열 선택</button>
+        <button class="qbtn" onclick="loadEx('filter')">조건 필터</button>
+        <button class="qbtn" onclick="loadEx('sort')">정렬</button>
+        <button class="qbtn" onclick="loadEx('addcol')">열 추가</button>
+        <button class="qbtn" onclick="loadEx('stats')">통계</button>
+        <button class="qbtn" onclick="loadEx('full')">종합 예제</button>
+      </div>
+      <label>CODE</label>
+      <textarea id="simCode" placeholder="pandas 코드를 입력하거나 위 예제를 불러오세요.
+
+예:
+import pandas as pd
+data = {'name': ['민수','지아','철수'], 'score': [90,85,88]}
+df = pd.DataFrame(data)
+print(df)
+print(df['score'].mean())"></textarea>
+      <button class="run-btn" onclick="runSim()">▶ 실행하기</button>
+      <div id="simOutput" class="sim-output" style="opacity:0.4">실행 결과가 여기에 표시됩니다.</div>
+    </div>
+  </div>
+  <div class="concept-box">
+    <h2>⚠️ 안내</h2>
+    <p><strong style="color:var(--accent)">지원:</strong> pd.DataFrame / pd.Series / 열 선택 / 조건 필터 / 열 추가 / sort_values / mean·sum·max·min / head / info / describe / print<br>
+    <strong style="color:var(--red)">미지원:</strong> pd.read_csv·to_csv (파일 I/O), groupby, merge 등 고급 기능</p>
+  </div>
+</div>
+
+<!-- ⑧ 퀴즈 -->
+<div id="tab-퀴즈" class="section">
+  <div class="quiz-score">
+    <span class="quiz-score-label">퀴즈 진행도</span>
+    <div class="score-track"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
+    <span class="score-count" id="scoreCount">0 / 10</span>
+  </div>
+  <div class="section-title">🧩 Pandas 퀴즈 10문항</div>
+  <div id="quizGrid"></div>
+</div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span>세영코딩연구소</span> &nbsp;|&nbsp; 저자: <span>ph.D kim</span><br>
+    Python 3.x · Pandas · DataFrame · Series · 데이터 분석
+  </div>
+</footer>
+
+<script>
+// TAB
+function switchTab(n, b) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active'); b.classList.add('active');
+}
+
+// ── INTERACTIVE DATAFRAME ──
+let dfData = [
+  {name:'민수', score:90, subject:'수학'},
+  {name:'지아', score:85, subject:'영어'},
+  {name:'철수', score:88, subject:'과학'},
+  {name:'영희', score:92, subject:'수학'},
+  {name:'준호', score:78, subject:'국어'},
+];
+let dfDisplayData = [...dfData];
+
+function dfRender(data) {
+  const table = document.getElementById('dfTable');
+  const stats = document.getElementById('dfStats');
+  const info  = document.getElementById('dfInfo');
+  if (!data.length) { table.innerHTML='<tr><td colspan="4" style="color:var(--text3);padding:20px;text-align:center">데이터가 없습니다</td></tr>'; return; }
+  const cols = Object.keys(data[0]);
+  table.innerHTML = `
+    <thead><tr>
+      <th style="background:var(--bg2);color:var(--text3)">idx</th>
+      ${cols.map(c=>`<th>${c}</th>`).join('')}
+    </tr></thead>
+    <tbody>
+      ${data.map((row,i)=>`
+        <tr>
+          <td class="idx">${i}</td>
+          ${cols.map(c=>`<td class="${c==='score'&&row[c]>=90?'hl':''}">${row[c]}</td>`).join('')}
+        </tr>`).join('')}
+    </tbody>
+  `;
+  const scores = data.map(r=>r.score).filter(n=>!isNaN(n));
+  const sum = scores.reduce((a,b)=>a+b,0);
+  const mean = scores.length ? (sum/scores.length).toFixed(2) : 'N/A';
+  const mx = scores.length ? Math.max(...scores) : 'N/A';
+  const mn = scores.length ? Math.min(...scores) : 'N/A';
+  stats.innerHTML = `
+    <div class="stat-pill">행 수: ${data.length}</div>
+    <div class="stat-pill">평균: ${mean}</div>
+    <div class="stat-pill">최고: ${mx}</div>
+    <div class="stat-pill">최저: ${mn}</div>
+    <div class="stat-pill">합계: ${sum}</div>
+  `;
+  info.textContent = `DataFrame shape: (${data.length}, ${cols.length})  |  열: ${cols.join(', ')}`;
+}
+
+function dfAddRow() {
+  const name    = document.getElementById('addName').value.trim();
+  const score   = parseInt(document.getElementById('addScore').value);
+  const subject = document.getElementById('addSubject').value.trim();
+  if (!name || isNaN(score)) { alert('이름과 점수를 입력해주세요'); return; }
+  dfData.push({name, score, subject: subject||'기타'});
+  dfDisplayData = [...dfData];
+  dfRender(dfDisplayData);
+  document.getElementById('addName').value='';
+  document.getElementById('addScore').value='';
+  document.getElementById('addSubject').value='';
+}
+
+function dfFilter() {
+  const op  = document.getElementById('filterOp').value;
+  const val = parseFloat(document.getElementById('filterVal').value);
+  dfDisplayData = dfData.filter(r => {
+    if (op==='gte') return r.score >= val;
+    if (op==='gt')  return r.score > val;
+    if (op==='lte') return r.score <= val;
+    if (op==='lt')  return r.score < val;
+    if (op==='eq')  return r.score === val;
+    return true;
+  });
+  dfRender(dfDisplayData);
+  document.getElementById('dfInfo').textContent += `  ← 필터 적용됨`;
+}
+
+function dfSort(dir) {
+  dfDisplayData = [...dfDisplayData].sort((a,b)=>dir==='asc'?a.score-b.score:b.score-a.score);
+  dfRender(dfDisplayData);
+}
+
+function dfShowAll() {
+  dfDisplayData = [...dfData];
+  dfRender(dfDisplayData);
+}
+
+function dfReset() {
+  dfData = [
+    {name:'민수', score:90, subject:'수학'},
+    {name:'지아', score:85, subject:'영어'},
+    {name:'철수', score:88, subject:'과학'},
+    {name:'영희', score:92, subject:'수학'},
+    {name:'준호', score:78, subject:'국어'},
+  ];
+  dfDisplayData = [...dfData];
+  dfRender(dfDisplayData);
+}
+
+dfRender(dfDisplayData);
+
+// ── SIMULATOR ──
+const exMap = {
+  basic:   `import pandas as pd\n\ndata = {\n    "name": ["민수", "지아", "철수"],\n    "score": [90, 85, 88]\n}\ndf = pd.DataFrame(data)\nprint(df)`,
+  series:  `import pandas as pd\n\ns = pd.Series([10, 20, 30])\nprint(s)\n\ns2 = pd.Series([90, 85, 88], index=["민수", "지아", "철수"])\nprint(s2)`,
+  select:  `import pandas as pd\n\ndata = {"name": ["민수","지아","철수"], "score": [90,85,88]}\ndf = pd.DataFrame(data)\n\nprint(df["score"])\nprint(df["name"])`,
+  filter:  `import pandas as pd\n\ndata = {"name": ["민수","지아","철수","영희"], "score": [90,85,88,92]}\ndf = pd.DataFrame(data)\n\nprint("85 초과:")\nprint(df[df["score"] > 85])\n\nprint("90 이상:")\nprint(df[df["score"] >= 90])`,
+  sort:    `import pandas as pd\n\ndata = {"name": ["민수","지아","철수"], "score": [90,85,88]}\ndf = pd.DataFrame(data)\n\nprint("오름차순:")\nprint(df.sort_values("score"))\n\nprint("내림차순:")\nprint(df.sort_values("score", ascending=False))`,
+  addcol:  `import pandas as pd\n\ndata = {"name": ["민수","지아","철수"], "score": [90,85,88]}\ndf = pd.DataFrame(data)\n\ndf["grade"] = ["A", "B", "B"]\nprint(df)`,
+  stats:   `import pandas as pd\n\ndata = {"name": ["민수","지아","철수","영희"], "score": [90,85,88,92]}\ndf = pd.DataFrame(data)\n\nprint("평균:", df["score"].mean())\nprint("합계:", df["score"].sum())\nprint("최고:", df["score"].max())\nprint("최저:", df["score"].min())`,
+  full:    `import pandas as pd\n\ndata = {\n    "name": ["민수","지아","철수","영희"],\n    "score": [90, 85, 88, 92]\n}\ndf = pd.DataFrame(data)\n\ndf["grade"] = ["A", "B", "B", "A"]\n\ndf_sorted = df.sort_values("score", ascending=False)\nprint(df_sorted)\n\nprint("90점 이상:")\nprint(df[df["score"] >= 90])\n\nprint("평균:", df["score"].mean())\nprint("최고점:", df["score"].max())`,
+};
+
+function loadEx(name) {
+  document.getElementById('simCode').value = exMap[name] || '';
+}
+
+function runSim() {
+  const code = document.getElementById('simCode').value;
+  const outEl = document.getElementById('simOutput');
+  outEl.style.opacity='1'; outEl.className='sim-output';
+  try {
+    const output = [];
+    let totalOps = 0;
+    const env = {};
+
+    // ── Mini Pandas Emulator ──
+    class Series {
+      constructor(data, index=null) {
+        this._data = Array.isArray(data) ? [...data] : Object.values(data);
+        this._index = index || this._data.map((_,i)=>i);
+        this._isPandas = true;
+        this._type = 'Series';
+      }
+      mean() { return this._data.reduce((a,b)=>a+b,0)/this._data.length; }
+      sum()  { return this._data.reduce((a,b)=>a+b,0); }
+      max()  { return Math.max(...this._data); }
+      min()  { return Math.min(...this._data); }
+      toString() {
+        const lines = this._index.map((idx,i)=>`${String(idx).padEnd(6)} ${this._data[i]}`);
+        const dtype = typeof this._data[0]==='number' ? 'int64' : 'object';
+        return lines.join('\n') + `\ndtype: ${dtype}`;
+      }
+      gt(v)  { return this._data.map(x=>x>v); }
+      gte(v) { return this._data.map(x=>x>=v); }
+      lt(v)  { return this._data.map(x=>x<v); }
+      lte(v) { return this._data.map(x=>x<=v); }
+      eq(v)  { return this._data.map(x=>x===v); }
+    }
+
+    class DataFrame {
+      constructor(data) {
+        this._cols = Object.keys(data);
+        this._data = data;
+        this._len  = data[this._cols[0]]?.length || 0;
+        this._isPandas = true;
+        this._type = 'DataFrame';
+      }
+      _getRows(indices=null) {
+        const idxs = indices !== null ? indices : [...Array(this._len).keys()];
+        return idxs.map(i => {
+          const row = {};
+          this._cols.forEach(c=>{ row[c]=this._data[c][i]; });
+          return row;
+        });
+      }
+      head(n=5) {
+        const idxs = [...Array(Math.min(n,this._len)).keys()];
+        return this._subsetDF(idxs);
+      }
+      _subsetDF(indices) {
+        const newData = {};
+        this._cols.forEach(c=>{ newData[c]=indices.map(i=>this._data[c][i]); });
+        return new DataFrame(newData);
+      }
+      col(name) {
+        if (!this._data[name]) throw new Error(`KeyError: '${name}'`);
+        return new Series(this._data[name]);
+      }
+      filter(mask) {
+        const indices = mask.map((v,i)=>v?i:-1).filter(i=>i>=0);
+        return this._subsetDF(indices);
+      }
+      sort_values(col, ascending=true) {
+        const pairs = this._data[col].map((v,i)=>({v,i}));
+        pairs.sort((a,b)=>ascending?a.v-b.v:b.v-a.v);
+        return this._subsetDF(pairs.map(p=>p.i));
+      }
+      addCol(name, values) {
+        const newData = {...this._data};
+        newData[name] = Array.isArray(values)?values:Array(this._len).fill(values);
+        const nd = new DataFrame(newData);
+        return nd;
+      }
+      info() {
+        const lines = [`<class 'pandas.core.frame.DataFrame'>`, `RangeIndex: ${this._len} entries, 0 to ${this._len-1}`, `Data columns:`];
+        this._cols.forEach(c=>{
+          const dtype = typeof this._data[c][0]==='number'?'int64':'object';
+          lines.push(`  ${c.padEnd(12)} ${this._len} non-null   ${dtype}`);
+        });
+        lines.push(`dtypes: int64(${this._cols.filter(c=>typeof this._data[c][0]==='number').length}), object(${this._cols.filter(c=>typeof this._data[c][0]==='string').length})`);
+        return lines.join('\n');
+      }
+      describe() {
+        const numCols = this._cols.filter(c=>typeof this._data[c][0]==='number');
+        const lines = ['       ' + numCols.map(c=>c.padStart(8)).join('')];
+        const metrics = ['count','mean','std','min','25%','50%','75%','max'];
+        metrics.forEach(m=>{
+          const vals = numCols.map(c=>{
+            const d=this._data[c]; const n=d.length;
+            if (m==='count') return n;
+            if (m==='mean')  return (d.reduce((a,b)=>a+b,0)/n).toFixed(2);
+            if (m==='min')   return Math.min(...d);
+            if (m==='max')   return Math.max(...d);
+            const sorted=[...d].sort((a,b)=>a-b);
+            if (m==='50%') return sorted[Math.floor(n/2)];
+            if (m==='25%') return sorted[Math.floor(n/4)];
+            if (m==='75%') return sorted[Math.floor(3*n/4)];
+            if (m==='std')  { const mean=d.reduce((a,b)=>a+b,0)/n; return Math.sqrt(d.reduce((s,v)=>s+(v-mean)**2,0)/n).toFixed(2); }
+            return '?';
+          });
+          lines.push(m.padEnd(7) + vals.map(v=>String(v).padStart(8)).join(''));
+        });
+        return lines.join('\n');
+      }
+      toString() {
+        const rows = this._getRows();
+        const widths = this._cols.map(c => Math.max(c.length, ...rows.map(r=>String(r[c]).length)));
+        const header = '  ' + this._cols.map((c,i)=>c.padStart(widths[i]+1)).join('');
+        const lines = rows.map((r,idx)=>{
+          return String(idx).padStart(2) + this._cols.map((c,i)=>String(r[c]).padStart(widths[i]+1)).join('');
+        });
+        return header + '\n' + lines.join('\n');
+      }
+    }
+
+    const pd = {
+      DataFrame: (data) => new DataFrame(data),
+      Series:    (data, opts) => new Series(data, opts?.index),
+      _isPd: true,
+    };
+    env.pd = pd;
+
+    function reprVal(v) {
+      if (v===null||v===undefined) return 'None';
+      if (v===true) return 'True'; if (v===false) return 'False';
+      if (v && v._isPandas) return v.toString();
+      if (Array.isArray(v)) return '['+v.map(reprVal).join(', ')+']';
+      if (typeof v==='object') return JSON.stringify(v);
+      if (typeof v==='string') return v;
+      if (typeof v==='number') return Number.isInteger(v)?String(v):parseFloat(v.toFixed(4)).toString();
+      return String(v);
+    }
+
+    function splitCommas(str) {
+      const parts=[]; let depth=0,inStr=false,strChar='',cur='';
+      for (let ci=0;ci<str.length;ci++) {
+        const c=str[ci];
+        if (!inStr&&(c==='"'||c==="'")){inStr=true;strChar=c;cur+=c;continue;}
+        if (inStr&&c===strChar&&str[ci-1]!=='\\'){inStr=false;cur+=c;continue;}
+        if (inStr){cur+=c;continue;}
+        if ('([{'.includes(c)) depth++;
+        else if (')]}'.includes(c)) depth--;
+        else if (c===','&&depth===0){parts.push(cur);cur='';continue;}
+        cur+=c;
+      }
+      if (cur.trim()) parts.push(cur);
+      return parts;
+    }
+
+    function evalExpr(expr, env) {
+      expr=expr.trim();
+      if (expr==='True') return true; if(expr==='False') return false; if(expr==='None') return null;
+      if (/^-?\d+$/.test(expr)) return parseInt(expr);
+      if (/^-?\d+\.\d+$/.test(expr)) return parseFloat(expr);
+      if ((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'"))) return expr.slice(1,-1);
+      if (expr==='[]') return [];
+      // List literal
+      if (expr.startsWith('[')&&expr.endsWith(']')) {
+        const inner=expr.slice(1,-1).trim(); if(!inner) return [];
+        return splitCommas(inner).map(e=>evalExpr(e.trim(),env));
+      }
+      // Dict literal
+      if (expr.startsWith('{')&&expr.endsWith('}')) {
+        const inner=expr.slice(1,-1).trim(); if(!inner) return {};
+        const d={};
+        splitCommas(inner).forEach(pair=>{
+          const ci=pair.indexOf(':'); if(ci<0) return;
+          const k=evalExpr(pair.slice(0,ci).trim(),env);
+          const v=evalExpr(pair.slice(ci+1).trim(),env);
+          d[k]=v;
+        });
+        return d;
+      }
+      if (/^[a-zA-Z_]\w*$/.test(expr)) return env.hasOwnProperty(expr)?env[expr]:undefined;
+
+      // pd.DataFrame(data) / pd.Series(...)
+      let m;
+      m=expr.match(/^pd\.(DataFrame|Series)\((.+)\)$/s);
+      if (m) {
+        const fn=m[1]; const argsRaw=m[2];
+        const args=splitCommas(argsRaw).map(a=>evalExpr(a.trim(),env));
+        if (fn==='DataFrame') return new DataFrame(args[0]);
+        if (fn==='Series') {
+          const opts=args[1]&&typeof args[1]==='object'?args[1]:null;
+          return new Series(args[0], opts?.index);
+        }
+      }
+
+      // Method chains: obj.method(args)
+      m=expr.match(/^(.+?)\.([a-zA-Z_]\w*)\((.*?)\)$/s);
+      if (m) {
+        const obj=evalExpr(m[1].trim(),env); const method=m[2]; const argsRaw=m[3].trim();
+        const args=argsRaw?splitCommas(argsRaw).map(a=>{
+          const kv=a.match(/^(\w+)\s*=\s*(.+)$/);
+          if (kv) return evalExpr(kv[2].trim(),env);
+          return evalExpr(a.trim(),env);
+        }):[];
+        // Keyword args for sort_values
+        const hasAscendingFalse = argsRaw.includes('ascending=False');
+        if (obj instanceof DataFrame) {
+          if (method==='head') return obj.head(args[0]||5);
+          if (method==='info') return obj.info();
+          if (method==='describe') return obj.describe();
+          if (method==='sort_values') return obj.sort_values(args[0], !hasAscendingFalse);
+          if (method==='to_csv') return null;
+        }
+        if (obj instanceof Series) {
+          if (method==='mean') return obj.mean();
+          if (method==='sum') return obj.sum();
+          if (method==='max') return obj.max();
+          if (method==='min') return obj.min();
+        }
+        if (typeof obj==='string') {
+          if (method==='split') return args.length?obj.split(args[0]):obj.trim().split(/\s+/);
+        }
+        if (Array.isArray(obj)) {
+          if (method==='append'){const r=[...obj];r.push(args[0]);return r;}
+        }
+      }
+
+      // Property access: df["col"] or df.col
+      m=expr.match(/^([a-zA-Z_]\w*)\[(.+)\]$/);
+      if (m) {
+        const obj=env[m[1]]; const key=evalExpr(m[2],env);
+        if (obj instanceof DataFrame) {
+          // Boolean mask: df[df["col"] > val]
+          if (Array.isArray(key)) return obj.filter(key);
+          return obj.col(key);
+        }
+        if (Array.isArray(obj)) return obj[key];
+        if (typeof obj==='object'&&obj!==null) return obj[key];
+      }
+
+      // df.property (shape, etc.)
+      m=expr.match(/^([a-zA-Z_]\w*)\.([a-zA-Z_]\w*)$/);
+      if (m) {
+        const obj=env[m[1]];
+        if (obj instanceof DataFrame) {
+          if (m[2]==='shape') return [obj._len, obj._cols.length];
+          if (m[2]==='columns') return obj._cols;
+          if (m[2]==='index') return [...Array(obj._len).keys()];
+        }
+        if (obj instanceof Series) {
+          if (m[2]==='values') return obj._data;
+          if (m[2]==='index') return obj._index;
+        }
+      }
+
+      // Comparison: df["col"] > val → mask array
+      for (const op of ['>=','<=','>','<','==','!=']) {
+        const oi=expr.indexOf(op);
+        if (oi>0) {
+          const L=expr.slice(0,oi).trim(), R=expr.slice(oi+op.length).trim();
+          if (L&&R) {
+            const l=evalExpr(L,env), r=evalExpr(R,env);
+            if (l instanceof Series) {
+              if (op==='>=') return l.gte(r); if(op==='<=') return l.lte(r);
+              if (op==='>') return l.gt(r); if(op==='<') return l.lt(r);
+              if (op==='==') return l.eq(r);
+              if (op==='!=') return l._data.map(v=>v!==r);
+            }
+            if (op==='>=') return l>=r; if(op==='<=') return l<=r;
+            if (op==='>') return l>r; if(op==='<') return l<r;
+            if (op==='==') return l==r; if(op==='!=') return l!=r;
+          }
+        }
+      }
+      // Arithmetic
+      for (const op of ['+','-','*','/','//','^','%']) {
+        const oi=expr.lastIndexOf(op);
+        if (oi>0) {
+          const L=expr.slice(0,oi).trim(), R=expr.slice(oi+op.length).trim();
+          if (L&&R) {
+            const l=evalExpr(L,env), r=evalExpr(R,env);
+            if (op==='+') return (typeof l==='string'||typeof r==='string')?String(l)+String(r):l+r;
+            if (op==='-') return l-r; if(op==='*') return l*r; if(op==='/') return l/r;
+            if (op==='//') return Math.trunc(l/r); if(op==='%') return l%r;
+          }
+        }
+      }
+      return expr;
+    }
+
+    function getIndent(line){return (line.match(/^(\s*)/)||['',''])[1].length;}
+    function collectBody(lines,start,base){const body=[];let j=start;while(j<lines.length){const l=lines[j];if(!l.trim()){j++;continue;}if(getIndent(l)<=base)break;body.push(l);j++;}return{body,end:j};}
+
+    function runBlock(lines, env) {
+      let i=0;
+      while (i<lines.length) {
+        if (totalOps++>8000) throw new Error('최대 실행 횟수 초과');
+        const line=lines[i]; const t=line.trim();
+        if (!t||t.startsWith('#')){i++;continue;}
+        if (t==='break') return {signal:'break'};
+
+        if (/^import pandas as pd$/.test(t)||/^import pandas$/.test(t)){env.pd=pd;i++;continue;}
+        if (/^from pandas import/.test(t)){i++;continue;}
+
+        // print
+        if (t==='print()'){output.push('');i++;continue;}
+        let m=t.match(/^print\((.+)\)$/);
+        if (m){
+          let args=m[1]; let sep=' ';
+          const sm=args.match(/,\s*sep\s*=\s*["'](.*)["']/); if(sm){sep=sm[1];args=args.replace(/,\s*sep\s*=\s*["'].*?["']/,'');}
+          args=args.replace(/,\s*end\s*=\s*["'].*?["']/,'').trim().replace(/,$/,'').trim();
+          const parts=splitCommas(args).map(a=>reprVal(evalExpr(a.trim(),env)));
+          output.push(parts.join(sep)); i++; continue;
+        }
+
+        // augmented assignment
+        m=t.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=)\s*(.+)$/);
+        if (m){const[,vn,op,rhs]=m;const r=evalExpr(rhs,env);const l=env[vn]??0;if(op==='+=')env[vn]=(typeof l==='string'||typeof r==='string')?String(l)+String(r):l+r;else if(op==='-=')env[vn]=l-r;else if(op==='*=')env[vn]=l*r;i++;continue;}
+
+        // df["col"] = [...] → addCol
+        m=t.match(/^([a-zA-Z_]\w*)\["(.+)"\]\s*=\s*(.+)$/);
+        if (!m) m=t.match(/^([a-zA-Z_]\w*)\['(.+)'\]\s*=\s*(.+)$/);
+        if (m){
+          const obj=env[m[1]]; const col=m[2]; const val=evalExpr(m[3],env);
+          if (obj instanceof DataFrame) env[m[1]]=obj.addCol(col,val);
+          i++;continue;
+        }
+
+        // for loop
+        if (/^for .+ in .+:$/.test(t)){
+          const base=getIndent(line);const{body,end}=collectBody(lines,i+1,base);
+          const lm=t.match(/^for (.+) in (.+):$/);
+          if(lm){const varP=lm[1].trim();const iterV=evalExpr(lm[2].trim(),env);const iterable=Array.isArray(iterV)?iterV:typeof iterV==='string'?iterV.split(''):[];for(const item of iterable){if(totalOps++>8000)throw new Error('최대 초과');env[varP]=item;const res=runBlock(body,env);if(res&&res.signal==='break')break;}}
+          i=end;continue;
+        }
+
+        // if/elif/else
+        if(/^if .+:$/.test(t)||/^elif .+:$/.test(t)||/^else:$/.test(t)){
+          const base=getIndent(line);const branches=[];let j=i;
+          while(j<lines.length){const bl=lines[j].trim();if(!bl){j++;continue;}const bi=getIndent(lines[j]);if(bi<base)break;if(bi===base){if(/^if .+:$/.test(bl)||/^elif .+:$/.test(bl)){const cond=bl.replace(/^(if|elif)\s+/,'').slice(0,-1).trim();const{body,end}=collectBody(lines,j+1,base);branches.push({cond,body});j=end;}else if(/^else:$/.test(bl)){const{body,end}=collectBody(lines,j+1,base);branches.push({cond:'__else__',body});j=end;}else break;}else break;}
+          let exec=false;for(const b of branches){if(exec)break;if(b.cond==='__else__'||evalExpr(b.cond,env)){const res=runBlock(b.body,env);if(res&&res.signal)return res;exec=true;}}
+          i=j;continue;
+        }
+
+        // assignment
+        m=t.match(/^([a-zA-Z_,\s]+)\s*=\s*(.+)$/);
+        if(m){
+          const lhs=m[1].trim(),rhs=m[2].trim();
+          const val=evalExpr(rhs,env);
+          if(lhs.includes(',')){const vars=lhs.split(',').map(v=>v.trim());if(Array.isArray(val))vars.forEach((v,j)=>{env[v]=val[j];});else vars.forEach((v,j)=>{env[v]=j===0?val:undefined;});}
+          else env[lhs]=val;
+          i++;continue;
+        }
+        i++;
+      }
+      return {signal:null};
+    }
+
+    runBlock(code.split('\n'), env);
+    outEl.textContent = output.join('\n') || '(출력 없음)';
+  } catch(e) {
+    outEl.className='sim-output error';
+    outEl.textContent='오류: '+e.message;
+  }
+}
+
+// QUIZ
+const quizData = [
+  { q:'판다스를 불러오는 표준 방법은?', opts:['import pandas', 'import pandas as pd', 'from pandas import *', 'include pandas as pd'], ans:1 },
+  { q:'표 형태 데이터를 만드는 판다스 자료형은?', opts:['Series', 'Array', 'DataFrame', 'Table'], ans:2 },
+  { q:'DataFrame에서 특정 열을 선택하는 방법은?', opts:['df.col("name")', 'df["name"]', 'df.select("name")', 'df.get("name")'], ans:1 },
+  { q:'점수가 85보다 큰 데이터만 고르는 코드는?', opts:['df.filter(score > 85)', 'df[df["score"] > 85]', 'df.where("score", 85)', 'df["score"] > 85'], ans:1 },
+  { q:'점수 열의 평균을 구하는 코드는?', opts:['df["score"].avg()', 'np.mean(df["score"])', 'df["score"].mean()', 'mean(df["score"])'], ans:2 },
+  { q:'점수 내림차순으로 정렬하는 코드는?', opts:['df.sort("score")', 'df.sort_values("score", ascending=False)', 'df.order("score", desc=True)', 'df.sort_values("score")'], ans:1 },
+  { q:'CSV 파일을 읽어 DataFrame으로 만드는 코드는?', opts:['pd.open_csv("f.csv")', 'pd.import_csv("f.csv")', 'pd.read_csv("f.csv")', 'pd.load_csv("f.csv")'], ans:2 },
+  { q:'DataFrame에 새로운 열을 추가하는 방법은?', opts:['df.add_col("grade", vals)', 'df.insert("grade", vals)', 'df["grade"] = vals', 'df.append_col("grade", vals)'], ans:2 },
+  { q:'DataFrame 앞 5행을 보는 메서드는?', opts:['df.top()', 'df.first()', 'df.head()', 'df.show()'], ans:2 },
+  { q:'1차원 데이터를 표현하는 판다스 자료형은?', opts:['Array', 'Series', 'Column', 'List'], ans:1 },
+];
+
+let quizAnswered = new Set();
+function buildQuiz() {
+  document.getElementById('quizGrid').innerHTML = quizData.map((q,i) => `
+    <div class="quiz-card" id="qcard-${i}">
+      <div class="quiz-q">Q${i+1}. ${q.q}</div>
+      <div class="quiz-opts">${q.opts.map((o,j)=>`<button class="quiz-opt" onclick="answerQuiz(${i},${j})">${o}</button>`).join('')}</div>
+      <div class="quiz-feedback" id="qfb-${i}"></div>
+    </div>
+  `).join('');
+}
+
+function answerQuiz(qi, oi) {
+  if (quizAnswered.has(qi)) return;
+  quizAnswered.add(qi);
+  const q=quizData[qi];
+  document.querySelectorAll(`#qcard-${qi} .quiz-opt`).forEach((el,j)=>{
+    if(j===q.ans) el.classList.add('correct');
+    else if(j===oi&&j!==q.ans) el.classList.add('wrong');
+  });
+  document.getElementById('qfb-'+qi).textContent = oi===q.ans?'✅ 정답입니다!':`❌ 오답. 정답: ${q.opts[q.ans]}`;
+  const pct=(quizAnswered.size/quizData.length)*100;
+  document.getElementById('scoreFill').style.width=pct+'%';
+  document.getElementById('scoreCount').textContent=`${quizAnswered.size} / ${quizData.length}`;
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 클래스&객체 - 세영코딩연구소</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0a18;
+    --bg2: #16102a;
+    --bg3: #1e1638;
+    --card: #201840;
+    --border: #2e224e;
+    --accent: #c084fc;
+    --accent2: #f97316;
+    --accent3: #34d399;
+    --accent4: #38bdf8;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --pink: #f472b6;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #3a2e5a;
+    --code-bg: #06040f;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -8%, rgba(192,132,252,0.14) 0%, transparent 60%),
+      linear-gradient(rgba(192,132,252,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(192,132,252,0.02) 1px, transparent 1px);
+    background-size:100% 100%, 44px 44px, 44px 44px;
+  }
+  .container { max-width:980px; margin:0 auto; padding:0 20px 60px; position:relative; z-index:1; }
+
+  header { padding:36px 0 24px; text-align:center; border-bottom:1px solid var(--border); margin-bottom:32px; }
+  .lab-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(192,132,252,0.08); border:1px solid rgba(192,132,252,0.28); border-radius:100px; padding:6px 18px; font-size:11.5px; color:var(--accent); letter-spacing:0.1em; margin-bottom:16px; font-family:'JetBrains Mono',monospace; }
+  .lab-badge::before { content:''; width:7px; height:7px; background:var(--accent); border-radius:50%; box-shadow:0 0 10px var(--accent); animation:blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.12} }
+  header h1 { font-family:'Gmarket Sans',sans-serif; font-size:2.5rem; font-weight:700; background:linear-gradient(135deg,#fff 20%,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  header h1 span { display:block; font-size:1rem; font-weight:300; color:var(--accent); -webkit-text-fill-color:var(--accent); letter-spacing:0.2em; margin-top:6px; }
+  .author-line { margin-top:12px; font-size:11.5px; color:var(--text3); font-family:'JetBrains Mono',monospace; }
+
+  .nav-tabs { display:flex; gap:4px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:6px; margin-bottom:28px; overflow-x:auto; scrollbar-width:none; }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .tab-btn { flex:1; min-width:68px; padding:9px 6px; background:transparent; border:none; border-radius:8px; color:var(--text2); font-family:'Noto Sans KR',sans-serif; font-size:11.5px; font-weight:500; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .tab-btn.active { background:var(--card); color:var(--accent); box-shadow:inset 0 0 0 1px rgba(192,132,252,0.28); }
+  .tab-btn:hover:not(.active) { background:var(--bg3); color:var(--text); }
+
+  .section { display:none; animation:fadeUp 0.26s ease; }
+  .section.active { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(9px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-title { font-family:'Gmarket Sans',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); }
+
+  .concept-box { background:linear-gradient(135deg,rgba(192,132,252,0.07),rgba(249,115,22,0.04)); border:1px solid rgba(192,132,252,0.2); border-radius:16px; padding:20px 24px; margin-bottom:20px; }
+  .concept-box h2 { font-size:0.93rem; color:var(--accent); margin-bottom:9px; display:flex; align-items:center; gap:8px; }
+  .concept-box p { color:var(--text2); line-height:1.85; font-size:0.88rem; }
+
+  .code-card { background:var(--card); border:1px solid var(--border); border-radius:13px; overflow:hidden; margin-bottom:13px; transition:border-color 0.2s; }
+  .code-card:hover { border-color:rgba(192,132,252,0.38); }
+  .code-header { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; background:var(--bg2); border-bottom:1px solid var(--border); }
+  .code-title { font-size:0.8rem; color:var(--text); font-weight:600; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .tag { font-size:10px; padding:2px 7px; border-radius:100px; font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .t-cls  { background:rgba(192,132,252,0.14); color:var(--accent);  border:1px solid rgba(192,132,252,0.3); }
+  .t-init { background:rgba(249,115,22,0.12);  color:var(--accent2); border:1px solid rgba(249,115,22,0.3); }
+  .t-meth { background:rgba(52,211,153,0.1);   color:var(--accent3); border:1px solid rgba(52,211,153,0.3); }
+  .t-obj  { background:rgba(56,189,248,0.1);   color:var(--accent4); border:1px solid rgba(56,189,248,0.3); }
+  .t-ex   { background:rgba(251,191,36,0.1);   color:var(--yellow);  border:1px solid rgba(251,191,36,0.3); }
+  .t-warn { background:rgba(248,113,113,0.1);  color:var(--red);     border:1px solid rgba(248,113,113,0.3); }
+  .dot-group { display:flex; gap:5px; }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+
+  .code-body { padding:14px 16px; }
+  pre.cblock { background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.75; color:#e2e8f0; overflow-x:auto; white-space:pre; margin-bottom:9px; }
+  .kw  { color:#c084fc; } .fn  { color:#82aaff; } .str { color:#c3e88d; }
+  .num { color:#f78c6c; } .var { color:#ffcb6b; } .op  { color:#89ddff; }
+  .cm  { color:#2e2250; } .cls { color:#f472b6; } .slf { color:#34d399; }
+
+  .oblock { background:rgba(52,211,153,0.06); border:1px solid rgba(52,211,153,0.2); border-radius:8px; padding:9px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--accent3); white-space:pre-wrap; }
+  .oblock::before { content:'▶ 출력'; display:block; font-size:10px; color:var(--text3); margin-bottom:4px; letter-spacing:0.06em; }
+
+  .warn-box { background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.22); border-radius:9px; padding:11px 15px; margin-top:9px; font-size:0.81rem; color:var(--red); line-height:1.7; }
+  .warn-box::before { content:'⚠️  주의  '; font-weight:700; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+
+  /* CLASS DIAGRAM */
+  .class-diagram { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:20px; }
+  .diagram-label { font-size:11px; color:var(--text3); font-family:'JetBrains Mono',monospace; margin-bottom:14px; }
+  .class-box { background:var(--code-bg); border:2px solid rgba(192,132,252,0.4); border-radius:12px; overflow:hidden; max-width:320px; margin:0 auto; }
+  .class-box-header { background:rgba(192,132,252,0.15); padding:10px 16px; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--accent); font-size:0.88rem; border-bottom:1px solid rgba(192,132,252,0.2); text-align:center; }
+  .class-box-section { padding:10px 16px; border-bottom:1px solid var(--border); }
+  .class-box-section:last-child { border-bottom:none; }
+  .class-box-section-label { font-size:9.5px; color:var(--text3); font-family:'JetBrains Mono',monospace; letter-spacing:0.08em; margin-bottom:6px; }
+  .class-attr { display:flex; align-items:center; gap:8px; margin-bottom:4px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; }
+  .class-attr .dot-ind { width:6px; height:6px; border-radius:50%; background:var(--accent2); flex-shrink:0; }
+  .class-attr .dot-fn  { width:6px; height:6px; border-radius:50%; background:var(--accent3); flex-shrink:0; }
+  .class-attr .attr-name { color:var(--yellow); }
+  .class-attr .attr-sep  { color:var(--text3); }
+  .class-attr .attr-type { color:var(--text2); }
+  .diagram-arrow { display:flex; flex-direction:column; align-items:center; gap:4px; margin:12px 0; }
+  .diagram-arrow-line { font-size:1.4rem; color:var(--accent); }
+  .diagram-arrow-label { font-size:11px; color:var(--text2); font-family:'JetBrains Mono',monospace; }
+  .obj-boxes { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .obj-box { background:rgba(56,189,248,0.06); border:1.5px solid rgba(56,189,248,0.3); border-radius:10px; padding:10px 14px; font-family:'JetBrains Mono',monospace; font-size:0.76rem; min-width:120px; }
+  .obj-box-name { color:var(--accent4); font-weight:700; margin-bottom:6px; font-size:0.79rem; }
+  .obj-attr { color:var(--text2); margin-bottom:2px; }
+  .obj-attr span { color:var(--yellow); }
+
+  /* INTERACTIVE CLASS BUILDER */
+  .class-builder { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:20px; }
+  .class-builder-label { font-size:11px; color:var(--text3); font-family:'JetBrains Mono',monospace; margin-bottom:14px; }
+  .builder-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; align-items:flex-end; }
+  .builder-row input { background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:7px 11px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.79rem; transition:border-color 0.2s; }
+  .builder-row input:focus { outline:none; border-color:var(--accent); }
+  .builder-row input.wide { width:160px; }
+  .builder-row input.med  { width:110px; }
+  .viz-btn { background:var(--accent); border:none; border-radius:7px; padding:7px 16px; color:#fff; font-family:'Noto Sans KR',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .viz-btn:hover { transform:translateY(-1px); box-shadow:0 3px 12px rgba(192,132,252,0.4); }
+  .viz-btn.sec { background:var(--bg3); border:1px solid var(--border); color:var(--text2); }
+  .viz-btn.sec:hover { border-color:var(--accent); color:var(--accent); box-shadow:none; }
+  .generated-code { background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:13px 15px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--text); white-space:pre; overflow-x:auto; margin-bottom:10px; min-height:60px; }
+  .obj-list { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+  /* TABLE */
+  .info-table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; font-size:0.84rem; margin-bottom:15px; }
+  .info-table th { background:var(--bg2); padding:9px 15px; text-align:left; font-size:10px; color:var(--text3); letter-spacing:0.07em; font-weight:600; border-bottom:1px solid var(--border); }
+  .info-table td { padding:9px 15px; border-bottom:1px solid rgba(46,34,78,0.5); color:var(--text2); }
+  .info-table tr:last-child td { border-bottom:none; }
+  .info-table code { font-family:'JetBrains Mono',monospace; color:var(--accent); background:rgba(192,132,252,0.09); padding:1px 6px; border-radius:4px; font-size:0.78rem; }
+
+  /* SIMULATOR */
+  .simulator { background:var(--card); border:1px solid var(--border); border-radius:15px; overflow:hidden; margin-bottom:18px; }
+  .sim-header { padding:11px 20px; background:var(--bg2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .sim-header .dot-group { margin-right:auto; }
+  .sim-title { font-size:12px; color:var(--text2); font-family:'JetBrains Mono',monospace; }
+  .sim-body { padding:17px 20px; }
+  .sim-body label { display:block; font-size:11px; color:var(--text3); letter-spacing:0.07em; margin-bottom:5px; font-family:'JetBrains Mono',monospace; }
+  .sim-body textarea { width:100%; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.7; resize:vertical; min-height:130px; transition:border-color 0.2s; margin-bottom:10px; }
+  .sim-body textarea:focus { outline:none; border-color:var(--accent); }
+  .quick-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:11px; }
+  .qbtn { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:5px 11px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:10.5px; cursor:pointer; transition:all 0.18s; }
+  .qbtn:hover { border-color:var(--accent); color:var(--accent); }
+  .run-btn { background:linear-gradient(135deg,var(--accent),var(--pink)); border:none; border-radius:8px; padding:10px 22px; color:#fff; font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px; }
+  .run-btn:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(192,132,252,0.4); }
+  .sim-output { margin-top:13px; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-family:'JetBrains Mono',monospace; font-size:0.79rem; min-height:48px; color:var(--accent3); white-space:pre-wrap; max-height:280px; overflow-y:auto; }
+  .sim-output.error { color:var(--red); }
+  .sim-output::before { content:'$ '; color:var(--text3); }
+
+  /* QUIZ */
+  .quiz-score { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:13px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; }
+  .quiz-score-label { font-size:12px; color:var(--text3); }
+  .score-track { flex:1; height:6px; background:var(--bg3); border-radius:100px; overflow:hidden; }
+  .score-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent4)); border-radius:100px; transition:width 0.4s ease; }
+  .score-count { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); white-space:nowrap; }
+  .quiz-card { background:var(--card); border:1px solid var(--border); border-radius:13px; padding:18px 20px; margin-bottom:13px; transition:border-color 0.2s; }
+  .quiz-card:hover { border-color:rgba(192,132,252,0.3); }
+  .quiz-q { font-size:0.88rem; color:var(--text); margin-bottom:12px; line-height:1.6; }
+  .quiz-q code { font-family:'JetBrains Mono',monospace; color:var(--accent3); background:rgba(52,211,153,0.08); padding:1px 6px; border-radius:4px; font-size:0.79rem; }
+  .quiz-opts { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .quiz-opt { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:7px 14px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:0.79rem; cursor:pointer; transition:all 0.18s; }
+  .quiz-opt:hover { border-color:var(--accent); color:var(--accent); }
+  .quiz-opt.correct { background:rgba(52,211,153,0.12); border-color:var(--accent3); color:var(--accent3); }
+  .quiz-opt.wrong { background:rgba(248,113,113,0.1); border-color:var(--red); color:var(--red); }
+  .quiz-feedback { font-size:0.79rem; color:var(--text3); min-height:18px; font-family:'JetBrains Mono',monospace; }
+
+  footer { text-align:center; padding:24px 0 16px; border-top:1px solid var(--border); color:var(--text3); font-size:11.5px; font-family:'JetBrains Mono',monospace; line-height:1.9; }
+  footer span { color:var(--accent); }
+
+  @media (max-width:600px) {
+    header h1 { font-size:1.8rem; }
+    .grid2 { grid-template-columns:1fr; }
+    .tab-btn { font-size:10.5px; padding:8px 5px; }
+    pre.cblock { font-size:0.73rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="lab-badge">세영코딩연구소 · SEYYOUNG CODING LAB</div>
+  <h1>파이썬 클래스 & 객체<span>Class · Object · OOP</span></h1>
+  <div class="author-line">저자: ph.D kim &nbsp;|&nbsp; Python 3.x &nbsp;|&nbsp; class · __init__ · self · method</div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('개념',this)">📘 개념</button>
+  <button class="tab-btn" onclick="switchTab('구조',this)">🏗️ 구조</button>
+  <button class="tab-btn" onclick="switchTab('메서드',this)">⚙️ 메서드</button>
+  <button class="tab-btn" onclick="switchTab('활용',this)">🔗 활용</button>
+  <button class="tab-btn" onclick="switchTab('인터랙티브',this)">🎮 인터랙티브</button>
+  <button class="tab-btn" onclick="switchTab('예제',this)">📝 예제</button>
+  <button class="tab-btn" onclick="switchTab('시뮬',this)">▶ 시뮬</button>
+  <button class="tab-btn" onclick="switchTab('퀴즈',this)">🧩 퀴즈</button>
+</div>
+
+<!-- ① 개념 -->
+<div id="tab-개념" class="section active">
+  <div class="concept-box">
+    <h2>💡 객체(Object)란?</h2>
+    <p>
+      객체는 <strong style="color:var(--accent2)">데이터</strong> + <strong style="color:var(--accent3)">기능(함수)</strong>를 함께 가진 것입니다.<br>
+      현실 세계의 사물을 코드로 표현하는 방법입니다.<br><br>
+      🎓 학생 → <em style="color:var(--accent2)">이름·점수</em> + <em style="color:var(--accent3)">공부하기 기능</em><br>
+      🚗 자동차 → <em style="color:var(--accent2)">색깔·속도</em> + <em style="color:var(--accent3)">달리기 기능</em>
+    </p>
+  </div>
+
+  <!-- Class Diagram -->
+  <div class="section-title">🔬 클래스 vs 객체 시각화</div>
+  <div class="class-diagram">
+    <div class="diagram-label">클래스(설계도) → 객체(실제 사용) 관계</div>
+    <div class="class-box">
+      <div class="class-box-header">🏗️  Student  (클래스 = 붕어빵 틀)</div>
+      <div class="class-box-section">
+        <div class="class-box-section-label">📦 속성 (Attributes)</div>
+        <div class="class-attr"><div class="dot-ind"></div><div class="attr-name">self.name</div><div class="attr-sep">:</div><div class="attr-type">str</div></div>
+        <div class="class-attr"><div class="dot-ind"></div><div class="attr-name">self.score</div><div class="attr-sep">:</div><div class="attr-type">int</div></div>
+      </div>
+      <div class="class-box-section">
+        <div class="class-box-section-label">⚙️ 메서드 (Methods)</div>
+        <div class="class-attr"><div class="dot-fn"></div><div class="attr-name">__init__(self, name, score)</div></div>
+        <div class="class-attr"><div class="dot-fn"></div><div class="attr-name">show(self)</div></div>
+        <div class="class-attr"><div class="dot-fn"></div><div class="attr-name">grade(self)</div></div>
+      </div>
+    </div>
+    <div class="diagram-arrow">
+      <div class="diagram-arrow-line">↓</div>
+      <div class="diagram-arrow-label">Student("민수", 90) → 객체 생성</div>
+    </div>
+    <div class="obj-boxes">
+      <div class="obj-box">
+        <div class="obj-box-name">🎓 s1 (객체)</div>
+        <div class="obj-attr">name = <span>"민수"</span></div>
+        <div class="obj-attr">score = <span>90</span></div>
+      </div>
+      <div class="obj-box">
+        <div class="obj-box-name">🎓 s2 (객체)</div>
+        <div class="obj-attr">name = <span>"지아"</span></div>
+        <div class="obj-attr">score = <span>85</span></div>
+      </div>
+      <div class="obj-box">
+        <div class="obj-box-name">🎓 s3 (객체)</div>
+        <div class="obj-attr">name = <span>"철수"</span></div>
+        <div class="obj-attr">score = <span>88</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">📋 핵심 개념 비유</div>
+  <table class="info-table">
+    <tr><th>현실 세계</th><th>코드</th><th>설명</th></tr>
+    <tr><td>붕어빵 틀</td><td><code>class Student:</code></td><td>클래스 = 설계도·틀</td></tr>
+    <tr><td>붕어빵 1개</td><td><code>s1 = Student()</code></td><td>객체 = 실제 사용하는 것</td></tr>
+    <tr><td>붕어빵 속 재료</td><td><code>self.name, self.score</code></td><td>속성 = 객체가 가진 데이터</td></tr>
+    <tr><td>붕어빵 먹는 방법</td><td><code>s1.show()</code></td><td>메서드 = 객체가 할 수 있는 기능</td></tr>
+  </table>
+</div>
+
+<!-- ② 구조 -->
+<div id="tab-구조" class="section">
+  <div class="section-title">🏗️ 클래스 구조</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-cls">기본</span> 클래스 만들기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Student</span>:
+    <span class="kw">pass</span>   <span class="cm"># 아무것도 없는 빈 클래스</span>
+
+<span class="var">s1</span> <span class="op">=</span> <span class="cls">Student</span>()   <span class="cm"># 객체 생성</span>
+<span class="fn">print</span>(<span class="var">s1</span>)</pre>
+      <div class="oblock">&lt;__main__.Student object at 0x...&gt;</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-init">__init__</span> 생성자 (가장 중요!)</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Student</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, <span class="var">name</span>, <span class="var">score</span>):
+        <span class="slf">self</span>.name  <span class="op">=</span> <span class="var">name</span>    <span class="cm"># 속성 저장</span>
+        <span class="slf">self</span>.score <span class="op">=</span> <span class="var">score</span>
+
+<span class="var">s1</span> <span class="op">=</span> <span class="cls">Student</span>(<span class="str">"민수"</span>, <span class="num">90</span>)
+<span class="fn">print</span>(<span class="var">s1</span>.name)
+<span class="fn">print</span>(<span class="var">s1</span>.score)</pre>
+      <div class="oblock">민수
+90</div>
+    </div>
+  </div>
+
+  <div class="concept-box" style="margin-top:16px">
+    <h2>📌 self 이해하기</h2>
+    <p>
+      <code style="color:var(--accent3);background:rgba(52,211,153,0.1);padding:1px 6px;border-radius:4px;font-family:JetBrains Mono">self</code>는 <strong style="color:var(--accent)">자기 자신 객체</strong>를 가리킵니다.<br>
+      <code style="color:var(--accent3);background:rgba(52,211,153,0.1);padding:1px 6px;border-radius:4px;font-family:JetBrains Mono">self.name</code>은 "이 객체의 name"이라는 뜻입니다.<br>
+      모든 메서드의 첫 번째 인자로 반드시 넣어야 합니다.
+    </p>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">📋 클래스 전체 구조</div>
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-cls">구조</span> 완전한 클래스 템플릿</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">클래스이름</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, 변수들):   <span class="cm"># ① 생성자</span>
+        <span class="slf">self</span>.변수 <span class="op">=</span> 값           <span class="cm"># ② 속성 저장</span>
+
+    <span class="kw">def</span> <span class="fn">메서드명</span>(<span class="slf">self</span>):          <span class="cm"># ③ 메서드</span>
+         실행코드</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 메서드 -->
+<div id="tab-메서드" class="section">
+  <div class="section-title">⚙️ 메서드 (Method)</div>
+  <div class="concept-box">
+    <h2>📌 메서드란?</h2>
+    <p>클래스 안에 정의된 함수를 <strong style="color:var(--accent)">메서드</strong>라고 합니다.<br>
+    항상 첫 번째 인자는 <code style="color:var(--accent3);background:rgba(52,211,153,0.1);padding:1px 6px;border-radius:4px;font-family:JetBrains Mono">self</code>입니다.<br>
+    호출할 때는 <code style="color:var(--accent3);background:rgba(52,211,153,0.1);padding:1px 6px;border-radius:4px;font-family:JetBrains Mono">객체.메서드()</code> 형태로 사용합니다.</p>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-meth">메서드</span> say_hello 메서드</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Student</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, <span class="var">name</span>):
+        <span class="slf">self</span>.name <span class="op">=</span> <span class="var">name</span>
+
+    <span class="kw">def</span> <span class="fn">say_hello</span>(<span class="slf">self</span>):
+        <span class="fn">print</span>(<span class="str">"안녕 나는"</span>, <span class="slf">self</span>.name)
+
+<span class="var">s1</span> <span class="op">=</span> <span class="cls">Student</span>(<span class="str">"민수"</span>)
+<span class="var">s1</span>.<span class="fn">say_hello</span>()    <span class="cm"># 객체.메서드() 형태</span></pre>
+      <div class="oblock">안녕 나는 민수</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-meth">반환값</span> return 있는 메서드</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Student</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, <span class="var">score</span>):
+        <span class="slf">self</span>.score <span class="op">=</span> <span class="var">score</span>
+
+    <span class="kw">def</span> <span class="fn">grade</span>(<span class="slf">self</span>):
+        <span class="kw">if</span> <span class="slf">self</span>.score <span class="op">>=</span> <span class="num">90</span>:
+            <span class="kw">return</span> <span class="str">"A"</span>
+        <span class="kw">else</span>:
+            <span class="kw">return</span> <span class="str">"B"</span>
+
+<span class="var">s</span> <span class="op">=</span> <span class="cls">Student</span>(<span class="num">95</span>)
+<span class="fn">print</span>(<span class="var">s</span>.<span class="fn">grade</span>())</pre>
+      <div class="oblock">A</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-warn">❌ 자주 하는 실수</span> self 빠뜨리기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="cm"># ❌ 잘못된 예</span>
+<span class="kw">def</span> <span class="fn">show</span>():         <span class="cm"># self 없음 → 오류!</span>
+    <span class="fn">print</span>(<span class="slf">self</span>.name)
+
+<span class="cm"># ✅ 올바른 예</span>
+<span class="kw">def</span> <span class="fn">show</span>(<span class="slf">self</span>):      <span class="cm"># self 필수!</span>
+    <span class="fn">print</span>(<span class="slf">self</span>.name)</pre>
+      <div class="warn-box">메서드의 첫 번째 인자는 반드시 <strong>self</strong>를 써야 합니다!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 활용 -->
+<div id="tab-활용" class="section">
+  <div class="section-title">🔗 클래스 활용</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-obj">여러 객체</span> 하나의 클래스로 여러 객체 생성</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Student</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, <span class="var">name</span>, <span class="var">score</span>):
+        <span class="slf">self</span>.name  <span class="op">=</span> <span class="var">name</span>
+        <span class="slf">self</span>.score <span class="op">=</span> <span class="var">score</span>
+
+    <span class="kw">def</span> <span class="fn">show</span>(<span class="slf">self</span>):
+        <span class="fn">print</span>(<span class="slf">self</span>.name, <span class="slf">self</span>.score)
+
+<span class="var">s1</span> <span class="op">=</span> <span class="cls">Student</span>(<span class="str">"민수"</span>, <span class="num">90</span>)
+<span class="var">s2</span> <span class="op">=</span> <span class="cls">Student</span>(<span class="str">"지아"</span>, <span class="num">85</span>)
+
+<span class="var">s1</span>.<span class="fn">show</span>()
+<span class="var">s2</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">민수 90
+지아 85</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-obj">리스트</span> 객체를 리스트로 관리</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">students</span> <span class="op">=</span> [
+    <span class="cls">Student</span>(<span class="str">"민수"</span>, <span class="num">90</span>),
+    <span class="cls">Student</span>(<span class="str">"지아"</span>, <span class="num">85</span>),
+    <span class="cls">Student</span>(<span class="str">"철수"</span>, <span class="num">88</span>)
+]
+
+<span class="kw">for</span> <span class="var">s</span> <span class="kw">in</span> <span class="var">students</span>:
+    <span class="var">s</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">민수 90
+지아 85
+철수 88</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-obj">반복문</span> 클래스 내 반복문 활용</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Numbers</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, <span class="var">arr</span>):
+        <span class="slf">self</span>.arr <span class="op">=</span> <span class="var">arr</span>
+
+    <span class="kw">def</span> <span class="fn">total</span>(<span class="slf">self</span>):
+        <span class="var">s</span> <span class="op">=</span> <span class="num">0</span>
+        <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="slf">self</span>.arr:
+            <span class="var">s</span> <span class="op">+=</span> <span class="var">x</span>
+        <span class="kw">return</span> <span class="var">s</span>
+
+<span class="var">n</span> <span class="op">=</span> <span class="cls">Numbers</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>])
+<span class="fn">print</span>(<span class="var">n</span>.<span class="fn">total</span>())</pre>
+      <div class="oblock">10</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 인터랙티브 -->
+<div id="tab-인터랙티브" class="section">
+  <div class="section-title">🎮 클래스 빌더</div>
+  <div class="class-builder">
+    <div class="class-builder-label">클래스 이름과 속성을 입력하면 코드가 자동으로 생성됩니다!</div>
+    <div class="builder-row">
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">클래스 이름</div>
+        <input type="text" class="wide" id="clsName" value="Student" placeholder="예: Student">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">속성1 이름</div>
+        <input type="text" class="med" id="attr1" value="name" placeholder="name">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">속성2 이름</div>
+        <input type="text" class="med" id="attr2" value="score" placeholder="score">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">속성3 이름 (선택)</div>
+        <input type="text" class="med" id="attr3" value="" placeholder="grade">
+      </div>
+      <button class="viz-btn" onclick="buildClass()" style="align-self:flex-end">코드 생성</button>
+    </div>
+
+    <div style="font-size:11px;color:var(--accent);font-family:JetBrains Mono;margin-bottom:6px">📄 생성된 클래스 코드</div>
+    <div class="generated-code" id="generatedCode"></div>
+
+    <div style="margin-top:14px;margin-bottom:8px;font-size:11px;color:var(--text3);font-family:JetBrains Mono">🎯 객체 만들기</div>
+    <div class="builder-row">
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">값1</div>
+        <input type="text" class="med" id="val1" value="민수" placeholder="민수">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">값2</div>
+        <input type="text" class="med" id="val2" value="90" placeholder="90">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">값3 (선택)</div>
+        <input type="text" class="med" id="val3" value="" placeholder="">
+      </div>
+      <button class="viz-btn" onclick="addObject()">+ 객체 추가</button>
+      <button class="viz-btn sec" onclick="clearObjects()">초기화</button>
+    </div>
+    <div class="obj-list" id="objList"></div>
+  </div>
+</div>
+
+<!-- ⑥ 예제 -->
+<div id="tab-예제" class="section">
+  <div class="section-title">📝 실전 예제</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 1</span> 학생 클래스</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Student</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, <span class="var">name</span>, <span class="var">score</span>):
+        <span class="slf">self</span>.name  <span class="op">=</span> <span class="var">name</span>
+        <span class="slf">self</span>.score <span class="op">=</span> <span class="var">score</span>
+
+    <span class="kw">def</span> <span class="fn">show</span>(<span class="slf">self</span>):
+        <span class="fn">print</span>(<span class="str">"이름:"</span>, <span class="slf">self</span>.name)
+        <span class="fn">print</span>(<span class="str">"점수:"</span>, <span class="slf">self</span>.score)
+
+<span class="var">s1</span> <span class="op">=</span> <span class="cls">Student</span>(<span class="str">"민수"</span>, <span class="num">90</span>)
+<span class="var">s1</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">이름: 민수
+점수: 90</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 2</span> 계산기 클래스</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Calculator</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, <span class="var">a</span>, <span class="var">b</span>):
+        <span class="slf">self</span>.a <span class="op">=</span> <span class="var">a</span>
+        <span class="slf">self</span>.b <span class="op">=</span> <span class="var">b</span>
+
+    <span class="kw">def</span> <span class="fn">add</span>(<span class="slf">self</span>):
+        <span class="kw">return</span> <span class="slf">self</span>.a <span class="op">+</span> <span class="slf">self</span>.b
+
+    <span class="kw">def</span> <span class="fn">mul</span>(<span class="slf">self</span>):
+        <span class="kw">return</span> <span class="slf">self</span>.a <span class="op">*</span> <span class="slf">self</span>.b
+
+<span class="var">c</span> <span class="op">=</span> <span class="cls">Calculator</span>(<span class="num">3</span>, <span class="num">4</span>)
+<span class="fn">print</span>(<span class="var">c</span>.<span class="fn">add</span>())
+<span class="fn">print</span>(<span class="var">c</span>.<span class="fn">mul</span>())</pre>
+      <div class="oblock">7
+12</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 3</span> 자동차 클래스</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">class</span> <span class="cls">Car</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, <span class="var">color</span>, <span class="var">speed</span>):
+        <span class="slf">self</span>.color <span class="op">=</span> <span class="var">color</span>
+        <span class="slf">self</span>.speed <span class="op">=</span> <span class="var">speed</span>
+
+    <span class="kw">def</span> <span class="fn">drive</span>(<span class="slf">self</span>):
+        <span class="fn">print</span>(<span class="slf">self</span>.color, <span class="str">"자동차가"</span>, <span class="slf">self</span>.speed, <span class="str">"속도로 달립니다"</span>)
+
+<span class="var">c1</span> <span class="op">=</span> <span class="cls">Car</span>(<span class="str">"빨간색"</span>, <span class="num">100</span>)
+<span class="var">c1</span>.<span class="fn">drive</span>()</pre>
+      <div class="oblock">빨간색 자동차가 100 속도로 달립니다</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑦ 시뮬레이터 -->
+<div id="tab-시뮬" class="section">
+  <div class="section-title">▶ 클래스 시뮬레이터</div>
+  <div class="simulator">
+    <div class="sim-header">
+      <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      <span class="sim-title">class_simulator.py</span>
+    </div>
+    <div class="sim-body">
+      <label>빠른 예제 불러오기</label>
+      <div class="quick-btns">
+        <button class="qbtn" onclick="loadEx('student')">학생 클래스</button>
+        <button class="qbtn" onclick="loadEx('calc')">계산기 클래스</button>
+        <button class="qbtn" onclick="loadEx('car')">자동차 클래스</button>
+        <button class="qbtn" onclick="loadEx('grade')">등급 메서드</button>
+        <button class="qbtn" onclick="loadEx('list')">객체 리스트</button>
+        <button class="qbtn" onclick="loadEx('numbers')">합계 클래스</button>
+        <button class="qbtn" onclick="loadEx('modify')">속성 수정</button>
+        <button class="qbtn" onclick="loadEx('multi')">다중 메서드</button>
+      </div>
+      <label>CODE</label>
+      <textarea id="simCode" placeholder="클래스 코드를 입력하거나 위 예제를 불러오세요.
+
+예:
+class Student:
+    def __init__(self, name, score):
+        self.name = name
+        self.score = score
+    def show(self):
+        print(self.name, self.score)
+
+s1 = Student('민수', 90)
+s1.show()"></textarea>
+      <button class="run-btn" onclick="runSim()">▶ 실행하기</button>
+      <div id="simOutput" class="sim-output" style="opacity:0.4">실행 결과가 여기에 표시됩니다.</div>
+    </div>
+  </div>
+  <div class="concept-box">
+    <h2>⚠️ 안내</h2>
+    <p><strong style="color:var(--accent)">지원:</strong> class 정의 / __init__ / self / 메서드 / 객체 생성 / 속성 접근·수정 / 조건문·반복문 / 리스트 / print<br>
+    <strong style="color:var(--red)">미지원:</strong> 상속(inheritance), 클래스 변수, @property 등 고급 기능</p>
+  </div>
+</div>
+
+<!-- ⑧ 퀴즈 -->
+<div id="tab-퀴즈" class="section">
+  <div class="quiz-score">
+    <span class="quiz-score-label">퀴즈 진행도</span>
+    <div class="score-track"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
+    <span class="score-count" id="scoreCount">0 / 10</span>
+  </div>
+  <div class="section-title">🧩 클래스 & 객체 퀴즈 10문항</div>
+  <div id="quizGrid"></div>
+</div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span>세영코딩연구소</span> &nbsp;|&nbsp; 저자: <span>ph.D kim</span><br>
+    Python 3.x · 클래스(Class) · 객체(Object) · __init__ · self · OOP
+  </div>
+</footer>
+
+<script>
+// TAB
+function switchTab(n, b) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active'); b.classList.add('active');
+}
+
+// ── CLASS BUILDER ──
+let builtClass = { name:'Student', attrs:['name','score'] };
+let objects = [];
+
+function buildClass() {
+  const name   = document.getElementById('clsName').value.trim() || 'MyClass';
+  const attrs  = [
+    document.getElementById('attr1').value.trim(),
+    document.getElementById('attr2').value.trim(),
+    document.getElementById('attr3').value.trim(),
+  ].filter(Boolean);
+  builtClass = { name, attrs };
+  objects = [];
+  document.getElementById('objList').innerHTML = '';
+
+  const initArgs = ['self', ...attrs].join(', ');
+  const selfLines = attrs.map(a=>`        self.${a} = ${a}`).join('\n');
+  const showBody  = attrs.map(a=>`        print("${a}:", self.${a})`).join('\n');
+
+  const code = `class ${name}:\n    def __init__(${initArgs}):\n${selfLines}\n\n    def show(self):\n${showBody}\n\n# 객체 생성 예시\nobj = ${name}(${attrs.map(a=>`"${a}값"`).join(', ')})\nobj.show()`;
+  document.getElementById('generatedCode').textContent = code;
+}
+
+function addObject() {
+  const v1 = document.getElementById('val1').value.trim();
+  const v2 = document.getElementById('val2').value.trim();
+  const v3 = document.getElementById('val3').value.trim();
+  const vals = [v1, v2, v3].filter(Boolean);
+  if (!vals.length) return;
+  objects.push(vals);
+  renderObjList();
+}
+
+function renderObjList() {
+  const list = document.getElementById('objList');
+  list.innerHTML = objects.map((vals, i) => {
+    const pairs = builtClass.attrs.map((a, j) => `<div class="obj-attr">${a} = <span>${vals[j]||'?'}</span></div>`).join('');
+    return `<div class="obj-box"><div class="obj-box-name">🔷 obj${i+1}</div>${pairs}</div>`;
+  }).join('');
+}
+
+function clearObjects() { objects = []; renderObjList(); }
+
+buildClass();
+
+// ── QUICK EXAMPLES ──
+const exMap = {
+  student: `class Student:\n    def __init__(self, name, score):\n        self.name = name\n        self.score = score\n\n    def show(self):\n        print("이름:", self.name)\n        print("점수:", self.score)\n\ns1 = Student("민수", 90)\ns1.show()`,
+  calc:    `class Calculator:\n    def __init__(self, a, b):\n        self.a = a\n        self.b = b\n\n    def add(self):\n        return self.a + self.b\n\n    def sub(self):\n        return self.a - self.b\n\n    def mul(self):\n        return self.a * self.b\n\nc = Calculator(10, 3)\nprint(c.add())\nprint(c.sub())\nprint(c.mul())`,
+  car:     `class Car:\n    def __init__(self, color, speed):\n        self.color = color\n        self.speed = speed\n\n    def drive(self):\n        print(self.color, "자동차가", self.speed, "속도로 달립니다")\n\nc1 = Car("빨간색", 100)\nc2 = Car("파란색", 80)\nc1.drive()\nc2.drive()`,
+  grade:   `class Student:\n    def __init__(self, score):\n        self.score = score\n\n    def grade(self):\n        if self.score >= 90:\n            return "A"\n        elif self.score >= 80:\n            return "B"\n        else:\n            return "C"\n\ns1 = Student(95)\ns2 = Student(82)\ns3 = Student(70)\nprint(s1.grade())\nprint(s2.grade())\nprint(s3.grade())`,
+  list:    `class Student:\n    def __init__(self, name, score):\n        self.name = name\n        self.score = score\n\n    def show(self):\n        print(self.name, self.score)\n\nstudents = [\n    Student("민수", 90),\n    Student("지아", 85),\n    Student("철수", 88)\n]\n\nfor s in students:\n    s.show()`,
+  numbers: `class Numbers:\n    def __init__(self, arr):\n        self.arr = arr\n\n    def total(self):\n        s = 0\n        for x in self.arr:\n            s += x\n        return s\n\n    def average(self):\n        return self.total() / len(self.arr)\n\nn = Numbers([10, 20, 30, 40])\nprint("합계:", n.total())\nprint("평균:", n.average())`,
+  modify:  `class Student:\n    def __init__(self, name, score):\n        self.name = name\n        self.score = score\n\ns1 = Student("민수", 80)\nprint(s1.name, s1.score)\n\ns1.score = 100\nprint(s1.name, s1.score)`,
+  multi:   `class Character:\n    def __init__(self, name, hp, attack):\n        self.name = name\n        self.hp = hp\n        self.attack = attack\n\n    def info(self):\n        print(self.name, "| HP:", self.hp, "| ATK:", self.attack)\n\n    def hit(self, damage):\n        self.hp -= damage\n        print(self.name, "이(가 공격받아 HP:", self.hp, "남음")\n\n    def is_alive(self):\n        return self.hp > 0\n\nhero = Character("용사", 100, 30)\nhero.info()\nhero.hit(40)\nprint("생존:", hero.is_alive())`,
+};
+
+function loadEx(name) {
+  document.getElementById('simCode').value = exMap[name] || '';
+}
+
+// ── SIMULATOR ENGINE ──
+function runSim() {
+  const code = document.getElementById('simCode').value;
+  const outEl = document.getElementById('simOutput');
+  outEl.style.opacity='1'; outEl.className='sim-output';
+  try {
+    const output = [];
+    let totalOps = 0;
+    const globalEnv = {};
+    const classRegistry = {}; // class name → { attrs, methods }
+
+    function splitCommas(str) {
+      const parts=[]; let depth=0,inStr=false,sc='',cur='';
+      for (const c of str) {
+        if (!inStr&&(c==='"'||c==="'")){inStr=true;sc=c;cur+=c;continue;}
+        if (inStr&&c===sc){inStr=false;cur+=c;continue;}
+        if (inStr){cur+=c;continue;}
+        if ('([{'.includes(c)) depth++; else if (')]}'.includes(c)) depth--;
+        else if (c===','&&depth===0){parts.push(cur);cur='';continue;}
+        cur+=c;
+      }
+      if (cur.trim()) parts.push(cur); return parts;
+    }
+
+    function getIndent(line){return (line.match(/^(\s*)/)||['',''])[1].length;}
+    function collectBody(lines,start,base){const body=[];let j=start;while(j<lines.length){const l=lines[j];if(!l.trim()){j++;continue;}if(getIndent(l)<=base)break;body.push(l);j++;}return{body,end:j};}
+
+    function evalExpr(expr, env) {
+      expr=expr.trim();
+      if (expr==='True') return true; if(expr==='False') return false; if(expr==='None') return null;
+      if (expr==='self') return env['self'];
+      if (/^-?\d+$/.test(expr)) return parseInt(expr);
+      if (/^-?\d+\.\d+$/.test(expr)) return parseFloat(expr);
+      if ((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'"))) return expr.slice(1,-1);
+      if (expr==='[]') return [];
+      if (expr.startsWith('[')&&expr.endsWith(']')){const inner=expr.slice(1,-1).trim();if(!inner)return[];return splitCommas(inner).map(e=>evalExpr(e.trim(),env));}
+
+      let m;
+
+      // Class instantiation: ClassName(args)
+      m = expr.match(/^([A-Z][a-zA-Z0-9_]*)\((.*)?\)$/);
+      if (m && classRegistry[m[1]]) {
+        const cls = classRegistry[m[1]];
+        const argsRaw = (m[2]||'').trim();
+        const args = argsRaw ? splitCommas(argsRaw).map(a=>evalExpr(a.trim(),env)) : [];
+        const instance = { __class__: m[1], __attrs__: {} };
+        // Call __init__ if it exists
+        if (cls.methods['__init__']) {
+          const initMethod = cls.methods['__init__'];
+          const initEnv = { ...env, self: instance };
+          initMethod.params.slice(1).forEach((p,i)=>{ initEnv[p]=args[i]; });
+          runBlock(initMethod.body, initEnv);
+        }
+        return instance;
+      }
+
+      // Method call: obj.method(args) or self.method(args)
+      m = expr.match(/^(.+?)\.([a-zA-Z_]\w*)\((.*?)\)$/s);
+      if (m) {
+        const obj = evalExpr(m[1].trim(), env);
+        const method = m[2];
+        const argsRaw = (m[3]||'').trim();
+        const args = argsRaw ? splitCommas(argsRaw).map(a=>evalExpr(a.trim(),env)) : [];
+        if (obj && obj.__class__ && classRegistry[obj.__class__]) {
+          const cls = classRegistry[obj.__class__];
+          if (cls.methods[method]) {
+            const md = cls.methods[method];
+            const mdEnv = { ...env, self: obj };
+            md.params.slice(1).forEach((p,i)=>{ mdEnv[p]=args[i]; });
+            const res = runBlock(md.body, mdEnv);
+            if (res && res.signal === 'return') return res.returnVal;
+            return null;
+          }
+        }
+        // Built-in methods on lists/strings
+        if (Array.isArray(obj)) {
+          if (method==='append'){obj.push(args[0]);return null;}
+          if (method==='pop') return args.length ? obj.splice(parseInt(args[0]),1)[0] : obj.pop();
+          if (method==='len') return obj.length;
+        }
+        if (typeof obj==='string') {
+          if (method==='upper') return obj.toUpperCase();
+          if (method==='lower') return obj.toLowerCase();
+          if (method==='strip') return obj.trim();
+          if (method==='split') return args.length ? obj.split(args[0]) : obj.trim().split(/\s+/);
+        }
+        if (method==='len'&&args.length) return Array.isArray(args[0])?args[0].length:String(args[0]).length;
+      }
+
+      // Attribute access: obj.attr or self.attr
+      m = expr.match(/^(.+?)\.([a-zA-Z_]\w*)$/);
+      if (m) {
+        const obj = evalExpr(m[1].trim(), env);
+        if (obj && typeof obj === 'object' && obj.__attrs__) return obj.__attrs__[m[2]];
+      }
+
+      // Indexing: arr[i]
+      m = expr.match(/^([a-zA-Z_]\w*)\[(.+)\]$/);
+      if (m) {
+        const obj = env[m[1]] ?? globalEnv[m[1]];
+        const key = evalExpr(m[2], env);
+        if (Array.isArray(obj)) { let i=parseInt(key); if(i<0) i=obj.length+i; return obj[i]; }
+        return obj?.[key];
+      }
+
+      // Built-in functions
+      m = expr.match(/^len\((.+)\)$/); if(m){const v=evalExpr(m[1],env);return Array.isArray(v)?v.length:String(v).length;}
+      m = expr.match(/^int\((.+)\)$/); if(m) return parseInt(evalExpr(m[1],env));
+      m = expr.match(/^str\((.+)\)$/); if(m) return String(evalExpr(m[1],env));
+      m = expr.match(/^float\((.+)\)$/); if(m) return parseFloat(evalExpr(m[1],env));
+      m = expr.match(/^range\((.+)\)$/); if(m){const args=splitCommas(m[1]).map(a=>parseInt(evalExpr(a.trim(),env)));const[s,e,st]=args.length===1?[0,args[0],1]:args.length===2?[args[0],args[1],1]:args;const arr=[];if(st>0)for(let i=s;i<e;i+=st)arr.push(i);else for(let i=s;i>e;i+=st)arr.push(i);return arr;}
+
+      // Variable lookup
+      if (/^[a-zA-Z_]\w*$/.test(expr)) {
+        if (env.hasOwnProperty(expr)) return env[expr];
+        if (globalEnv.hasOwnProperty(expr)) return globalEnv[expr];
+        return undefined;
+      }
+
+      // not
+      m = expr.match(/^not\s+(.+)$/); if(m) return !evalExpr(m[1],env);
+
+      // Binary ops
+      for (const op of ['//', '%', '**', '*', '/', '+', '-', '>=', '<=', '>', '<', '==', '!=', ' and ', ' or ']) {
+        const oi = expr.indexOf(op);
+        if (oi > 0) {
+          const L=expr.slice(0,oi).trim(), R=expr.slice(oi+op.length).trim();
+          if (L && R) {
+            const l=evalExpr(L,env), r=evalExpr(R,env);
+            if (op==='//') return Math.trunc(l/r);
+            if (op==='%') return ((l%r)+Math.abs(r))%Math.abs(r);
+            if (op==='**') return Math.pow(l,r);
+            if (op==='*') return typeof l==='string'?l.repeat(r):typeof r==='string'?r.repeat(l):l*r;
+            if (op==='/') return l/r;
+            if (op==='+') return (typeof l==='string'||typeof r==='string')?String(l)+String(r):l+r;
+            if (op==='-') return l-r;
+            if (op==='>=') return l>=r; if(op==='<=') return l<=r;
+            if(op==='>') return l>r; if(op==='<') return l<r;
+            if(op==='==') return l==r; if(op==='!=') return l!=r;
+            if(op===' and ') return l&&r; if(op===' or ') return l||r;
+          }
+        }
+      }
+      return expr;
+    }
+
+    function evalCond(c, env) {
+      if (c.startsWith('not ')) return !evalCond(c.slice(4).trim(),env);
+      const ands=c.split(' and '); if(ands.length>1) return ands.every(p=>evalCond(p.trim(),env));
+      const ors=c.split(' or '); if(ors.length>1) return ors.some(p=>evalCond(p.trim(),env));
+      return !!evalExpr(c,env);
+    }
+
+    function reprVal(v) {
+      if (v===true) return 'True'; if(v===false) return 'False'; if(v===null) return 'None';
+      if (v && v.__class__) return `<${v.__class__} object>`;
+      if (Array.isArray(v)) return '['+v.map(reprVal).join(', ')+']';
+      if (typeof v==='string') return v;
+      if (typeof v==='number') return Number.isInteger(v)?String(v):String(v);
+      return String(v);
+    }
+
+    function runBlock(lines, env) {
+      let i=0;
+      while (i<lines.length) {
+        if (totalOps++>10000) throw new Error('최대 실행 횟수 초과');
+        const line=lines[i]; const t=line.trim();
+        if (!t||t.startsWith('#')){i++;continue;}
+        if (t==='pass'){i++;continue;}
+        if (t==='break') return {signal:'break'};
+        if (t==='continue') return {signal:'continue'};
+
+        let m;
+
+        // return statement
+        m=t.match(/^return\s*(.*)$/);
+        if(m) return {signal:'return', returnVal: m[1].trim() ? evalExpr(m[1].trim(),env) : null};
+
+        // class definition
+        if (/^class [A-Z][a-zA-Z0-9_]*:/.test(t)) {
+          const clsName = t.match(/^class ([A-Z][a-zA-Z0-9_]*):/)[1];
+          const base = getIndent(line);
+          const { body, end } = collectBody(lines, i+1, base);
+          const methods = {};
+          let bi = 0;
+          while (bi < body.length) {
+            const bline = body[bi]; const bt = bline.trim();
+            if (/^def [a-zA-Z_]\w*\(/.test(bt)) {
+              const mm = bt.match(/^def ([a-zA-Z_]\w*)\((.+)\):/);
+              if (mm) {
+                const mname = mm[1];
+                const params = splitCommas(mm[2]).map(p=>p.trim());
+                const mbase = getIndent(bline);
+                const { body: mbody, end: mend } = collectBody(body, bi+1, mbase);
+                methods[mname] = { params, body: mbody };
+                bi = mend;
+              } else bi++;
+            } else bi++;
+          }
+          classRegistry[clsName] = { methods };
+          globalEnv[clsName] = clsName;
+          i = end; continue;
+        }
+
+        // print
+        if (t==='print()'){output.push('');i++;continue;}
+        m=t.match(/^print\((.+)\)$/);
+        if(m){
+          let args=m[1]; let sep=' ';
+          const sm=args.match(/,\s*sep\s*=\s*["'](.*)["']/);
+          if(sm){sep=sm[1];args=args.replace(/,\s*sep\s*=\s*["'].*?["']/,'');}
+          args=args.replace(/,\s*end\s*=\s*["'].*?["']/,'').trim().replace(/,$/,'').trim();
+          const parts=splitCommas(args).map(a=>reprVal(evalExpr(a.trim(),env)));
+          output.push(parts.join(sep)); i++; continue;
+        }
+
+        // self.attr = val (inside method)
+        m=t.match(/^self\.([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+        if(m){
+          const self=env['self'];
+          if(self && typeof self === 'object' && self.__attrs__ !== undefined) self.__attrs__[m[1]]=evalExpr(m[2],env);
+          i++;continue;
+        }
+
+        // obj.attr = val
+        m=t.match(/^([a-zA-Z_]\w*)\.([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+        if(m){
+          const obj=env[m[1]]??globalEnv[m[1]];
+          if(obj && typeof obj === 'object' && obj.__attrs__ !== undefined) obj.__attrs__[m[2]]=evalExpr(m[3],env);
+          i++;continue;
+        }
+
+        // obj.method() as statement
+        m=t.match(/^(.+?)\.([a-zA-Z_]\w*)\((.*?)\)$/s);
+        if(m){ evalExpr(t,env); i++;continue; }
+
+        // augmented
+        m=t.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|%=)\s*(.+)$/);
+        if(m){
+          const vn=m[1]; const op=m[2]; const r=evalExpr(m[3],env);
+          const lv=env.hasOwnProperty(vn)?env[vn]:(globalEnv[vn]??0);
+          let res;
+          if(op==='+=') res=(typeof lv==='string'||typeof r==='string')?String(lv)+String(r):lv+r;
+          else if(op==='-=') res=lv-r;
+          else if(op==='*=') res=lv*r;
+          else res=lv%r;
+          if(env.hasOwnProperty(vn))env[vn]=res; else globalEnv[vn]=res;
+          i++;continue;
+        }
+
+        // for loop
+        if(/^for .+ in .+:$/.test(t)){
+          const base=getIndent(line);const{body,end}=collectBody(lines,i+1,base);
+          const lm=t.match(/^for (.+) in (.+):$/);
+          if(lm){
+            const varP=lm[1].trim();const iterV=evalExpr(lm[2].trim(),env);
+            const iterable=Array.isArray(iterV)?iterV:typeof iterV==='string'?iterV.split(''):[...Array(Math.max(0,parseInt(iterV)||0)).keys()];
+            for(const item of iterable){if(totalOps++>10000)throw new Error('최대 초과');const loopEnv={...env,[varP]:item};const res=runBlock(body,loopEnv);Object.keys(loopEnv).forEach(k=>{if(k!==varP)env[k]=loopEnv[k];});if(res&&res.signal==='break')break;if(res&&res.signal==='return')return res;}
+          }
+          i=end;continue;
+        }
+
+        // while
+        if(/^while .+:$/.test(t)){
+          const base=getIndent(line);const{body,end}=collectBody(lines,i+1,base);
+          const condS=t.slice(6,-1).trim();let lc=0;
+          while(evalCond(condS,env)){if(++lc>500||totalOps++>10000)throw new Error('최대 반복 초과');const res=runBlock(body,env);if(res&&res.signal==='break')break;if(res&&res.signal==='return')return res;}
+          i=end;continue;
+        }
+
+        // if/elif/else
+        if(/^if .+:$/.test(t)||/^elif .+:$/.test(t)||/^else:$/.test(t)){
+          const base=getIndent(line);const branches=[];let j=i;
+          while(j<lines.length){const bl=lines[j].trim();if(!bl){j++;continue;}const bi=getIndent(lines[j]);if(bi<base)break;if(bi===base){if(/^if .+:$/.test(bl)||/^elif .+:$/.test(bl)){const cond=bl.replace(/^(if|elif)\s+/,'').slice(0,-1).trim();const{body,end}=collectBody(lines,j+1,base);branches.push({cond,body});j=end;}else if(/^else:$/.test(bl)){const{body,end}=collectBody(lines,j+1,base);branches.push({cond:'__else__',body});j=end;}else break;}else break;}
+          let exec=false;for(const b of branches){if(exec)break;if(b.cond==='__else__'||evalCond(b.cond,env)){const res=runBlock(b.body,env);if(res&&(res.signal==='return'||res.signal==='break'))return res;exec=true;}}
+          i=j;continue;
+        }
+
+        // assignment
+        m=t.match(/^([a-zA-Z_,\s]+)\s*=\s*(.+)$/);
+        if(m){
+          const lhs=m[1].trim(),rhs=m[2].trim();
+          const val=evalExpr(rhs,env);
+          if(lhs.includes(',')){const vars=lhs.split(',').map(v=>v.trim());if(Array.isArray(val))vars.forEach((v,j)=>{env[v]=val[j];globalEnv[v]=val[j];});else vars.forEach((v,j)=>{env[v]=j===0?val:undefined;globalEnv[v]=j===0?val:undefined;});}
+          else{env[lhs]=val;globalEnv[lhs]=val;}
+          i++;continue;
+        }
+        i++;
+      }
+      return {signal:null};
+    }
+
+    runBlock(code.split('\n'), globalEnv);
+    outEl.textContent = output.join('\n') || '(출력 없음)';
+  } catch(e) {
+    outEl.className='sim-output error';
+    outEl.textContent='오류: '+e.message;
+  }
+}
+
+// ── QUIZ ──
+const quizData = [
+  { q:'클래스를 만드는 키워드는?', opts:['def', 'object', 'class', 'make'], ans:2 },
+  { q:'객체 생성 시 자동으로 호출되는 특수 메서드는?', opts:['__start__', '__init__', '__create__', '__new__'], ans:1 },
+  { q:'메서드의 첫 번째 인자로 반드시 써야 하는 것은?', opts:['this', 'me', 'self', 'obj'], ans:2 },
+  { q:'<code>class Car:</code> 에서 <code>Car</code>의 역할은?', opts:['객체', '함수', '변수', '클래스 이름'], ans:3 },
+  { q:'클래스에서 속성을 저장하는 방법은?', opts:['var.name = val', 'self.name = val', 'this.name = val', 'me.name = val'], ans:1 },
+  { q:'Student 클래스로 객체를 만드는 코드는?', opts:['Student.new()', 'make Student()', 'Student()', 'create Student()'], ans:2 },
+  { q:'객체 s1의 name 속성에 접근하는 방법은?', opts:['s1[name]', 'name.s1', 's1->name', 's1.name'], ans:3 },
+  { q:'클래스는 무엇에 비유할 수 있나요?', opts:['붕어빵', '설계도(틀)', '레시피', '위 모두'], ans:3 },
+  { q:'<code>__init__</code>의 self는 무엇을 가리키나요?', opts:['클래스 자신', '생성된 객체 자신', '부모 클래스', '아무것도 없음'], ans:1 },
+  { q:'하나의 클래스로 만들 수 있는 객체의 수는?', opts:['1개만', '2개까지', '10개까지', '제한 없음'], ans:3 },
+];
+
+let quizAnswered = new Set();
+function buildQuiz() {
+  document.getElementById('quizGrid').innerHTML = quizData.map((q,i) => `
+    <div class="quiz-card" id="qcard-${i}">
+      <div class="quiz-q">Q${i+1}. ${q.q}</div>
+      <div class="quiz-opts">${q.opts.map((o,j)=>`<button class="quiz-opt" onclick="answerQuiz(${i},${j})">${o}</button>`).join('')}</div>
+      <div class="quiz-feedback" id="qfb-${i}"></div>
+    </div>
+  `).join('');
+}
+
+function answerQuiz(qi, oi) {
+  if(quizAnswered.has(qi)) return;
+  quizAnswered.add(qi);
+  const q=quizData[qi];
+  document.querySelectorAll(`#qcard-${qi} .quiz-opt`).forEach((el,j)=>{
+    if(j===q.ans) el.classList.add('correct');
+    else if(j===oi&&j!==q.ans) el.classList.add('wrong');
+  });
+  document.getElementById('qfb-'+qi).textContent = oi===q.ans?'✅ 정답입니다!':`❌ 오답. 정답: ${q.opts[q.ans]}`;
+  const pct=(quizAnswered.size/quizData.length)*100;
+  document.getElementById('scoreFill').style.width=pct+'%';
+  document.getElementById('scoreCount').textContent=`${quizAnswered.size} / ${quizData.length}`;
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

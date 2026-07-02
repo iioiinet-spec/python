@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 넘파이(NumPy) - 세영코딩연구소</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070a14;
+    --bg2: #0c1220;
+    --bg3: #111828;
+    --card: #141e30;
+    --border: #1e2d48;
+    --accent: #38bdf8;
+    --accent2: #fb923c;
+    --accent3: #a3e635;
+    --accent4: #f472b6;
+    --purple: #c084fc;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #2a4060;
+    --code-bg: #040810;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      radial-gradient(ellipse 60% 35% at 50% -5%, rgba(56,189,248,0.12) 0%, transparent 60%),
+      linear-gradient(rgba(56,189,248,0.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.022) 1px, transparent 1px);
+    background-size:100% 100%, 44px 44px, 44px 44px;
+  }
+  .container { max-width:980px; margin:0 auto; padding:0 20px 60px; position:relative; z-index:1; }
+
+  header { padding:36px 0 24px; text-align:center; border-bottom:1px solid var(--border); margin-bottom:32px; }
+  .lab-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.28); border-radius:100px; padding:6px 18px; font-size:11.5px; color:var(--accent); letter-spacing:0.1em; margin-bottom:16px; font-family:'JetBrains Mono',monospace; }
+  .lab-badge::before { content:''; width:7px; height:7px; background:var(--accent); border-radius:50%; box-shadow:0 0 10px var(--accent); animation:blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.12} }
+  header h1 { font-family:'Gmarket Sans',sans-serif; font-size:2.5rem; font-weight:700; background:linear-gradient(135deg,#fff 20%,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  header h1 span { display:block; font-size:1rem; font-weight:300; color:var(--accent); -webkit-text-fill-color:var(--accent); letter-spacing:0.2em; margin-top:6px; }
+  .author-line { margin-top:12px; font-size:11.5px; color:var(--text3); font-family:'JetBrains Mono',monospace; }
+
+  .nav-tabs { display:flex; gap:4px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:6px; margin-bottom:28px; overflow-x:auto; scrollbar-width:none; }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .tab-btn { flex:1; min-width:70px; padding:9px 7px; background:transparent; border:none; border-radius:8px; color:var(--text2); font-family:'Noto Sans KR',sans-serif; font-size:11.5px; font-weight:500; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .tab-btn.active { background:var(--card); color:var(--accent); box-shadow:inset 0 0 0 1px rgba(56,189,248,0.28); }
+  .tab-btn:hover:not(.active) { background:var(--bg3); color:var(--text); }
+
+  .section { display:none; animation:fadeUp 0.26s ease; }
+  .section.active { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(9px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-title { font-family:'Gmarket Sans',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); }
+
+  .concept-box { background:linear-gradient(135deg,rgba(56,189,248,0.07),rgba(163,230,53,0.04)); border:1px solid rgba(56,189,248,0.2); border-radius:16px; padding:20px 24px; margin-bottom:20px; }
+  .concept-box h2 { font-size:0.93rem; color:var(--accent); margin-bottom:9px; display:flex; align-items:center; gap:8px; }
+  .concept-box p { color:var(--text2); line-height:1.85; font-size:0.88rem; }
+
+  .code-card { background:var(--card); border:1px solid var(--border); border-radius:13px; overflow:hidden; margin-bottom:13px; transition:border-color 0.2s; }
+  .code-card:hover { border-color:rgba(56,189,248,0.35); }
+  .code-header { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; background:var(--bg2); border-bottom:1px solid var(--border); }
+  .code-title { font-size:0.8rem; color:var(--text); font-weight:600; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .tag { font-size:10px; padding:2px 7px; border-radius:100px; font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .t-np   { background:rgba(56,189,248,0.12);  color:var(--accent);  border:1px solid rgba(56,189,248,0.28); }
+  .t-op   { background:rgba(251,146,60,0.12);  color:var(--accent2); border:1px solid rgba(251,146,60,0.28); }
+  .t-fn   { background:rgba(163,230,53,0.1);   color:var(--accent3); border:1px solid rgba(163,230,53,0.28); }
+  .t-ex   { background:rgba(244,114,182,0.1);  color:var(--accent4); border:1px solid rgba(244,114,182,0.28); }
+  .t-quiz { background:rgba(192,132,252,0.1);  color:var(--purple);  border:1px solid rgba(192,132,252,0.28); }
+  .t-warn { background:rgba(248,113,113,0.1);  color:var(--red);     border:1px solid rgba(248,113,113,0.28); }
+  .dot-group { display:flex; gap:5px; }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+
+  .code-body { padding:14px 16px; }
+  pre.cblock { background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.75; color:#e2e8f0; overflow-x:auto; white-space:pre; margin-bottom:9px; }
+  .kw  { color:#38bdf8; } .fn  { color:#82aaff; } .str { color:#c3e88d; }
+  .num { color:#f78c6c; } .var { color:#ffcb6b; } .op  { color:#89ddff; }
+  .cm  { color:#1e3050; } .mod { color:#f472b6; }
+
+  .oblock { background:rgba(163,230,53,0.06); border:1px solid rgba(163,230,53,0.2); border-radius:8px; padding:9px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--accent3); white-space:pre-wrap; }
+  .oblock::before { content:'▶ 출력'; display:block; font-size:10px; color:var(--text3); margin-bottom:4px; letter-spacing:0.06em; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+
+  /* ARRAY VISUALIZER */
+  .arr-viz { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:20px; }
+  .arr-viz-label { font-size:11px; color:var(--text3); font-family:'JetBrains Mono',monospace; margin-bottom:12px; }
+  .arr-input-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; align-items:flex-end; }
+  .arr-input-row input { background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:7px 11px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.8rem; width:180px; transition:border-color 0.2s; }
+  .arr-input-row input:focus { outline:none; border-color:var(--accent); }
+  .arr-input-row select { background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:7px 10px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.8rem; }
+  .viz-btn { background:var(--accent); border:none; border-radius:7px; padding:7px 16px; color:var(--bg); font-family:'Noto Sans KR',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .viz-btn:hover { transform:translateY(-1px); box-shadow:0 3px 12px rgba(56,189,248,0.4); }
+  .arr-display { display:flex; gap:0; flex-wrap:wrap; margin-bottom:10px; }
+  .arr-cell { display:flex; flex-direction:column; align-items:center; gap:3px; margin:2px; }
+  .arr-val { min-width:46px; height:46px; background:var(--card); border:2px solid var(--border); border-radius:9px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:0.88rem; font-weight:700; color:var(--text); transition:all 0.22s; cursor:pointer; padding:0 6px; }
+  .arr-val:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-3px); box-shadow:0 4px 14px rgba(56,189,248,0.28); }
+  .arr-val.hl { border-color:var(--accent2); color:var(--accent2); background:rgba(251,146,60,0.1); }
+  .arr-idx { font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--text3); }
+  .arr-info { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); margin-top:8px; min-height:16px; }
+  .arr-stats { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+  .stat-pill { background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.2); border-radius:8px; padding:5px 12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent3); }
+
+  /* 2D VIZ */
+  .arr2d-display { display:inline-block; border:2px solid rgba(56,189,248,0.3); border-radius:10px; overflow:hidden; margin-top:8px; }
+  .arr2d-row { display:flex; }
+  .arr2d-cell { width:46px; height:38px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:0.82rem; font-weight:600; border:1px solid rgba(30,45,72,0.6); cursor:pointer; transition:all 0.2s; color:var(--text); }
+  .arr2d-cell:hover { background:rgba(56,189,248,0.15); color:var(--accent); }
+  .arr2d-cell.hl { background:rgba(251,146,60,0.15); color:var(--accent2); border-color:var(--accent2); }
+
+  /* TABLE */
+  .info-table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; font-size:0.84rem; margin-bottom:15px; }
+  .info-table th { background:var(--bg2); padding:9px 15px; text-align:left; font-size:10px; color:var(--text3); letter-spacing:0.07em; font-weight:600; border-bottom:1px solid var(--border); }
+  .info-table td { padding:9px 15px; border-bottom:1px solid rgba(30,45,72,0.5); color:var(--text2); }
+  .info-table tr:last-child td { border-bottom:none; }
+  .info-table code { font-family:'JetBrains Mono',monospace; color:var(--accent); background:rgba(56,189,248,0.09); padding:1px 6px; border-radius:4px; font-size:0.78rem; }
+
+  /* SIMULATOR */
+  .simulator { background:var(--card); border:1px solid var(--border); border-radius:15px; overflow:hidden; margin-bottom:18px; }
+  .sim-header { padding:11px 20px; background:var(--bg2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .sim-header .dot-group { margin-right:auto; }
+  .sim-title { font-size:12px; color:var(--text2); font-family:'JetBrains Mono',monospace; }
+  .sim-body { padding:17px 20px; }
+  .sim-body label { display:block; font-size:11px; color:var(--text3); letter-spacing:0.07em; margin-bottom:5px; font-family:'JetBrains Mono',monospace; }
+  .sim-body textarea { width:100%; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.7; resize:vertical; min-height:120px; transition:border-color 0.2s; margin-bottom:10px; }
+  .sim-body textarea:focus { outline:none; border-color:var(--accent); }
+  .quick-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:11px; }
+  .qbtn { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:5px 11px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:10.5px; cursor:pointer; transition:all 0.18s; }
+  .qbtn:hover { border-color:var(--accent); color:var(--accent); }
+  .run-btn { background:linear-gradient(135deg,var(--accent),var(--purple)); border:none; border-radius:8px; padding:10px 22px; color:#fff; font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px; }
+  .run-btn:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(56,189,248,0.35); }
+  .sim-output { margin-top:13px; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-family:'JetBrains Mono',monospace; font-size:0.79rem; min-height:48px; color:var(--accent3); white-space:pre-wrap; max-height:260px; overflow-y:auto; }
+  .sim-output.error { color:var(--red); }
+  .sim-output::before { content:'$ '; color:var(--text3); }
+
+  /* QUIZ */
+  .quiz-score { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:13px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; }
+  .quiz-score-label { font-size:12px; color:var(--text3); }
+  .score-track { flex:1; height:6px; background:var(--bg3); border-radius:100px; overflow:hidden; }
+  .score-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent3)); border-radius:100px; transition:width 0.4s ease; }
+  .score-count { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); white-space:nowrap; }
+  .quiz-card { background:var(--card); border:1px solid var(--border); border-radius:13px; padding:18px 20px; margin-bottom:13px; transition:border-color 0.2s; }
+  .quiz-card:hover { border-color:rgba(56,189,248,0.3); }
+  .quiz-q { font-size:0.88rem; color:var(--text); margin-bottom:12px; line-height:1.6; }
+  .quiz-q code { font-family:'JetBrains Mono',monospace; color:var(--accent3); background:rgba(163,230,53,0.08); padding:1px 6px; border-radius:4px; font-size:0.79rem; }
+  .quiz-opts { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .quiz-opt { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:7px 14px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:0.79rem; cursor:pointer; transition:all 0.18s; }
+  .quiz-opt:hover { border-color:var(--accent); color:var(--accent); }
+  .quiz-opt.correct { background:rgba(163,230,53,0.12); border-color:var(--accent3); color:var(--accent3); }
+  .quiz-opt.wrong { background:rgba(248,113,113,0.1); border-color:var(--red); color:var(--red); }
+  .quiz-feedback { font-size:0.79rem; color:var(--text3); min-height:18px; font-family:'JetBrains Mono',monospace; }
+
+  /* INSTALL */
+  .install-box { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:13px 18px; margin:10px 0; font-family:'JetBrains Mono',monospace; font-size:0.81rem; color:var(--accent3); display:flex; align-items:center; gap:12px; }
+  .install-box::before { content:'$'; color:var(--text3); }
+
+  footer { text-align:center; padding:24px 0 16px; border-top:1px solid var(--border); color:var(--text3); font-size:11.5px; font-family:'JetBrains Mono',monospace; line-height:1.9; }
+  footer span { color:var(--accent); }
+
+  @media (max-width:600px) {
+    header h1 { font-size:1.8rem; }
+    .grid2 { grid-template-columns:1fr; }
+    .tab-btn { font-size:10.5px; padding:8px 5px; }
+    pre.cblock { font-size:0.73rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="lab-badge">세영코딩연구소 · SEYYOUNG CODING LAB</div>
+  <h1>파이썬 넘파이<span>NumPy — Numerical Python</span></h1>
+  <div class="author-line">저자: ph.D kim &nbsp;|&nbsp; Python 3.x &nbsp;|&nbsp; numpy · array · shape · reshape</div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('개념',this)">📘 개념</button>
+  <button class="tab-btn" onclick="switchTab('배열',this)">🔢 배열생성</button>
+  <button class="tab-btn" onclick="switchTab('속성',this)">📐 속성확인</button>
+  <button class="tab-btn" onclick="switchTab('인덱스',this)">🎯 인덱싱</button>
+  <button class="tab-btn" onclick="switchTab('계산',this)">⚡ 계산</button>
+  <button class="tab-btn" onclick="switchTab('함수',this)">🔧 주요함수</button>
+  <button class="tab-btn" onclick="switchTab('예제',this)">📝 예제</button>
+  <button class="tab-btn" onclick="switchTab('시뮬',this)">▶ 시뮬</button>
+  <button class="tab-btn" onclick="switchTab('퀴즈',this)">🧩 퀴즈</button>
+</div>
+
+<!-- ① 개념 -->
+<div id="tab-개념" class="section active">
+  <div class="concept-box">
+    <h2>💡 넘파이(NumPy)란?</h2>
+    <p>
+      넘파이는 숫자 배열을 <strong style="color:var(--accent)">쉽고 빠르게</strong> 다룰 수 있게 해주는 파이썬 라이브러리입니다.<br>
+      리스트도 여러 값을 저장할 수 있지만, 넘파이 배열은 <strong style="color:var(--accent3)">수학 계산·행렬 계산·데이터 처리</strong>에 훨씬 편리합니다.<br><br>
+      데이터 분석 · 인공지능 · 이미지 처리 · 과학 계산에서 아주 많이 사용합니다.
+    </p>
+  </div>
+
+  <!-- Interactive 1D Array Visualizer -->
+  <div class="section-title">🔬 배열 인터랙티브 시각화</div>
+  <div class="arr-viz">
+    <div class="arr-viz-label">값을 입력하고 [배열 만들기] 버튼을 누르세요. 셀을 클릭하면 인덱스 정보가 표시됩니다.</div>
+    <div class="arr-input-row">
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">값 입력 (쉼표 구분)</div>
+        <input type="text" id="vizInput" value="10, 20, 30, 40, 50" placeholder="1, 2, 3...">
+      </div>
+      <button class="viz-btn" onclick="buildArrViz()">배열 만들기</button>
+    </div>
+    <div class="arr-display" id="arrDisplay"></div>
+    <div class="arr-info" id="arrInfo">👆 셀을 클릭하면 인덱스 정보가 표시됩니다</div>
+    <div class="arr-stats" id="arrStats"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-np">기본</span> 넘파이 불러오기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">import</span> <span class="mod">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+
+<span class="cm"># numpy를 np라는 이름으로 줄여서 사용</span>
+<span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+<span class="fn">print</span>(<span class="var">arr</span>)</pre>
+        <div class="oblock">[1 2 3]</div>
+      </div>
+    </div>
+    <div>
+      <div class="install-box">pip install numpy</div>
+      <div style="font-size:12px;color:var(--text2);padding:10px 4px;line-height:1.8">
+        💡 <strong style="color:var(--accent)">넘파이 활용 분야</strong><br>
+        🤖 인공지능 / 머신러닝<br>
+        📊 데이터 분석 (pandas와 함께)<br>
+        🖼️ 이미지 처리 (픽셀 = 2D 배열)<br>
+        🔬 과학·공학 계산
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:10px">📋 리스트 vs 넘파이 배열</div>
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-warn">비교</span> 리스트 * 2 vs 넘파이 * 2</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="cm"># 파이썬 리스트</span>
+<span class="var">a</span> <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]
+<span class="fn">print</span>(<span class="var">a</span> <span class="op">*</span> <span class="num">2</span>)         <span class="cm"># [1,2,3,1,2,3] 반복!</span>
+
+<span class="cm"># 넘파이 배열</span>
+<span class="kw">import</span> <span class="mod">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+<span class="var">b</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+<span class="fn">print</span>(<span class="var">b</span> <span class="op">*</span> <span class="num">2</span>)         <span class="cm"># [2 4 6] 진짜 곱셈!</span></pre>
+      <div class="oblock">[1, 2, 3, 1, 2, 3]
+[2 4 6]</div>
+    </div>
+  </div>
+</div>
+
+<!-- ② 배열 생성 -->
+<div id="tab-배열" class="section">
+  <div class="section-title">🔢 배열 만들기</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-np">1차원</span> 1차원 배열</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+
+<span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>])
+<span class="fn">print</span>(<span class="var">arr</span>)</pre>
+      <div class="oblock">[1 2 3 4 5]</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-np">2차원</span> 2차원 배열 (표·행렬)</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+
+<span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+                [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]])
+<span class="fn">print</span>(<span class="var">arr</span>)</pre>
+      <div class="oblock">[[1 2 3]
+ [4 5 6]]</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">🏭 특수 배열 생성 함수</div>
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-fn">zeros</span> 0으로 채우기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">np</span>.<span class="fn">zeros</span>(<span class="num">5</span>)
+<span class="var">np</span>.<span class="fn">zeros</span>((<span class="num">2</span>, <span class="num">3</span>))   <span class="cm"># 2행 3열</span></pre>
+        <div class="oblock">[0. 0. 0. 0. 0.]
+[[0. 0. 0.]
+ [0. 0. 0.]]</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-fn">ones</span> 1로 채우기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">np</span>.<span class="fn">ones</span>(<span class="num">5</span>)
+<span class="var">np</span>.<span class="fn">ones</span>((<span class="num">2</span>, <span class="num">2</span>))</pre>
+        <div class="oblock">[1. 1. 1. 1. 1.]
+[[1. 1.]
+ [1. 1.]]</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-fn">arange</span> 연속된 숫자</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">np</span>.<span class="fn">arange</span>(<span class="num">1</span>, <span class="num">6</span>)
+<span class="var">np</span>.<span class="fn">arange</span>(<span class="num">0</span>, <span class="num">10</span>, <span class="num">2</span>)  <span class="cm"># 간격 2</span></pre>
+        <div class="oblock">[1 2 3 4 5]
+[0 2 4 6 8]</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-fn">linspace</span> 균등 간격 실수</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">np</span>.<span class="fn">linspace</span>(<span class="num">0</span>, <span class="num">1</span>, <span class="num">5</span>)
+<span class="cm"># 0~1 사이를 5개로 균등 분할</span></pre>
+        <div class="oblock">[0.   0.25 0.5  0.75 1.  ]</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 속성 확인 -->
+<div id="tab-속성" class="section">
+  <div class="section-title">📐 배열 속성 확인</div>
+
+  <!-- 2D Visualizer -->
+  <div class="arr-viz">
+    <div class="arr-viz-label">2차원 배열 시각화 — 셀을 클릭하면 [행, 열] 인덱스가 표시됩니다</div>
+    <div id="arr2dDisplay"></div>
+    <div class="arr-info" id="arr2dInfo">클릭해서 좌표를 확인해보세요</div>
+  </div>
+
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-np">shape</span> 배열 모양 (행, 열)</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([[<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>],[<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]])
+<span class="fn">print</span>(<span class="var">arr</span>.shape)</pre>
+        <div class="oblock">(2, 3)  → 2행 3열</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-np">ndim</span> 차원 수</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">a</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>])
+<span class="var">b</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([[<span class="num">1</span>,<span class="num">2</span>],[<span class="num">3</span>,<span class="num">4</span>]])
+<span class="fn">print</span>(<span class="var">a</span>.ndim, <span class="var">b</span>.ndim)</pre>
+        <div class="oblock">1  2</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-np">size</span> 전체 원소 개수</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([[<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>],[<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]])
+<span class="fn">print</span>(<span class="var">arr</span>.size)</pre>
+        <div class="oblock">6</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-np">dtype</span> 자료형</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+<span class="fn">print</span>(<span class="var">arr</span>.dtype)</pre>
+        <div class="oblock">int64  (또는 int32)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:16px">📋 속성 요약</div>
+  <table class="info-table">
+    <tr><th>속성</th><th>의미</th><th>예시 출력</th></tr>
+    <tr><td><code>.shape</code></td><td>배열 모양 (행, 열)</td><td><code>(2, 3)</code></td></tr>
+    <tr><td><code>.ndim</code></td><td>차원 수</td><td><code>1</code> 또는 <code>2</code></td></tr>
+    <tr><td><code>.size</code></td><td>전체 원소 개수</td><td><code>6</code></td></tr>
+    <tr><td><code>.dtype</code></td><td>데이터 자료형</td><td><code>int64</code></td></tr>
+  </table>
+</div>
+
+<!-- ④ 인덱싱·슬라이싱 -->
+<div id="tab-인덱스" class="section">
+  <div class="section-title">🎯 인덱싱 & 슬라이싱</div>
+
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-np">1D</span> 1차원 인덱싱</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>])
+<span class="fn">print</span>(<span class="var">arr</span>[<span class="num">0</span>])   <span class="cm"># 10</span>
+<span class="fn">print</span>(<span class="var">arr</span>[<span class="num">2</span>])   <span class="cm"># 30</span>
+<span class="fn">print</span>(<span class="var">arr</span>[<span class="op">-</span><span class="num">1</span>])  <span class="cm"># 40</span></pre>
+        <div class="oblock">10
+30
+40</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-np">2D</span> 2차원 인덱싱 [행, 열]</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([[<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>],
+                [<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>]])
+<span class="fn">print</span>(<span class="var">arr</span>[<span class="num">0</span>, <span class="num">1</span>])   <span class="cm"># 2</span>
+<span class="fn">print</span>(<span class="var">arr</span>[<span class="num">1</span>, <span class="num">2</span>])   <span class="cm"># 6</span></pre>
+        <div class="oblock">2
+6</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-np">슬라이싱</span> 1D · 2D 슬라이싱</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">arr1</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>])
+<span class="fn">print</span>(<span class="var">arr1</span>[<span class="num">1</span>:<span class="num">4</span>])     <span class="cm"># [20 30 40]</span>
+
+<span class="var">arr2</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([[<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>],[<span class="num">4</span>,<span class="num">5</span>,<span class="num">6</span>],[<span class="num">7</span>,<span class="num">8</span>,<span class="num">9</span>]])
+<span class="fn">print</span>(<span class="var">arr2</span>[<span class="num">0</span>:<span class="num">2</span>, <span class="num">1</span>:<span class="num">3</span>])  <span class="cm"># 0~1행, 1~2열</span></pre>
+      <div class="oblock">[20 30 40]
+[[2 3]
+ [5 6]]</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-fn">조건 선택</span> 조건을 만족하는 값만 추출</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">arange</span>(<span class="num">1</span>, <span class="num">11</span>)
+<span class="fn">print</span>(<span class="var">arr</span>[<span class="var">arr</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>])   <span class="cm"># 짝수만</span>
+<span class="fn">print</span>(<span class="var">arr</span>[<span class="var">arr</span> <span class="op">></span> <span class="num">5</span>])          <span class="cm"># 5보다 큰 값</span></pre>
+      <div class="oblock">[ 2  4  6  8 10]
+[ 6  7  8  9 10]</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 계산 -->
+<div id="tab-계산" class="section">
+  <div class="section-title">⚡ 배열 계산</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-op">브로드캐스팅</span> 배열 전체에 한 번에 계산</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>])
+
+<span class="fn">print</span>(<span class="var">arr</span> <span class="op">+</span> <span class="num">10</span>)   <span class="cm"># [11 12 13 14]</span>
+<span class="fn">print</span>(<span class="var">arr</span> <span class="op">*</span> <span class="num">2</span>)    <span class="cm"># [ 2  4  6  8]</span>
+<span class="fn">print</span>(<span class="var">arr</span> <span class="op">**</span> <span class="num">2</span>)   <span class="cm"># [ 1  4  9 16]</span></pre>
+      <div class="oblock">[11 12 13 14]
+[ 2  4  6  8]
+[ 1  4  9 16]</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-op">배열끼리</span> 같은 위치끼리 계산</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">a</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>])
+<span class="var">b</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>])
+
+<span class="fn">print</span>(<span class="var">a</span> <span class="op">+</span> <span class="var">b</span>)    <span class="cm"># [5 7 9]</span>
+<span class="fn">print</span>(<span class="var">a</span> <span class="op">*</span> <span class="var">b</span>)    <span class="cm"># [ 4 10 18]</span></pre>
+      <div class="oblock">[5 7 9]
+[ 4 10 18]</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">📊 합계·평균·최대·최소</div>
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-fn">통계</span> sum · mean · max · min</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>])
+
+<span class="fn">print</span>(<span class="var">np</span>.<span class="fn">sum</span>(<span class="var">arr</span>))    <span class="cm"># 100</span>
+<span class="fn">print</span>(<span class="var">np</span>.<span class="fn">mean</span>(<span class="var">arr</span>))   <span class="cm"># 25.0</span>
+<span class="fn">print</span>(<span class="var">np</span>.<span class="fn">max</span>(<span class="var">arr</span>))    <span class="cm"># 40</span>
+<span class="fn">print</span>(<span class="var">np</span>.<span class="fn">min</span>(<span class="var">arr</span>))    <span class="cm"># 10</span></pre>
+      <div class="oblock">100
+25.0
+40
+10</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑥ 주요 함수 -->
+<div id="tab-함수" class="section">
+  <div class="section-title">🔧 주요 함수</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-fn">reshape</span> 배열 모양 바꾸기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>])
+<span class="var">new_arr</span> <span class="op">=</span> <span class="var">arr</span>.<span class="fn">reshape</span>(<span class="num">2</span>, <span class="num">3</span>)
+<span class="fn">print</span>(<span class="var">new_arr</span>)</pre>
+      <div class="oblock">[[1 2 3]
+ [4 5 6]]</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-fn">반복문</span> 배열 순회</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>], [<span class="num">3</span>, <span class="num">4</span>]])
+
+<span class="kw">for</span> <span class="var">row</span> <span class="kw">in</span> <span class="var">arr</span>:
+    <span class="fn">print</span>(<span class="var">row</span>)</pre>
+      <div class="oblock">[1 2]
+[3 4]</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">📋 자주 쓰는 함수 정리</div>
+  <table class="info-table">
+    <tr><th>함수</th><th>역할</th><th>예시</th></tr>
+    <tr><td><code>np.array()</code></td><td>배열 생성</td><td><code>np.array([1,2,3])</code></td></tr>
+    <tr><td><code>np.zeros()</code></td><td>0으로 채운 배열</td><td><code>np.zeros((2,3))</code></td></tr>
+    <tr><td><code>np.ones()</code></td><td>1로 채운 배열</td><td><code>np.ones(5)</code></td></tr>
+    <tr><td><code>np.arange()</code></td><td>연속 숫자 배열</td><td><code>np.arange(1,6)</code></td></tr>
+    <tr><td><code>np.linspace()</code></td><td>균등 간격 실수</td><td><code>np.linspace(0,1,5)</code></td></tr>
+    <tr><td><code>.reshape()</code></td><td>모양 변경</td><td><code>arr.reshape(2,3)</code></td></tr>
+    <tr><td><code>np.sum()</code></td><td>합계</td><td><code>np.sum(arr)</code></td></tr>
+    <tr><td><code>np.mean()</code></td><td>평균</td><td><code>np.mean(arr)</code></td></tr>
+    <tr><td><code>np.max()</code></td><td>최댓값</td><td><code>np.max(arr)</code></td></tr>
+    <tr><td><code>np.min()</code></td><td>최솟값</td><td><code>np.min(arr)</code></td></tr>
+  </table>
+</div>
+
+<!-- ⑦ 예제 -->
+<div id="tab-예제" class="section">
+  <div class="section-title">📝 실전 예제</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 1</span> 학생 점수 분석</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+
+<span class="var">scores</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">80</span>, <span class="num">90</span>, <span class="num">75</span>, <span class="num">85</span>, <span class="num">95</span>])
+
+<span class="fn">print</span>(<span class="str">"점수:"</span>, <span class="var">scores</span>)
+<span class="fn">print</span>(<span class="str">"합계:"</span>, <span class="var">np</span>.<span class="fn">sum</span>(<span class="var">scores</span>))
+<span class="fn">print</span>(<span class="str">"평균:"</span>, <span class="var">np</span>.<span class="fn">mean</span>(<span class="var">scores</span>))
+<span class="fn">print</span>(<span class="str">"최고점:"</span>, <span class="var">np</span>.<span class="fn">max</span>(<span class="var">scores</span>))
+<span class="fn">print</span>(<span class="str">"최저점:"</span>, <span class="var">np</span>.<span class="fn">min</span>(<span class="var">scores</span>))</pre>
+      <div class="oblock">점수: [80 90 75 85 95]
+합계: 425
+평균: 85.0
+최고점: 95
+최저점: 75</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 2</span> 짝수만 골라내기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+
+<span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">arange</span>(<span class="num">1</span>, <span class="num">11</span>)
+<span class="var">even</span> <span class="op">=</span> <span class="var">arr</span>[<span class="var">arr</span> <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>]
+
+<span class="fn">print</span>(<span class="str">"전체:"</span>, <span class="var">arr</span>)
+<span class="fn">print</span>(<span class="str">"짝수:"</span>, <span class="var">even</span>)</pre>
+      <div class="oblock">전체: [ 1  2  3  4  5  6  7  8  9 10]
+짝수: [ 2  4  6  8 10]</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제 3</span> 1D → 2D 표로 변환 (reshape)</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">numpy</span> <span class="kw">as</span> <span class="var">np</span>
+
+<span class="var">arr</span> <span class="op">=</span> <span class="var">np</span>.<span class="fn">array</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>])
+<span class="var">table</span> <span class="op">=</span> <span class="var">arr</span>.<span class="fn">reshape</span>(<span class="num">2</span>, <span class="num">3</span>)
+
+<span class="fn">print</span>(<span class="str">"원래:"</span>, <span class="var">arr</span>)
+<span class="fn">print</span>(<span class="str">"2행3열:"</span>)
+<span class="fn">print</span>(<span class="var">table</span>)</pre>
+      <div class="oblock">원래: [1 2 3 4 5 6]
+2행3열:
+[[1 2 3]
+ [4 5 6]]</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑧ 시뮬레이터 -->
+<div id="tab-시뮬" class="section">
+  <div class="section-title">▶ NumPy 시뮬레이터</div>
+  <div class="simulator">
+    <div class="sim-header">
+      <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      <span class="sim-title">numpy_simulator.py</span>
+    </div>
+    <div class="sim-body">
+      <label>빠른 예제 불러오기</label>
+      <div class="quick-btns">
+        <button class="qbtn" onclick="loadEx('basic')">1D 배열</button>
+        <button class="qbtn" onclick="loadEx('arr2d')">2D 배열</button>
+        <button class="qbtn" onclick="loadEx('stats')">통계 함수</button>
+        <button class="qbtn" onclick="loadEx('calc')">배열 계산</button>
+        <button class="qbtn" onclick="loadEx('cond')">조건 선택</button>
+        <button class="qbtn" onclick="loadEx('reshape')">reshape</button>
+        <button class="qbtn" onclick="loadEx('arange')">arange</button>
+        <button class="qbtn" onclick="loadEx('scores')">점수 분석</button>
+      </div>
+      <label>CODE</label>
+      <textarea id="simCode" placeholder="numpy 코드를 입력하거나 위에서 예제를 불러오세요.
+
+예:
+import numpy as np
+arr = np.array([1, 2, 3, 4, 5])
+print(arr)
+print(np.sum(arr))
+print(np.mean(arr))"></textarea>
+      <button class="run-btn" onclick="runSim()">▶ 실행하기</button>
+      <div id="simOutput" class="sim-output" style="opacity:0.4">실행 결과가 여기에 표시됩니다.</div>
+    </div>
+  </div>
+  <div class="concept-box">
+    <h2>⚠️ 안내</h2>
+    <p>
+      <strong style="color:var(--accent)">지원:</strong> np.array / np.zeros / np.ones / np.arange / np.linspace / np.sum / np.mean / np.max / np.min / .shape / .ndim / .size / .dtype / .reshape / 인덱싱 / 슬라이싱 / 조건선택 / 브로드캐스팅 / for문<br>
+      <strong style="color:var(--red)">미지원:</strong> np.linalg / np.random 등 고급 기능
+    </p>
+  </div>
+</div>
+
+<!-- ⑨ 퀴즈 -->
+<div id="tab-퀴즈" class="section">
+  <div class="quiz-score">
+    <span class="quiz-score-label">퀴즈 진행도</span>
+    <div class="score-track"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
+    <span class="score-count" id="scoreCount">0 / 10</span>
+  </div>
+  <div class="section-title">🧩 NumPy 퀴즈 10문항</div>
+  <div id="quizGrid"></div>
+</div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span>세영코딩연구소</span> &nbsp;|&nbsp; 저자: <span>ph.D kim</span><br>
+    Python 3.x · NumPy · array · shape · reshape · broadcasting
+  </div>
+</footer>
+
+<script>
+// TAB
+function switchTab(n, b) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active'); b.classList.add('active');
+}
+
+// 1D ARRAY VISUALIZER
+function buildArrViz() {
+  const raw = document.getElementById('vizInput').value;
+  const vals = raw.split(',').map(s=>s.trim()).filter(Boolean);
+  const nums = vals.map(v=>isNaN(v)?v:parseFloat(v));
+  const display = document.getElementById('arrDisplay');
+  const info = document.getElementById('arrInfo');
+  const stats = document.getElementById('arrStats');
+  display.innerHTML = '';
+  nums.forEach((v,i) => {
+    const cell = document.createElement('div'); cell.className='arr-cell';
+    const valEl = document.createElement('div'); valEl.className='arr-val';
+    valEl.textContent = v;
+    valEl.onclick = () => {
+      document.querySelectorAll('.arr-val').forEach(el=>el.classList.remove('hl'));
+      valEl.classList.add('hl');
+      const numericVals = nums.filter(n=>!isNaN(n));
+      info.textContent = `arr[${i}] = ${v}  |  arr[${-(nums.length-i)}] = ${v}  |  전체 길이: ${nums.length}`;
+    };
+    const idxEl = document.createElement('div'); idxEl.className='arr-idx'; idxEl.textContent='['+i+']';
+    cell.appendChild(valEl); cell.appendChild(idxEl);
+    display.appendChild(cell);
+  });
+  const numericVals = nums.filter(n=>typeof n==='number'&&!isNaN(n));
+  if (numericVals.length) {
+    const sum = numericVals.reduce((a,b)=>a+b,0);
+    const mean = sum/numericVals.length;
+    stats.innerHTML = `
+      <div class="stat-pill">sum = ${sum}</div>
+      <div class="stat-pill">mean = ${mean.toFixed(2)}</div>
+      <div class="stat-pill">max = ${Math.max(...numericVals)}</div>
+      <div class="stat-pill">min = ${Math.min(...numericVals)}</div>
+      <div class="stat-pill">size = ${nums.length}</div>
+      <div class="stat-pill">ndim = 1</div>
+    `;
+  }
+}
+
+// 2D ARRAY VISUALIZER
+function build2dViz() {
+  const data = [[1,2,3],[4,5,6],[7,8,9]];
+  const wrap = document.getElementById('arr2dDisplay');
+  const info = document.getElementById('arr2dInfo');
+  const container = document.createElement('div'); container.className='arr2d-display';
+  data.forEach((row,r)=>{
+    const rowDiv = document.createElement('div'); rowDiv.className='arr2d-row';
+    row.forEach((v,c)=>{
+      const cell = document.createElement('div'); cell.className='arr2d-cell';
+      cell.textContent = v;
+      cell.onclick = ()=>{
+        document.querySelectorAll('.arr2d-cell').forEach(el=>el.classList.remove('hl'));
+        cell.classList.add('hl');
+        info.textContent = `arr[${r}, ${c}] = ${v}  |  행(row)=${r}, 열(col)=${c}  |  shape=(3,3)`;
+      };
+      rowDiv.appendChild(cell);
+    });
+    container.appendChild(rowDiv);
+  });
+  wrap.innerHTML = '';
+  wrap.appendChild(container);
+  const label = document.createElement('div');
+  label.style.cssText='font-size:10px;color:#2a4060;font-family:JetBrains Mono;margin-top:6px';
+  label.textContent = 'np.array([[1,2,3],[4,5,6],[7,8,9]])  shape=(3,3)  ndim=2  size=9';
+  wrap.appendChild(label);
+}
+
+buildArrViz();
+build2dViz();
+
+// QUICK EXAMPLES
+const exMap = {
+  basic:   `import numpy as np\narr = np.array([1, 2, 3, 4, 5])\nprint(arr)\nprint("shape:", arr.shape)\nprint("size:", arr.size)\nprint("dtype:", arr.dtype)`,
+  arr2d:   `import numpy as np\narr = np.array([[1, 2, 3],\n                [4, 5, 6]])\nprint(arr)\nprint("shape:", arr.shape)\nprint("ndim:", arr.ndim)`,
+  stats:   `import numpy as np\narr = np.array([10, 20, 30, 40, 50])\nprint("sum:", np.sum(arr))\nprint("mean:", np.mean(arr))\nprint("max:", np.max(arr))\nprint("min:", np.min(arr))`,
+  calc:    `import numpy as np\narr = np.array([1, 2, 3, 4])\nprint(arr + 10)\nprint(arr * 2)\nprint(arr ** 2)\na = np.array([1, 2, 3])\nb = np.array([4, 5, 6])\nprint(a + b)\nprint(a * b)`,
+  cond:    `import numpy as np\narr = np.arange(1, 11)\nprint("전체:", arr)\nprint("짝수:", arr[arr % 2 == 0])\nprint("5 초과:", arr[arr > 5])`,
+  reshape: `import numpy as np\narr = np.array([1, 2, 3, 4, 5, 6])\ntable = arr.reshape(2, 3)\nprint("원래:", arr)\nprint("2x3:")\nprint(table)\nprint("shape:", table.shape)`,
+  arange:  `import numpy as np\nprint(np.arange(1, 6))\nprint(np.arange(0, 10, 2))\nprint(np.zeros(4))\nprint(np.ones((2, 3)))\nprint(np.linspace(0, 1, 5))`,
+  scores:  `import numpy as np\nscores = np.array([80, 90, 75, 85, 95])\nprint("점수:", scores)\nprint("합계:", np.sum(scores))\nprint("평균:", np.mean(scores))\nprint("최고점:", np.max(scores))\nprint("최저점:", np.min(scores))\nprint("90점 이상:", scores[scores >= 90])`,
+};
+
+function loadEx(name) {
+  document.getElementById('simCode').value = exMap[name] || '';
+}
+
+// NUMPY SIMULATOR
+function runSim() {
+  const code = document.getElementById('simCode').value;
+  const outEl = document.getElementById('simOutput');
+  outEl.style.opacity='1'; outEl.className='sim-output';
+  try {
+    const output = [];
+    let totalOps = 0;
+
+    // Simple NumPy emulator
+    const np = {
+      _isArr: v => v && v.__nparray,
+      _make: (data, shape) => ({ __nparray:true, data:data.flat(Infinity), shape:shape||[data.length], ndim:shape?shape.length:1, size:data.flat(Infinity).length, dtype:'int64' }),
+      array: (data) => {
+        if (Array.isArray(data[0])) {
+          const rows=data.length, cols=data[0].length;
+          return { __nparray:true, data:data.flat(), shape:[rows,cols], ndim:2, size:rows*cols, dtype:'float64', _rows:rows, _cols:cols };
+        }
+        return { __nparray:true, data:[...data], shape:[data.length], ndim:1, size:data.length, dtype:'int64' };
+      },
+      zeros: (s) => {
+        const shape=Array.isArray(s)?s:[s];
+        const size=shape.reduce((a,b)=>a*b,1);
+        return { __nparray:true, data:Array(size).fill(0), shape, ndim:shape.length, size, dtype:'float64', _rows:shape[0], _cols:shape[1]||null };
+      },
+      ones: (s) => {
+        const shape=Array.isArray(s)?s:[s];
+        const size=shape.reduce((a,b)=>a*b,1);
+        return { __nparray:true, data:Array(size).fill(1), shape, ndim:shape.length, size, dtype:'float64', _rows:shape[0], _cols:shape[1]||null };
+      },
+      arange: (a,b,step=1) => {
+        if (b===undefined){b=a;a=0;}
+        const d=[];
+        for(let i=a;i<b;i+=step) d.push(i);
+        return { __nparray:true, data:d, shape:[d.length], ndim:1, size:d.length, dtype:'int64' };
+      },
+      linspace: (a,b,n=50) => {
+        const d=[]; const step=(b-a)/(n-1);
+        for(let i=0;i<n;i++) d.push(+(a+step*i).toFixed(6));
+        return { __nparray:true, data:d, shape:[d.length], ndim:1, size:d.length, dtype:'float64' };
+      },
+      sum: (arr) => arr.__nparray ? arr.data.reduce((a,b)=>a+b,0) : arr.reduce((a,b)=>a+b,0),
+      mean: (arr) => { const d=arr.__nparray?arr.data:arr; return d.reduce((a,b)=>a+b,0)/d.length; },
+      max: (arr) => Math.max(...(arr.__nparray?arr.data:arr)),
+      min: (arr) => Math.min(...(arr.__nparray?arr.data:arr)),
+    };
+
+    function reprArr(arr) {
+      if (!arr.__nparray) return String(arr);
+      if (arr.ndim===1) return '['+arr.data.join(' ')+']';
+      if (arr.ndim===2) {
+        const rows=arr._rows||arr.shape[0], cols=arr._cols||arr.shape[1];
+        const lines=[];
+        for(let r=0;r<rows;r++) {
+          lines.push(' ['+arr.data.slice(r*cols,(r+1)*cols).join(' ')+']');
+        }
+        return '['+lines.join('\n')+']';
+      }
+      return '['+arr.data.join(' ')+']';
+    }
+
+    function arrOp(a, op, b) {
+      const ad = a.__nparray ? a.data : a;
+      const isArrB = b && b.__nparray;
+      const bd = isArrB ? b.data : null;
+      const res = ad.map((v,i)=>{
+        const rhs = bd ? bd[i] : b;
+        if (op==='+') return v+rhs;
+        if (op==='-') return v-rhs;
+        if (op==='*') return v*rhs;
+        if (op==='/') return v/rhs;
+        if (op==='**') return Math.pow(v,rhs);
+        if (op==='//') return Math.trunc(v/rhs);
+        if (op==='%') return ((v%rhs)+Math.abs(rhs))%Math.abs(rhs);
+        return v;
+      });
+      return { ...a, data:res };
+    }
+
+    function arrCmp(arr, op, val) {
+      return arr.data.map(v=>{
+        if (op==='==') return v==val;
+        if (op==='!=') return v!=val;
+        if (op==='>') return v>val;
+        if (op==='<') return v<val;
+        if (op==='>=') return v>=val;
+        if (op==='<=') return v<=val;
+        return false;
+      });
+    }
+
+    function arrFilter(arr, mask) {
+      const d = arr.data.filter((_,i)=>mask[i]);
+      return { __nparray:true, data:d, shape:[d.length], ndim:1, size:d.length, dtype:arr.dtype };
+    }
+
+    // Parse and execute line by line
+    const env = { np };
+    const lines = code.split('\n');
+
+    function getIndent(line) { return (line.match(/^(\s*)/)||['',''])[1].length; }
+    function collectBody(lines, start, base) {
+      const body=[]; let j=start;
+      while(j<lines.length){const l=lines[j];if(!l.trim()){j++;continue;}if(getIndent(l)<=base)break;body.push(l);j++;}
+      return {body,end:j};
+    }
+
+    function evalExpr(expr, env) {
+      expr = expr.trim();
+      if (expr==='True') return true; if(expr==='False') return false; if(expr==='None') return null;
+      if (/^-?\d+$/.test(expr)) return parseInt(expr);
+      if (/^-?\d+\.\d+$/.test(expr)) return parseFloat(expr);
+      if ((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'"))) return expr.slice(1,-1);
+      if (expr==='[]') return [];
+      if (expr.startsWith('[')&&expr.endsWith(']')) {
+        const inner=expr.slice(1,-1).trim();
+        if(!inner) return [];
+        // Check for nested lists
+        if (inner.includes('[')) {
+          const rows=[]; let depth=0,cur='';
+          for(const c of inner){if(c==='[')depth++;else if(c===']')depth--;if(c===','&&depth===0){rows.push(cur.trim());cur='';}else cur+=c;}
+          if(cur.trim())rows.push(cur.trim());
+          return rows.map(r=>evalExpr(r,env));
+        }
+        return splitCommas(inner).map(e=>evalExpr(e.trim(),env));
+      }
+
+      // np.method(...)
+      let m;
+      m=expr.match(/^np\.(array|zeros|ones|arange|linspace|sum|mean|max|min)\((.+)\)$/);
+      if(m){
+        const fn=m[1]; const argsRaw=m[2];
+        const args=splitCommas(argsRaw).map(a=>evalExpr(a.trim(),env));
+        return np[fn](...args);
+      }
+
+      // arr.method(...)
+      m=expr.match(/^([a-zA-Z_]\w*)\.([a-zA-Z_]\w*)\((.*)?\)$/);
+      if(m){
+        const obj=env[m[1]]; const method=m[2]; const argsRaw=(m[3]||'').trim();
+        const args=argsRaw?splitCommas(argsRaw).map(a=>evalExpr(a.trim(),env)):[];
+        if(obj&&obj.__nparray){
+          if(method==='reshape'){
+            const [r,c]=args; const rows=typeof r==='number'?r:parseInt(r); const cols=typeof c==='number'?c:parseInt(c);
+            return {...obj,shape:[rows,cols],ndim:2,_rows:rows,_cols:cols,size:obj.data.length,dtype:obj.dtype};
+          }
+        }
+        if(typeof obj==='string'){
+          if(method==='split') return args.length?obj.split(args[0]):obj.trim().split(/\s+/).filter(s=>s!=='');
+        }
+      }
+
+      // arr.shape / arr.ndim / arr.size / arr.dtype
+      m=expr.match(/^([a-zA-Z_]\w*)\.(shape|ndim|size|dtype)$/);
+      if(m){
+        const obj=env[m[1]];
+        if(obj&&obj.__nparray) return obj[m[2]];
+      }
+
+      // arr[cond] — e.g. arr[arr % 2 == 0]
+      m=expr.match(/^([a-zA-Z_]\w*)\[(.+)\]$/);
+      if(m){
+        const obj=env[m[1]]; const idxExpr=m[2].trim();
+        if(obj&&obj.__nparray){
+          // Slicing 1D: arr[1:4]
+          if(/^\d*:\d*$/.test(idxExpr)){
+            const [s,e]=idxExpr.split(':');
+            const si=s?parseInt(s):0; const ei=e?parseInt(e):obj.data.length;
+            const d=obj.data.slice(si,ei);
+            return {__nparray:true,data:d,shape:[d.length],ndim:1,size:d.length,dtype:obj.dtype};
+          }
+          // 2D indexing arr[r, c]
+          if(idxExpr.includes(',')){
+            const parts=idxExpr.split(',').map(p=>p.trim());
+            if(parts.length===2&&/^\d+$/.test(parts[0])&&/^\d+$/.test(parts[1])){
+              const r=parseInt(parts[0]), c=parseInt(parts[1]);
+              const cols=obj._cols||obj.shape[1];
+              return obj.data[r*cols+c];
+            }
+            // 2D slicing arr[0:2, 1:3]
+            const rParts=parts[0].split(':'); const cParts=parts[1].split(':');
+            const r1=rParts[0]?parseInt(rParts[0]):0, r2=rParts[1]?parseInt(rParts[1]):(obj._rows||obj.shape[0]);
+            const c1=cParts[0]?parseInt(cParts[0]):0, c2=cParts[1]?parseInt(cParts[1]):(obj._cols||obj.shape[1]);
+            const cols=obj._cols||obj.shape[1]; const res=[];
+            for(let r=r1;r<r2;r++) for(let c=c1;c<c2;c++) res.push(obj.data[r*cols+c]);
+            return {__nparray:true,data:res,shape:[r2-r1,c2-c1],ndim:2,_rows:r2-r1,_cols:c2-c1,size:res.length,dtype:obj.dtype};
+          }
+          // Boolean mask: arr[arr % 2 == 0]
+          const maskM = idxExpr.match(/^([a-zA-Z_]\w*)\s*([%*\/\+\-])\s*(\d+)\s*(==|!=|>|<|>=|<=)\s*(\d+)$/);
+          if(maskM){
+            const srcArr=env[maskM[1]]; const arithOp=maskM[2]; const arithVal=parseInt(maskM[3]); const cmpOp=maskM[4]; const cmpVal=parseInt(maskM[5]);
+            if(srcArr&&srcArr.__nparray){
+              const mask=srcArr.data.map(v=>{
+                let lhs=v;
+                if(arithOp==='%') lhs=((v%arithVal)+arithVal)%arithVal;
+                else if(arithOp==='*') lhs=v*arithVal;
+                else if(arithOp==='+') lhs=v+arithVal;
+                else if(arithOp==='-') lhs=v-arithVal;
+                if(cmpOp==='==') return lhs==cmpVal;
+                if(cmpOp==='!=') return lhs!=cmpVal;
+                if(cmpOp==='>') return lhs>cmpVal;
+                if(cmpOp==='<') return lhs<cmpVal;
+                if(cmpOp==='>=') return lhs>=cmpVal;
+                if(cmpOp==='<=') return lhs<=cmpVal;
+                return false;
+              });
+              return arrFilter(obj,mask);
+            }
+          }
+          // Simple comparison: arr[arr > 5]
+          const simpleMask = idxExpr.match(/^([a-zA-Z_]\w*)\s*(==|!=|>|<|>=|<=)\s*(\d+)$/);
+          if(simpleMask){
+            const srcArr=env[simpleMask[1]]; const cmpOp=simpleMask[2]; const cmpVal=parseInt(simpleMask[3]);
+            if(srcArr&&srcArr.__nparray){
+              const mask=arrCmp(srcArr,cmpOp,cmpVal);
+              return arrFilter(obj,mask);
+            }
+          }
+          // Simple index
+          const idx=parseInt(idxExpr);
+          if(!isNaN(idx)) return obj.data[idx<0?obj.data.length+idx:idx];
+        }
+      }
+
+      if(/^[a-zA-Z_]\w*$/.test(expr)) return env.hasOwnProperty(expr)?env[expr]:undefined;
+
+      // Binary ops on arrays
+      for(const op of ['**','//','+','-','*','/','>=',' <=','>','<','==','!=',' and ',' or ','%']){
+        const oi=expr.indexOf(op);
+        if(oi>0){
+          const L=expr.slice(0,oi).trim(),R=expr.slice(oi+op.length).trim();
+          if(L&&R){
+            const l=evalExpr(L,env),r=evalExpr(R,env);
+            if(l&&l.__nparray) return arrOp(l,op.trim(),r&&r.__nparray?r:r);
+            if(op==='+') return (typeof l==='string'||typeof r==='string')?String(l)+String(r):l+r;
+            if(op==='-') return l-r; if(op==='*') return l*r; if(op==='/') return l/r;
+            if(op==='**') return Math.pow(l,r); if(op==='//') return Math.trunc(l/r);
+            if(op==='%') return ((l%r)+Math.abs(r))%Math.abs(r);
+            if(op==='>=') return l>=r; if(op==='<=') return l<=r;
+            if(op==='>') return l>r; if(op==='<') return l<r;
+            if(op==='==') return l==r; if(op==='!=') return l!=r;
+          }
+        }
+      }
+      return expr;
+    }
+
+    function splitCommas(str) {
+      const parts=[]; let depth=0,cur='';
+      for(const c of str){if('([{'.includes(c))depth++;else if(')]}'.includes(c))depth--;else if(c===','&&depth===0){parts.push(cur);cur='';continue;}cur+=c;}
+      if(cur.trim())parts.push(cur); return parts;
+    }
+
+    function reprVal(v) {
+      if(v===true) return 'True'; if(v===false) return 'False'; if(v===null) return 'None';
+      if(v&&v.__nparray) return reprArr(v);
+      if(Array.isArray(v)) return '['+v.map(reprVal).join(', ')+']';
+      if(typeof v==='string') return v;
+      if(typeof v==='number') return Number.isInteger(v)?String(v):v.toFixed(4).replace(/\.?0+$/,'');
+      if(v&&v.constructor===Object&&v.hasOwnProperty('0')) return String(v);
+      return String(v);
+    }
+
+    function runBlock(lines, env) {
+      let i=0;
+      while(i<lines.length){
+        if(totalOps++>5000) throw new Error('최대 실행 횟수 초과');
+        const line=lines[i]; const t=line.trim();
+        if(!t||t.startsWith('#')){i++;continue;}
+        if(t==='break') return {signal:'break'};
+        if(t==='continue') return {signal:'continue'};
+
+        // import numpy as np
+        if(/^import numpy as np$/.test(t)||/^import numpy$/.test(t)){i++;continue;}
+        if(/^from numpy import/.test(t)){i++;continue;}
+
+        // print(...)
+        if(t==='print()'){output.push('');i++;continue;}
+        let m=t.match(/^print\((.+)\)$/);
+        if(m){
+          let args=m[1]; let sep=' ';
+          const sm=args.match(/,\s*sep\s*=\s*["'](.*)["']/);
+          if(sm){sep=sm[1];args=args.replace(/,\s*sep\s*=\s*["'].*?["']/,'');}
+          args=args.replace(/,\s*end\s*=\s*["'].*?["']/,'').trim().replace(/,$/,'').trim();
+          const parts=splitCommas(args).map(a=>reprVal(evalExpr(a.trim(),env)));
+          output.push(parts.join(sep)); i++; continue;
+        }
+
+        // augmented
+        m=t.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|%=)\s*(.+)$/);
+        if(m){const[,vn,op,rhs]=m;const r=evalExpr(rhs,env);const l=env[vn]??0;if(op==='+=')env[vn]=l&&l.__nparray?arrOp(l,'+',r):(typeof l==='string'||typeof r==='string'?String(l)+String(r):l+r);else if(op==='-=')env[vn]=l-r;else if(op==='*=')env[vn]=l*r;i++;continue;}
+
+        // for x in arr
+        if(/^for .+ in .+:$/.test(t)){
+          const base=getIndent(line); const {body,end}=collectBody(lines,i+1,base);
+          const lm=t.match(/^for (.+) in (.+):$/);
+          if(lm){
+            const varP=lm[1].trim(); const iterV=evalExpr(lm[2].trim(),env);
+            let iterable=[];
+            if(iterV&&iterV.__nparray){
+              if(iterV.ndim===1) iterable=iterV.data;
+              else {
+                const cols=iterV._cols||iterV.shape[1];
+                for(let r=0;r<(iterV._rows||iterV.shape[0]);r++){
+                  const rowData=iterV.data.slice(r*cols,(r+1)*cols);
+                  iterable.push({__nparray:true,data:rowData,shape:[rowData.length],ndim:1,size:rowData.length,dtype:iterV.dtype});
+                }
+              }
+            } else if(Array.isArray(iterV)) iterable=iterV;
+            else if(typeof iterV==='string') iterable=iterV.split('');
+            for(const item of iterable){if(totalOps++>5000)throw new Error('최대 초과');env[varP]=item;const res=runBlock(body,env);if(res&&res.signal==='break')break;}
+          }
+          i=end; continue;
+        }
+
+        // if/elif/else
+        if(/^if .+:$/.test(t)||/^elif .+:$/.test(t)||/^else:$/.test(t)){
+          const base=getIndent(line);const branches=[];let j=i;
+          while(j<lines.length){const bl=lines[j].trim();if(!bl){j++;continue;}const bi=getIndent(lines[j]);if(bi<base)break;if(bi===base){if(/^if .+:$/.test(bl)||/^elif .+:$/.test(bl)){const cond=bl.replace(/^(if|elif)\s+/,'').slice(0,-1).trim();const{body,end}=collectBody(lines,j+1,base);branches.push({cond,body});j=end;}else if(/^else:$/.test(bl)){const{body,end}=collectBody(lines,j+1,base);branches.push({cond:'__else__',body});j=end;}else break;}else break;}
+          let exec=false;for(const b of branches){if(exec)break;if(b.cond==='__else__'||evalExpr(b.cond,env)){const res=runBlock(b.body,env);if(res&&res.signal)return res;exec=true;}}
+          i=j; continue;
+        }
+
+        // assignment
+        m=t.match(/^([a-zA-Z_,\s]+)\s*=\s*(.+)$/);
+        if(m){
+          const lhs=m[1].trim(),rhs=m[2].trim();
+          const val=evalExpr(rhs,env);
+          if(lhs.includes(',')){const vars=lhs.split(',').map(v=>v.trim());if(Array.isArray(val))vars.forEach((v,j)=>{env[v]=val[j];});else vars.forEach((v,j)=>{env[v]=j===0?val:undefined;});}
+          else env[lhs]=val;
+          i++;continue;
+        }
+        i++;
+      }
+      return {signal:null};
+    }
+
+    runBlock(lines, env);
+    outEl.textContent = output.join('\n') || '(출력 없음)';
+  } catch(e) {
+    outEl.className='sim-output error';
+    outEl.textContent='오류: '+e.message;
+  }
+}
+
+// QUIZ
+const quizData = [
+  { q:'넘파이를 가져오는 표준 방법은?', opts:['import numpy', 'import numpy as np', 'from numpy import *', 'include numpy'], ans:1 },
+  { q:'1차원 넘파이 배열을 만드는 코드는?', opts:['np.list([1,2,3])', 'np.make([1,2,3])', 'np.array([1,2,3])', 'np.new([1,2,3])'], ans:2 },
+  { q:'배열의 모양(행, 열)을 확인하는 속성은?', opts:['.size', '.ndim', '.shape', '.form'], ans:2 },
+  { q:'배열의 전체 원소 개수를 확인하는 속성은?', opts:['.length', '.count', '.total', '.size'], ans:3 },
+  { q:'<code>arr = np.array([[1,2],[3,4]])</code> 에서 <code>arr.ndim</code>은?', opts:['1', '2', '4', '(2,2)'], ans:1 },
+  { q:'0으로 가득 찬 배열을 만드는 함수는?', opts:['np.empty()', 'np.null()', 'np.zeros()', 'np.blank()'], ans:2 },
+  { q:'<code>np.arange(0, 10, 2)</code>의 결과는?', opts:['[0 1 2 3 4]', '[0 2 4 6 8]', '[2 4 6 8 10]', '[0 2 4 6 8 10]'], ans:1 },
+  { q:'배열의 모양을 변경하는 메서드는?', opts:['.resize()', '.change()', '.reshape()', '.transform()'], ans:2 },
+  { q:'<code>arr = np.array([1,2,3,4]); arr * 2</code>의 결과는?', opts:['[1,2,3,4,1,2,3,4]', '[2 4 6 8]', '[3 4 5 6]', '오류'], ans:1 },
+  { q:'배열의 평균을 구하는 함수는?', opts:['np.avg()', 'np.average()', 'np.sum()/n', 'np.mean()'], ans:3 },
+];
+
+let quizAnswered = new Set();
+function buildQuiz() {
+  document.getElementById('quizGrid').innerHTML = quizData.map((q,i) => `
+    <div class="quiz-card" id="qcard-${i}">
+      <div class="quiz-q">Q${i+1}. ${q.q}</div>
+      <div class="quiz-opts">${q.opts.map((o,j)=>`<button class="quiz-opt" onclick="answerQuiz(${i},${j})">${o}</button>`).join('')}</div>
+      <div class="quiz-feedback" id="qfb-${i}"></div>
+    </div>
+  `).join('');
+}
+
+function answerQuiz(qi, oi) {
+  if(quizAnswered.has(qi)) return;
+  quizAnswered.add(qi);
+  const q=quizData[qi];
+  document.querySelectorAll(`#qcard-${qi} .quiz-opt`).forEach((el,j)=>{
+    if(j===q.ans) el.classList.add('correct');
+    else if(j===oi&&j!==q.ans) el.classList.add('wrong');
+  });
+  document.getElementById('qfb-'+qi).textContent = oi===q.ans ? '✅ 정답입니다!' : `❌ 오답. 정답: ${q.opts[q.ans]}`;
+  const pct=(quizAnswered.size/quizData.length)*100;
+  document.getElementById('scoreFill').style.width=pct+'%';
+  document.getElementById('scoreCount').textContent=`${quizAnswered.size} / ${quizData.length}`;
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

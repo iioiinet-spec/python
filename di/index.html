@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 데이터 시각화 & 이미지 처리 - 세영코딩연구소</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0810;
+    --bg2: #100e1a;
+    --bg3: #161424;
+    --card: #1a1830;
+    --border: #252244;
+    --accent: #e879f9;
+    --accent2: #f97316;
+    --accent3: #06b6d4;
+    --accent4: #84cc16;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --blue: #818cf8;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #3d3860;
+    --code-bg: #060510;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      radial-gradient(ellipse 50% 35% at 20% 10%, rgba(232,121,249,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(6,182,212,0.08) 0%, transparent 50%),
+      linear-gradient(rgba(232,121,249,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,121,249,0.018) 1px, transparent 1px);
+    background-size:100% 100%, 100% 100%, 44px 44px, 44px 44px;
+  }
+  .container { max-width:980px; margin:0 auto; padding:0 20px 60px; position:relative; z-index:1; }
+
+  header { padding:36px 0 24px; text-align:center; border-bottom:1px solid var(--border); margin-bottom:32px; }
+  .lab-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(232,121,249,0.08); border:1px solid rgba(232,121,249,0.28); border-radius:100px; padding:6px 18px; font-size:11.5px; color:var(--accent); letter-spacing:0.1em; margin-bottom:16px; font-family:'JetBrains Mono',monospace; }
+  .lab-badge::before { content:''; width:7px; height:7px; background:var(--accent); border-radius:50%; box-shadow:0 0 10px var(--accent); animation:blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.12} }
+  header h1 { font-family:'Gmarket Sans',sans-serif; font-size:2.2rem; font-weight:700; background:linear-gradient(135deg,#fff 15%,var(--accent) 60%,var(--accent3)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.3; }
+  header h1 span { display:block; font-size:0.95rem; font-weight:300; color:var(--accent); -webkit-text-fill-color:var(--accent); letter-spacing:0.18em; margin-top:6px; }
+  .author-line { margin-top:12px; font-size:11.5px; color:var(--text3); font-family:'JetBrains Mono',monospace; }
+
+  .nav-tabs { display:flex; gap:4px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:6px; margin-bottom:28px; overflow-x:auto; scrollbar-width:none; }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .tab-btn { flex:1; min-width:72px; padding:9px 7px; background:transparent; border:none; border-radius:8px; color:var(--text2); font-family:'Noto Sans KR',sans-serif; font-size:11.5px; font-weight:500; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .tab-btn.active { background:var(--card); color:var(--accent); box-shadow:inset 0 0 0 1px rgba(232,121,249,0.28); }
+  .tab-btn:hover:not(.active) { background:var(--bg3); color:var(--text); }
+
+  .section { display:none; animation:fadeUp 0.26s ease; }
+  .section.active { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(9px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-title { font-family:'Gmarket Sans',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); }
+
+  .concept-box { background:linear-gradient(135deg,rgba(232,121,249,0.07),rgba(6,182,212,0.05)); border:1px solid rgba(232,121,249,0.2); border-radius:16px; padding:20px 24px; margin-bottom:20px; }
+  .concept-box h2 { font-size:0.93rem; color:var(--accent); margin-bottom:9px; display:flex; align-items:center; gap:8px; }
+  .concept-box p { color:var(--text2); line-height:1.85; font-size:0.88rem; }
+
+  .code-card { background:var(--card); border:1px solid var(--border); border-radius:13px; overflow:hidden; margin-bottom:13px; transition:border-color 0.2s; }
+  .code-card:hover { border-color:rgba(232,121,249,0.35); }
+  .code-header { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; background:var(--bg2); border-bottom:1px solid var(--border); }
+  .code-title { font-size:0.8rem; color:var(--text); font-weight:600; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .tag { font-size:10px; padding:2px 7px; border-radius:100px; font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .t-plt  { background:rgba(232,121,249,0.12); color:var(--accent); border:1px solid rgba(232,121,249,0.28); }
+  .t-bar  { background:rgba(249,115,22,0.12);  color:var(--accent2);border:1px solid rgba(249,115,22,0.28); }
+  .t-pie  { background:rgba(6,182,212,0.1);    color:var(--accent3);border:1px solid rgba(6,182,212,0.28); }
+  .t-img  { background:rgba(132,204,22,0.1);   color:var(--accent4);border:1px solid rgba(132,204,22,0.28); }
+  .t-ex   { background:rgba(251,191,36,0.1);   color:var(--yellow); border:1px solid rgba(251,191,36,0.28); }
+  .t-quiz { background:rgba(129,140,248,0.1);  color:var(--blue);   border:1px solid rgba(129,140,248,0.28); }
+  .dot-group { display:flex; gap:5px; }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+
+  .code-body { padding:14px 16px; }
+  pre.cblock { background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.75; color:#e2e8f0; overflow-x:auto; white-space:pre; margin-bottom:9px; }
+  .kw  { color:#e879f9; } .fn  { color:#82aaff; } .str { color:#c3e88d; }
+  .num { color:#f78c6c; } .var { color:#ffcb6b; } .op  { color:#89ddff; }
+  .cm  { color:#2a2550; } .mod { color:#f472b6; }
+
+  .oblock { background:rgba(6,182,212,0.06); border:1px solid rgba(6,182,212,0.2); border-radius:8px; padding:9px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--accent3); white-space:pre-wrap; }
+  .oblock::before { content:'▶ 결과'; display:block; font-size:10px; color:var(--text3); margin-bottom:4px; letter-spacing:0.06em; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+
+  /* LIB CARDS */
+  .lib-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+  .lib-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:center; transition:all 0.2s; }
+  .lib-card:hover { transform:translateY(-3px); border-color:rgba(232,121,249,0.4); box-shadow:0 8px 24px rgba(232,121,249,0.12); }
+  .lib-icon { font-size:2.2rem; margin-bottom:10px; }
+  .lib-name { font-family:'JetBrains Mono',monospace; font-size:1rem; font-weight:700; color:var(--accent); margin-bottom:6px; }
+  .lib-desc { font-size:0.8rem; color:var(--text2); line-height:1.6; }
+  .lib-badge-text { display:inline-block; background:rgba(232,121,249,0.1); border:1px solid rgba(232,121,249,0.28); border-radius:100px; padding:3px 10px; font-size:10px; color:var(--accent); font-family:'JetBrains Mono',monospace; margin-top:8px; }
+
+  /* INTERACTIVE CHART */
+  .chart-demo { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:20px; }
+  .chart-demo-label { font-size:11px; color:var(--text3); font-family:'JetBrains Mono',monospace; margin-bottom:14px; }
+  .chart-controls { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+  .chart-controls input[type="text"] { background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:7px 11px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.79rem; width:160px; transition:border-color 0.2s; }
+  .chart-controls input[type="text"]:focus { outline:none; border-color:var(--accent); }
+  .chart-type-btns { display:flex; gap:6px; }
+  .ct-btn { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:6px 12px; color:var(--text2); font-size:11.5px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all 0.2s; }
+  .ct-btn.active { background:rgba(232,121,249,0.15); border-color:var(--accent); color:var(--accent); }
+  .ct-btn:hover:not(.active) { border-color:var(--text2); color:var(--text); }
+  .chart-canvas-wrap { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:16px; display:flex; flex-direction:column; align-items:center; }
+  canvas#chartCanvas { max-width:100%; }
+  .chart-info { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); margin-top:8px; }
+
+  /* IMAGE DEMO */
+  .img-demo { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:20px; }
+  .img-controls { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .img-btn { background:var(--bg3); border:1px solid var(--border); border-radius:7px; padding:7px 14px; color:var(--text2); font-size:11.5px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; transition:all 0.2s; }
+  .img-btn:hover { border-color:var(--accent4); color:var(--accent4); }
+  .img-btn.active { background:rgba(132,204,22,0.1); border-color:var(--accent4); color:var(--accent4); }
+  .img-canvas-wrap { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:16px; display:flex; justify-content:center; align-items:center; min-height:200px; position:relative; }
+  canvas#imgCanvas { max-width:100%; border-radius:6px; }
+  .img-placeholder { color:var(--text3); font-size:12px; font-family:'JetBrains Mono',monospace; text-align:center; }
+  .img-info { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent4); margin-top:8px; }
+  .upload-btn { background:linear-gradient(135deg,var(--accent4),#65a30d); border:none; border-radius:7px; padding:7px 16px; color:#fff; font-family:'Noto Sans KR',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+  .upload-btn:hover { transform:translateY(-1px); box-shadow:0 3px 12px rgba(132,204,22,0.35); }
+
+  /* TABLE */
+  .info-table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; font-size:0.84rem; margin-bottom:15px; }
+  .info-table th { background:var(--bg2); padding:9px 15px; text-align:left; font-size:10px; color:var(--text3); letter-spacing:0.07em; font-weight:600; border-bottom:1px solid var(--border); }
+  .info-table td { padding:9px 15px; border-bottom:1px solid rgba(37,34,68,0.5); color:var(--text2); }
+  .info-table tr:last-child td { border-bottom:none; }
+  .info-table code { font-family:'JetBrains Mono',monospace; color:var(--accent); background:rgba(232,121,249,0.09); padding:1px 6px; border-radius:4px; font-size:0.78rem; }
+
+  /* QUIZ */
+  .quiz-score { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:13px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; }
+  .quiz-score-label { font-size:12px; color:var(--text3); }
+  .score-track { flex:1; height:6px; background:var(--bg3); border-radius:100px; overflow:hidden; }
+  .score-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent3)); border-radius:100px; transition:width 0.4s ease; }
+  .score-count { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); white-space:nowrap; }
+  .quiz-card { background:var(--card); border:1px solid var(--border); border-radius:13px; padding:18px 20px; margin-bottom:13px; transition:border-color 0.2s; }
+  .quiz-card:hover { border-color:rgba(232,121,249,0.3); }
+  .quiz-q { font-size:0.88rem; color:var(--text); margin-bottom:12px; line-height:1.6; }
+  .quiz-q code { font-family:'JetBrains Mono',monospace; color:var(--accent3); background:rgba(6,182,212,0.08); padding:1px 6px; border-radius:4px; font-size:0.79rem; }
+  .quiz-opts { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .quiz-opt { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:7px 14px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:0.79rem; cursor:pointer; transition:all 0.18s; }
+  .quiz-opt:hover { border-color:var(--accent); color:var(--accent); }
+  .quiz-opt.correct { background:rgba(132,204,22,0.12); border-color:var(--accent4); color:var(--accent4); }
+  .quiz-opt.wrong { background:rgba(248,113,113,0.1); border-color:var(--red); color:var(--red); }
+  .quiz-feedback { font-size:0.79rem; color:var(--text3); min-height:18px; font-family:'JetBrains Mono',monospace; }
+
+  /* INSTALL BOX */
+  .install-box { background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin:12px 0; font-family:'JetBrains Mono',monospace; font-size:0.81rem; color:var(--accent4); display:flex; align-items:center; gap:12px; }
+  .install-box::before { content:'$'; color:var(--text3); }
+
+  /* PROJECT CARDS */
+  .project-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .project-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; transition:all 0.2s; }
+  .project-card:hover { border-color:rgba(232,121,249,0.4); transform:translateY(-2px); }
+  .project-icon { font-size:2rem; margin-bottom:10px; }
+  .project-title { font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .project-desc { font-size:0.8rem; color:var(--text2); line-height:1.7; }
+  .project-steps { margin-top:10px; }
+  .project-step { font-size:0.78rem; color:var(--text3); margin-bottom:3px; display:flex; align-items:center; gap:6px; }
+  .project-step::before { content:''; width:5px; height:5px; background:var(--accent); border-radius:50%; flex-shrink:0; }
+
+  footer { text-align:center; padding:24px 0 16px; border-top:1px solid var(--border); color:var(--text3); font-size:11.5px; font-family:'JetBrains Mono',monospace; line-height:1.9; }
+  footer span { color:var(--accent); }
+
+  @media (max-width:600px) {
+    header h1 { font-size:1.5rem; }
+    .grid2,.lib-grid,.project-grid { grid-template-columns:1fr; }
+    .tab-btn { font-size:10px; padding:7px 4px; }
+    pre.cblock { font-size:0.72rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="lab-badge">세영코딩연구소 · SEYYOUNG CODING LAB</div>
+  <h1>데이터 시각화 & 이미지 처리<span>matplotlib · Pillow · Python</span></h1>
+  <div class="author-line">저자: ph.D kim &nbsp;|&nbsp; Python 3.x &nbsp;|&nbsp; matplotlib / Pillow(PIL)</div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('개념',this)">📘 개념</button>
+  <button class="tab-btn" onclick="switchTab('선그래프',this)">📈 선그래프</button>
+  <button class="tab-btn" onclick="switchTab('막대',this)">📊 막대그래프</button>
+  <button class="tab-btn" onclick="switchTab('원그래프',this)">🥧 원그래프</button>
+  <button class="tab-btn" onclick="switchTab('이미지',this)">🖼️ 이미지처리</button>
+  <button class="tab-btn" onclick="switchTab('인터랙티브',this)">🎮 인터랙티브</button>
+  <button class="tab-btn" onclick="switchTab('프로젝트',this)">🚀 미니프로젝트</button>
+  <button class="tab-btn" onclick="switchTab('퀴즈',this)">🧩 퀴즈</button>
+</div>
+
+<!-- ① 개념 -->
+<div id="tab-개념" class="section active">
+  <div class="concept-box">
+    <h2> 데이터 시각화 & 이미지 처리란?</h2>
+    <p>
+      <strong style="color:var(--accent)">데이터 시각화</strong>는 숫자나 자료를 그래프·차트로 보기 쉽게 나타내는 것입니다.<br>
+      <strong style="color:var(--accent4)">이미지 처리</strong>는 사진이나 그림 파일을 불러와서 크기·방향·구도를 바꾸고 저장하는 것입니다.<br><br>
+      둘 다 <strong style="color:var(--accent3)">결과를 눈으로 즉시 확인</strong>할 수 있어서 배우기 재미있습니다!
+    </p>
+  </div>
+
+  <div class="section-title"> 라이브러리 소개</div>
+  <div class="lib-grid">
+    <div class="lib-card">
+      <div class="lib-icon">graph</div>
+      <div class="lib-name">matplotlib</div>
+      <div class="lib-desc">가장 대표적인 그래프 라이브러리<br>선·막대·원 그래프 등을 쉽게 그릴 수 있음</div>
+      <div class="lib-badge-text"> 초보자 추천 #1</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon">image</div>
+      <div class="lib-name">Pillow (PIL)</div>
+      <div class="lib-desc">이미지 열기·저장·크기변경·회전·잘라내기<br>이미지 처리 입문에 가장 적합</div>
+      <div class="lib-badge-text"> 초보자 추천 #2</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon">table</div>
+      <div class="lib-name">pandas</div>
+      <div class="lib-desc">표 형태 데이터 처리에 특화<br>데이터 분석 후 matplotlib과 함께 활용</div>
+      <div class="lib-badge-text">중급 이상 추천</div>
+    </div>
+    <div class="lib-card">
+      <div class="lib-icon">imageProcessing</div>
+      <div class="lib-name">OpenCV (cv2)</div>
+      <div class="lib-desc">컴퓨터 비전·얼굴인식·영상처리·카메라<br>실시간 영상 처리에 최적화</div>
+      <div class="lib-badge-text">고급 활용</div>
+    </div>
+  </div>
+
+  <div class="section-title"> 설치 방법</div>
+  <div class="install-box">pip install matplotlib</div>
+  <div class="install-box">pip install pillow</div>
+
+  <div class="section-title" style="margin-top:20px"> 핵심 문법 한눈에 보기</div>
+  <div class="grid2">
+    <div>
+      <div style="font-size:11px;color:var(--accent);margin-bottom:8px;font-family:JetBrains Mono">📊 matplotlib 핵심</div>
+      <table class="info-table">
+        <tr><th>함수</th><th>역할</th></tr>
+        <tr><td><code>plt.plot(x,y)</code></td><td>선 그래프</td></tr>
+        <tr><td><code>plt.bar(x,y)</code></td><td>막대 그래프</td></tr>
+        <tr><td><code>plt.pie(data)</code></td><td>원 그래프</td></tr>
+        <tr><td><code>plt.title()</code></td><td>제목 설정</td></tr>
+        <tr><td><code>plt.xlabel()</code></td><td>x축 이름</td></tr>
+        <tr><td><code>plt.ylabel()</code></td><td>y축 이름</td></tr>
+        <tr><td><code>plt.show()</code></td><td>그래프 출력</td></tr>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--accent4);margin-bottom:8px;font-family:JetBrains Mono">🖼️ Pillow 핵심</div>
+      <table class="info-table">
+        <tr><th>메서드</th><th>역할</th></tr>
+        <tr><td><code>Image.open()</code></td><td>이미지 열기</td></tr>
+        <tr><td><code>img.size</code></td><td>크기 확인</td></tr>
+        <tr><td><code>img.resize()</code></td><td>크기 변경</td></tr>
+        <tr><td><code>img.rotate()</code></td><td>회전</td></tr>
+        <tr><td><code>img.crop()</code></td><td>잘라내기</td></tr>
+        <tr><td><code>img.save()</code></td><td>저장</td></tr>
+        <tr><td><code>img.show()</code></td><td>화면에 보기</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ② 선 그래프 -->
+<div id="tab-선그래프" class="section">
+  <div class="section-title">📈 선 그래프 (Line Chart)</div>
+  <div class="concept-box">
+    <h2> 언제 쓸까?</h2>
+    <p>시간이 지남에 따라 <strong style="color:var(--accent)">값이 어떻게 변하는지</strong> 보여줄 때 사용합니다.<br>
+    예: 시험 점수 변화, 게임 점수 변화, 일별 공부 시간 변화</p>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-plt">기본</span> 가장 기본적인 선 그래프</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">x</span> <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+<span class="var">y</span> <span class="op">=</span> [<span class="num">2</span>, <span class="num">4</span>, <span class="num">6</span>, <span class="num">8</span>, <span class="num">10</span>]
+
+<span class="var">plt</span>.<span class="fn">plot</span>(<span class="var">x</span>, <span class="var">y</span>)
+<span class="var">plt</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">→ 선 그래프 화면에 표시</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-plt">옵션</span> 제목과 축 이름 추가</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">x</span> <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>]
+<span class="var">y</span> <span class="op">=</span> [<span class="num">10</span>, <span class="num">15</span>, <span class="num">13</span>, <span class="num">20</span>]
+
+<span class="var">plt</span>.<span class="fn">plot</span>(<span class="var">x</span>, <span class="var">y</span>)
+<span class="var">plt</span>.<span class="fn">title</span>(<span class="str">"Score Graph"</span>)   <span class="cm"># 제목</span>
+<span class="var">plt</span>.<span class="fn">xlabel</span>(<span class="str">"Day"</span>)          <span class="cm"># x축 이름</span>
+<span class="var">plt</span>.<span class="fn">ylabel</span>(<span class="str">"Score"</span>)        <span class="cm"># y축 이름</span>
+<span class="var">plt</span>.<span class="fn">show</span>()</pre>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제</span> 시험 점수 변화 그래프</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">test_num</span> <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+<span class="var">scores</span>   <span class="op">=</span> [<span class="num">60</span>, <span class="num">70</span>, <span class="num">75</span>, <span class="num">85</span>, <span class="num">90</span>]
+
+<span class="var">plt</span>.<span class="fn">plot</span>(<span class="var">test_num</span>, <span class="var">scores</span>)
+<span class="var">plt</span>.<span class="fn">title</span>(<span class="str">"Test Score Change"</span>)
+<span class="var">plt</span>.<span class="fn">xlabel</span>(<span class="str">"Test Number"</span>)
+<span class="var">plt</span>.<span class="fn">ylabel</span>(<span class="str">"Score"</span>)
+<span class="var">plt</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">시험 1~5회 점수: 60→70→75→85→90 (점수 상승 추이 확인)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 막대 그래프 -->
+<div id="tab-막대" class="section">
+  <div class="section-title">📊 막대 그래프 (Bar Chart)</div>
+  <div class="concept-box">
+    <h2> 언제 쓸까?</h2>
+    <p>여러 항목을 <strong style="color:var(--accent2)">한눈에 비교</strong>할 때 사용합니다.<br>
+    예: 과목별 점수 비교, 학생별 성적, 월별 매출 비교</p>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-bar">기본</span> 막대 그래프</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">name</span>  <span class="op">=</span> [<span class="str">"A"</span>, <span class="str">"B"</span>, <span class="str">"C"</span>]
+<span class="var">score</span> <span class="op">=</span> [<span class="num">80</span>, <span class="num">90</span>, <span class="num">75</span>]
+
+<span class="var">plt</span>.<span class="fn">bar</span>(<span class="var">name</span>, <span class="var">score</span>)
+<span class="var">plt</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">A=80, B=90, C=75 막대 그래프 출력</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제</span> 과목별 점수 막대 그래프</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">subjects</span> <span class="op">=</span> [<span class="str">"Math"</span>, <span class="str">"Science"</span>, <span class="str">"English"</span>, <span class="str">"Coding"</span>]
+<span class="var">scores</span>   <span class="op">=</span> [<span class="num">85</span>, <span class="num">90</span>, <span class="num">80</span>, <span class="num">95</span>]
+
+<span class="var">plt</span>.<span class="fn">bar</span>(<span class="var">subjects</span>, <span class="var">scores</span>)
+<span class="var">plt</span>.<span class="fn">title</span>(<span class="str">"Subject Scores"</span>)
+<span class="var">plt</span>.<span class="fn">xlabel</span>(<span class="str">"Subject"</span>)
+<span class="var">plt</span>.<span class="fn">ylabel</span>(<span class="str">"Score"</span>)
+<span class="var">plt</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">Math=85, Science=90, English=80, Coding=95</div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 원 그래프 -->
+<div id="tab-원그래프" class="section">
+  <div class="section-title"> 원 그래프 (Pie Chart)</div>
+  <div class="concept-box">
+    <h2> 언제 쓸까?</h2>
+    <p>전체 중에서 <strong style="color:var(--accent3)">각 항목의 비율</strong>을 보여줄 때 사용합니다.<br>
+    예: 좋아하는 과목 비율, 하루 시간 사용 비율, 취미 활동 비율</p>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-pie">기본</span> 원 그래프</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">labels</span> <span class="op">=</span> [<span class="str">"Python"</span>, <span class="str">"Game"</span>, <span class="str">"AI"</span>]
+<span class="var">sizes</span>  <span class="op">=</span> [<span class="num">40</span>, <span class="num">35</span>, <span class="num">25</span>]
+
+<span class="var">plt</span>.<span class="fn">pie</span>(<span class="var">sizes</span>, labels<span class="op">=</span><span class="var">labels</span>)
+<span class="var">plt</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">Python 40%, Game 35%, AI 25% 원형 비율 출력</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-ex">예제</span> 취미 비율 원 그래프</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">import</span> <span class="mod">matplotlib.pyplot</span> <span class="kw">as</span> <span class="var">plt</span>
+
+<span class="var">labels</span> <span class="op">=</span> [<span class="str">"Game"</span>, <span class="str">"Reading"</span>, <span class="str">"Sports"</span>, <span class="str">"Coding"</span>]
+<span class="var">sizes</span>  <span class="op">=</span> [<span class="num">30</span>, <span class="num">20</span>, <span class="num">25</span>, <span class="num">25</span>]
+
+<span class="var">plt</span>.<span class="fn">pie</span>(<span class="var">sizes</span>, labels<span class="op">=</span><span class="var">labels</span>)
+<span class="var">plt</span>.<span class="fn">title</span>(<span class="str">"Hobby Ratio"</span>)
+<span class="var">plt</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">Game 30% / Reading 20% / Sports 25% / Coding 25%</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">📊 그래프 종류 비교</div>
+  <table class="info-table">
+    <tr><th>그래프</th><th>함수</th><th>언제 사용?</th><th>예시</th></tr>
+    <tr><td>선 그래프</td><td><code>plt.plot()</code></td><td>시간 변화 추적</td><td>점수 변화, 기온 변화</td></tr>
+    <tr><td>막대 그래프</td><td><code>plt.bar()</code></td><td>항목 간 비교</td><td>과목별 점수, 국가별 인구</td></tr>
+    <tr><td>원 그래프</td><td><code>plt.pie()</code></td><td>전체 비율 표시</td><td>취미 비율, 시간 배분</td></tr>
+  </table>
+</div>
+
+<!-- ⑤ 이미지 처리 -->
+<div id="tab-이미지" class="section">
+  <div class="section-title"> 이미지 처리 (Pillow)</div>
+  <div class="concept-box">
+    <h2> Pillow란?</h2>
+    <p>Python으로 이미지를 다룰 수 있게 해주는 라이브러리입니다.<br>
+    <strong style="color:var(--accent4)">열기·크기변경·회전·잘라내기·저장</strong>이 가능합니다.</p>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-img">열기</span> 이미지 열고 보기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="kw">from</span> <span class="mod">PIL</span> <span class="kw">import</span> <span class="mod">Image</span>
+
+<span class="var">img</span> <span class="op">=</span> <span class="mod">Image</span>.<span class="fn">open</span>(<span class="str">"sample.jpg"</span>)
+<span class="fn">print</span>(<span class="var">img</span>.size)   <span class="cm"># (800, 600) 형태</span>
+<span class="var">img</span>.<span class="fn">show</span>()</pre>
+      <div class="oblock">(800, 600)</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-img">resize</span> 크기 변경</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">from</span> <span class="mod">PIL</span> <span class="kw">import</span> <span class="mod">Image</span>
+
+<span class="var">img</span> <span class="op">=</span> <span class="mod">Image</span>.<span class="fn">open</span>(<span class="str">"sample.jpg"</span>)
+<span class="var">small</span> <span class="op">=</span> <span class="var">img</span>.<span class="fn">resize</span>((<span class="num">300</span>, <span class="num">200</span>))
+<span class="var">small</span>.<span class="fn">show</span>()</pre>
+        <div class="oblock">300×200으로 축소 후 표시</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-img">rotate</span> 이미지 회전</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">from</span> <span class="mod">PIL</span> <span class="kw">import</span> <span class="mod">Image</span>
+
+<span class="var">img</span> <span class="op">=</span> <span class="mod">Image</span>.<span class="fn">open</span>(<span class="str">"sample.jpg"</span>)
+<span class="var">rot</span> <span class="op">=</span> <span class="var">img</span>.<span class="fn">rotate</span>(<span class="num">90</span>)
+<span class="var">rot</span>.<span class="fn">show</span>()</pre>
+        <div class="oblock">90도 회전 후 표시</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-img">crop</span> 이미지 잘라내기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">from</span> <span class="mod">PIL</span> <span class="kw">import</span> <span class="mod">Image</span>
+
+<span class="var">img</span> <span class="op">=</span> <span class="mod">Image</span>.<span class="fn">open</span>(<span class="str">"sample.jpg"</span>)
+<span class="cm"># (왼쪽, 위, 오른쪽, 아래)</span>
+<span class="var">cut</span> <span class="op">=</span> <span class="var">img</span>.<span class="fn">crop</span>((<span class="num">100</span>, <span class="num">100</span>, <span class="num">300</span>, <span class="num">300</span>))
+<span class="var">cut</span>.<span class="fn">show</span>()</pre>
+        <div class="oblock">200×200 구간 잘라서 표시</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-img">save</span> 저장하기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="kw">from</span> <span class="mod">PIL</span> <span class="kw">import</span> <span class="mod">Image</span>
+
+<span class="var">img</span> <span class="op">=</span> <span class="mod">Image</span>.<span class="fn">open</span>(<span class="str">"sample.jpg"</span>)
+<span class="var">small</span> <span class="op">=</span> <span class="var">img</span>.<span class="fn">resize</span>((<span class="num">200</span>, <span class="num">200</span>))
+<span class="var">small</span>.<span class="fn">save</span>(<span class="str">"new_image.jpg"</span>)
+<span class="cm"># 원본 보존, 새 파일 저장</span></pre>
+        <div class="oblock">new_image.jpg 파일 생성 완료</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">📋 이미지 처리 메서드 정리</div>
+  <table class="info-table">
+    <tr><th>메서드</th><th>사용법</th><th>설명</th></tr>
+    <tr><td><code>Image.open()</code></td><td><code>img = Image.open("파일")</code></td><td>이미지 불러오기</td></tr>
+    <tr><td><code>.size</code></td><td><code>print(img.size)</code></td><td>(가로, 세로) 픽셀 확인</td></tr>
+    <tr><td><code>.resize()</code></td><td><code>img.resize((300, 200))</code></td><td>크기 변경</td></tr>
+    <tr><td><code>.rotate()</code></td><td><code>img.rotate(90)</code></td><td>각도만큼 회전</td></tr>
+    <tr><td><code>.crop()</code></td><td><code>img.crop((x1,y1,x2,y2))</code></td><td>영역 잘라내기</td></tr>
+    <tr><td><code>.save()</code></td><td><code>img.save("새파일.jpg")</code></td><td>파일로 저장</td></tr>
+    <tr><td><code>.show()</code></td><td><code>img.show()</code></td><td>화면에 표시</td></tr>
+  </table>
+</div>
+
+<!-- ⑥ 인터랙티브 데모 -->
+<div id="tab-인터랙티브" class="section">
+  <div class="section-title"> 인터랙티브 그래프 만들기</div>
+
+  <div class="chart-demo">
+    <div class="chart-demo-label">데이터를 입력하고 그래프 종류를 선택해서 바로 그려보세요!</div>
+    <div class="chart-controls">
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">레이블 (쉼표로 구분)</div>
+        <input type="text" id="chartLabels" value="Mon,Tue,Wed,Thu,Fri" placeholder="레이블...">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">값 (쉼표로 구분)</div>
+        <input type="text" id="chartValues" value="60,75,80,70,90" placeholder="숫자...">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);font-family:JetBrains Mono;margin-bottom:4px">그래프 종류</div>
+        <div class="chart-type-btns">
+          <button class="ct-btn active" id="btn-line" onclick="setChartType('line',this)">📈 선</button>
+          <button class="ct-btn" id="btn-bar" onclick="setChartType('bar',this)"> 막대</button>
+          <button class="ct-btn" id="btn-pie" onclick="setChartType('pie',this)"> 원형</button>
+        </div>
+      </div>
+      <button class="upload-btn" onclick="drawChart()" style="align-self:flex-end">▶ 그리기</button>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas id="chartCanvas" width="500" height="300"></canvas>
+      <div class="chart-info" id="chartInfo">위에서 데이터를 입력하고 그리기 버튼을 누르세요</div>
+    </div>
+  </div>
+
+  <div class="section-title"> 인터랙티브 이미지 처리</div>
+  <div class="img-demo">
+    <div class="chart-demo-label">이미지를 업로드하면 브라우저에서 바로 처리 효과를 확인할 수 있습니다</div>
+    <div class="img-controls">
+      <label class="upload-btn" style="cursor:pointer"> 이미지 업로드 <input type="file" accept="image/*" id="imgUpload" onchange="loadImage(this)" style="display:none"></label>
+      <button class="img-btn" onclick="imgAction('original')">원본</button>
+      <button class="img-btn" onclick="imgAction('resize')">크기 축소 (50%)</button>
+      <button class="img-btn" onclick="imgAction('rotate90')">90° 회전</button>
+      <button class="img-btn" onclick="imgAction('rotate180')">180° 회전</button>
+      <button class="img-btn" onclick="imgAction('crop')">중앙 잘라내기</button>
+      <button class="img-btn" onclick="imgAction('gray')">흑백 변환</button>
+    </div>
+    <div class="img-canvas-wrap">
+      <canvas id="imgCanvas" style="display:none"></canvas>
+      <div class="img-placeholder" id="imgPlaceholder"> 이미지를 업로드하면 여기에 표시됩니다</div>
+    </div>
+    <div class="img-info" id="imgInfo"></div>
+  </div>
+</div>
+
+<!-- ⑦ 미니 프로젝트 -->
+<div id="tab-프로젝트" class="section">
+  <div class="section-title"> 미니 프로젝트 아이디어</div>
+  <div class="project-grid">
+    <div class="project-card">
+      <div class="project-icon">Study Graph P</div>
+      <div class="project-title">공부 기록 그래프 프로젝트</div>
+      <div class="project-desc">월~금 공부 시간을 입력받아 선 그래프로 표현하고 가장 많이 공부한 날을 찾습니다.</div>
+      <div class="project-steps">
+        <div class="project-step">월~금 공부 시간 리스트 준비</div>
+        <div class="project-step">plt.plot()으로 선 그래프 생성</div>
+        <div class="project-step">제목, 축 이름 설정</div>
+        <div class="project-step">max()로 최대값 날짜 찾기</div>
+        <div class="project-step">plt.show()로 출력</div>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-icon">Game</div>
+      <div class="project-title">게임 점수 비교 막대 그래프</div>
+      <div class="project-desc">친구들의 게임 점수를 입력받아 막대 그래프로 비교하고 1등을 찾습니다.</div>
+      <div class="project-steps">
+        <div class="project-step">플레이어 이름 리스트 준비</div>
+        <div class="project-step">점수 리스트 준비</div>
+        <div class="project-step">plt.bar()로 막대 그래프 생성</div>
+        <div class="project-step">max()로 1등 찾기</div>
+        <div class="project-step">plt.show()로 출력</div>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-icon">Circle</div>
+      <div class="project-title">하루 시간 비율 원 그래프</div>
+      <div class="project-desc">공부·게임·운동·수면 시간을 비율로 나타내어 생활 패턴을 분석합니다.</div>
+      <div class="project-steps">
+        <div class="project-step">활동 종류 리스트 준비</div>
+        <div class="project-step">각 활동 시간 리스트 준비</div>
+        <div class="project-step">plt.pie()로 원 그래프 생성</div>
+        <div class="project-step">제목 설정</div>
+        <div class="project-step">plt.show()로 출력</div>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-icon">Picture</div>
+      <div class="project-title">사진 편집 미니 프로젝트</div>
+      <div class="project-desc">이미지를 불러와서 크기를 줄이고, 회전하고, 일부를 잘라서 새 이름으로 저장합니다.</div>
+      <div class="project-steps">
+        <div class="project-step">Image.open()으로 이미지 열기</div>
+        <div class="project-step">resize()로 크기 축소</div>
+        <div class="project-step">rotate()로 회전</div>
+        <div class="project-step">crop()으로 원하는 부분 자르기</div>
+        <div class="project-step">save()로 새 이름으로 저장</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:22px"> 추천 활동 아이디어</div>
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-plt">그래프</span> 추천 활동</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <div style="font-size:0.82rem;color:var(--text2);line-height:2">
+           내 성적 그래프 만들기<br>
+           하루 공부 시간 그래프<br>
+           좋아하는 과목 비율 원 그래프<br>
+           학급 평균 점수 비교<br>
+           일주일 운동 시간 변화<br>
+           하루 시간 배분 분석
+        </div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-img">이미지</span> 추천 활동</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <div style="font-size:0.82rem;color:var(--text2);line-height:2">
+           내 사진 크기 바꾸기<br>
+           캐릭터 이미지 자르기<br>
+           여러 사진 같은 크기로 통일<br>
+           사진 회전해서 방향 맞추기<br>
+           프로필 사진 썸네일 만들기<br>
+           미니 포스터 이미지 편집
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑧ 퀴즈 -->
+<div id="tab-퀴즈" class="section">
+  <div class="quiz-score">
+    <span class="quiz-score-label">퀴즈 진행도</span>
+    <div class="score-track"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
+    <span class="score-count" id="scoreCount">0 / 10</span>
+  </div>
+  <div class="section-title"> 시각화 & 이미지 처리 퀴즈 10문항</div>
+  <div id="quizGrid"></div>
+</div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span>세영코딩연구소</span> &nbsp;|&nbsp; 저자: <span>ph.D kim</span><br>
+    Python 3.x · matplotlib · Pillow(PIL) · 데이터 시각화 & 이미지 처리
+  </div>
+</footer>
+
+<script>
+// TAB
+function switchTab(n, b) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active'); b.classList.add('active');
+}
+
+// CHART DEMO
+let currentChartType = 'line';
+function setChartType(type, btn) {
+  currentChartType = type;
+  document.querySelectorAll('.ct-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+const COLORS = ['#e879f9','#f97316','#06b6d4','#84cc16','#fbbf24','#818cf8','#f472b6','#34d399'];
+
+function drawChart() {
+  const canvas = document.getElementById('chartCanvas');
+  const ctx = canvas.getContext('2d');
+  const labelsRaw = document.getElementById('chartLabels').value;
+  const valuesRaw = document.getElementById('chartValues').value;
+  const labels = labelsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+  const values = valuesRaw.split(',').map(s=>parseFloat(s.trim())).filter(n=>!isNaN(n));
+  if (!labels.length || !values.length) { document.getElementById('chartInfo').textContent = '레이블과 값을 올바르게 입력해주세요'; return; }
+  const len = Math.min(labels.length, values.length);
+  const lbs = labels.slice(0,len), vals = values.slice(0,len);
+
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#060510'; ctx.fillRect(0,0,W,H);
+
+  if (currentChartType==='line') drawLine(ctx,lbs,vals,W,H);
+  else if (currentChartType==='bar') drawBar(ctx,lbs,vals,W,H);
+  else drawPie(ctx,lbs,vals,W,H);
+
+  document.getElementById('chartInfo').textContent = `${currentChartType.toUpperCase()} 그래프 | 데이터 ${len}개 | 최대: ${Math.max(...vals)} | 최소: ${Math.min(...vals)}`;
+}
+
+function drawLine(ctx,lbs,vals,W,H) {
+  const pad={l:50,r:20,t:30,b:40};
+  const mx=Math.max(...vals), mn=Math.min(...vals);
+  const rng=mx-mn||1;
+  const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
+
+  // Grid
+  ctx.strokeStyle='#252244'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++) {
+    const y=pad.t+gH*(i/4);
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    ctx.fillStyle='#3d3860'; ctx.font='10px JetBrains Mono'; ctx.textAlign='right';
+    ctx.fillText(Math.round(mx-rng*(i/4)), pad.l-5, y+4);
+  }
+
+  // Line
+  ctx.beginPath(); ctx.strokeStyle='#e879f9'; ctx.lineWidth=2.5;
+  vals.forEach((v,i) => {
+    const x=pad.l+gW*(i/(lbs.length-1||1));
+    const y=pad.t+gH*(1-(v-mn)/rng);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Points & labels
+  vals.forEach((v,i) => {
+    const x=pad.l+gW*(i/(lbs.length-1||1));
+    const y=pad.t+gH*(1-(v-mn)/rng);
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fillStyle='#e879f9'; ctx.fill();
+    ctx.strokeStyle='#060510'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#e2e8f0'; ctx.font='11px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText(v, x, y-10);
+    ctx.fillStyle='#94a3b8'; ctx.font='10px Noto Sans KR'; ctx.textAlign='center';
+    ctx.fillText(lbs[i], x, H-pad.b+16);
+  });
+}
+
+function drawBar(ctx,lbs,vals,W,H) {
+  const pad={l:50,r:20,t:30,b:40};
+  const mx=Math.max(...vals);
+  const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
+  const bW=gW/lbs.length*0.65, gap=gW/lbs.length;
+
+  for(let i=0;i<=4;i++) {
+    const y=pad.t+gH*(i/4);
+    ctx.strokeStyle='#252244'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+    ctx.fillStyle='#3d3860'; ctx.font='10px JetBrains Mono'; ctx.textAlign='right';
+    ctx.fillText(Math.round(mx*(1-i/4)), pad.l-5, y+4);
+  }
+
+  vals.forEach((v,i) => {
+    const x=pad.l+gap*i+gap*0.175;
+    const bH=gH*(v/mx);
+    const y=pad.t+gH-bH;
+    const g=ctx.createLinearGradient(0,y,0,y+bH);
+    g.addColorStop(0, COLORS[i%COLORS.length]);
+    g.addColorStop(1, COLORS[i%COLORS.length]+'44');
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    const r=4;
+    ctx.moveTo(x+r,y); ctx.lineTo(x+bW-r,y);
+    ctx.quadraticCurveTo(x+bW,y,x+bW,y+r);
+    ctx.lineTo(x+bW,y+bH); ctx.lineTo(x,y+bH); ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y); ctx.fill();
+    ctx.fillStyle='#e2e8f0'; ctx.font='11px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText(v, x+bW/2, y-6);
+    ctx.fillStyle='#94a3b8'; ctx.font='10px Noto Sans KR'; ctx.textAlign='center';
+    ctx.fillText(lbs[i], x+bW/2, H-pad.b+16);
+  });
+}
+
+function drawPie(ctx,lbs,vals,W,H) {
+  const total=vals.reduce((a,b)=>a+b,0);
+  const cx=W/2, cy=H/2, r=Math.min(W,H)/2-50;
+  let start=-Math.PI/2;
+  vals.forEach((v,i) => {
+    const angle=(v/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,start+angle);
+    ctx.fillStyle=COLORS[i%COLORS.length]; ctx.fill();
+    ctx.strokeStyle='#060510'; ctx.lineWidth=2; ctx.stroke();
+    const mid=start+angle/2;
+    const lx=cx+Math.cos(mid)*(r*0.65), ly=cy+Math.sin(mid)*(r*0.65);
+    ctx.fillStyle='#fff'; ctx.font='bold 11px Noto Sans KR'; ctx.textAlign='center';
+    ctx.fillText(Math.round(v/total*100)+'%', lx, ly+4);
+    const ox=cx+Math.cos(mid)*(r+20), oy=cy+Math.sin(mid)*(r+20);
+    ctx.fillStyle=COLORS[i%COLORS.length]; ctx.font='11px Noto Sans KR'; ctx.textAlign=ox<cx?'right':'left';
+    ctx.fillText(lbs[i], ox, oy+4);
+    start+=angle;
+  });
+}
+
+// Draw initial chart
+window.addEventListener('load', () => { drawChart(); });
+
+// IMAGE DEMO
+let originalImage = null;
+function loadImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      originalImage = img;
+      imgAction('original');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function imgAction(action) {
+  if (!originalImage) { document.getElementById('imgInfo').textContent = '먼저 이미지를 업로드하세요'; return; }
+  const canvas = document.getElementById('imgCanvas');
+  const ctx = canvas.getContext('2d');
+  const ph = document.getElementById('imgPlaceholder');
+  const info = document.getElementById('imgInfo');
+  const img = originalImage;
+  canvas.style.display = 'block';
+  ph.style.display = 'none';
+  let w=img.width, h=img.height, msg='';
+
+  const MAX=400;
+  let dw=w, dh=h;
+  if (dw>MAX) { dh=Math.round(dh*MAX/dw); dw=MAX; }
+  if (dh>MAX) { dw=Math.round(dw*MAX/dh); dh=MAX; }
+
+  if (action==='original') {
+    canvas.width=dw; canvas.height=dh;
+    ctx.drawImage(img,0,0,dw,dh);
+    msg=`원본 | ${w}×${h}px → 표시: ${dw}×${dh}px`;
+  } else if (action==='resize') {
+    const nw=Math.round(dw*0.5), nh=Math.round(dh*0.5);
+    canvas.width=nw; canvas.height=nh;
+    ctx.drawImage(img,0,0,nw,nh);
+    msg=`resize(50%) | ${dw}×${dh} → ${nw}×${nh}px`;
+  } else if (action==='rotate90') {
+    canvas.width=dh; canvas.height=dw;
+    ctx.translate(dh,0); ctx.rotate(Math.PI/2);
+    ctx.drawImage(img,0,0,dw,dh); ctx.resetTransform();
+    msg=`rotate(90°) | ${dw}×${dh} → ${dh}×${dw}px`;
+  } else if (action==='rotate180') {
+    canvas.width=dw; canvas.height=dh;
+    ctx.translate(dw,dh); ctx.rotate(Math.PI);
+    ctx.drawImage(img,0,0,dw,dh); ctx.resetTransform();
+    msg=`rotate(180°) | ${dw}×${dh}px`;
+  } else if (action==='crop') {
+    const cx=Math.round(dw*0.25), cy=Math.round(dh*0.25);
+    const cw=Math.round(dw*0.5), ch=Math.round(dh*0.5);
+    canvas.width=cw; canvas.height=ch;
+    ctx.drawImage(img, cx/dw*w, cy/dh*h, cw/dw*w, ch/dh*h, 0, 0, cw, ch);
+    msg=`crop(중앙 50%) | ${cw}×${ch}px 잘라냄`;
+  } else if (action==='gray') {
+    canvas.width=dw; canvas.height=dh;
+    ctx.drawImage(img,0,0,dw,dh);
+    const data=ctx.getImageData(0,0,dw,dh);
+    const d=data.data;
+    for(let i=0;i<d.length;i+=4) {
+      const g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+      d[i]=d[i+1]=d[i+2]=g;
+    }
+    ctx.putImageData(data,0,0);
+    msg=`흑백 변환 (Grayscale) | ${dw}×${dh}px`;
+  }
+  document.querySelectorAll('.img-btn').forEach(b=>b.classList.remove('active'));
+  info.textContent = msg;
+}
+
+// QUIZ
+const quizData = [
+  { q:`matplotlib에서 선 그래프를 그리는 함수는?`, opts:['plt.line()','plt.plot()','plt.draw()','plt.graph()'], ans:1 },
+  { q:`막대 그래프를 그리는 함수는?`, opts:['plt.rect()','plt.column()','plt.bar()','plt.histogram()'], ans:2 },
+  { q:`원 그래프를 그리는 함수는?`, opts:['plt.circle()','plt.round()','plt.donut()','plt.pie()'], ans:3 },
+  { q:`그래프를 화면에 출력하는 함수는?`, opts:['plt.display()','plt.render()','plt.show()','plt.print()'], ans:2 },
+  { q:`그래프 제목을 설정하는 함수는?`, opts:['plt.name()','plt.label()','plt.header()','plt.title()'], ans:3 },
+  { q:`Pillow에서 이미지를 불러오는 코드는?`, opts:['Image.load()','Image.read()','Image.open()','Image.get()'], ans:2 },
+  { q:`Pillow에서 이미지 크기를 변경하는 메서드는?`, opts:['.scale()', '.resize()', '.zoom()', '.size()'], ans:1 },
+  { q:`이미지를 90도 회전하는 코드는?`, opts:['img.turn(90)', 'img.spin(90)', 'img.flip(90)', 'img.rotate(90)'], ans:3 },
+  { q:`이미지의 일부를 잘라내는 메서드는?`, opts:['.cut()', '.crop()', '.clip()', '.slice()'], ans:1 },
+  { q:`수정한 이미지를 새 파일로 저장하는 메서드는?`, opts:['.export()', '.write()', '.save()', '.store()'], ans:2 },
+];
+
+let quizAnswered = new Set();
+function buildQuiz() {
+  document.getElementById('quizGrid').innerHTML = quizData.map((q,i) => `
+    <div class="quiz-card" id="qcard-${i}">
+      <div class="quiz-q">Q${i+1}. ${q.q}</div>
+      <div class="quiz-opts">${q.opts.map((o,j)=>`<button class="quiz-opt" onclick="answerQuiz(${i},${j})">${o}</button>`).join('')}</div>
+      <div class="quiz-feedback" id="qfb-${i}"></div>
+    </div>
+  `).join('');
+}
+
+function answerQuiz(qi, oi) {
+  if (quizAnswered.has(qi)) return;
+  quizAnswered.add(qi);
+  const q = quizData[qi];
+  document.querySelectorAll(`#qcard-${qi} .quiz-opt`).forEach((el,j)=>{
+    if (j===q.ans) el.classList.add('correct');
+    else if (j===oi&&j!==q.ans) el.classList.add('wrong');
+  });
+  document.getElementById('qfb-'+qi).textContent = oi===q.ans ? '✅ 정답입니다!' : `❌ 오답. 정답: ${q.opts[q.ans]}`;
+  const pct=(quizAnswered.size/quizData.length)*100;
+  document.getElementById('scoreFill').style.width=pct+'%';
+  document.getElementById('scoreCount').textContent=`${quizAnswered.size} / ${quizData.length}`;
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

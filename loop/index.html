@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04강 반복문(Loop) 인터랙티브 강의 | 세영코딩연구소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1628; --panel:#10203a; --panel2:#152848; --line:#24406b;
+  --teal:#2dd4bf; --cyan:#38bdf8; --orange:#fbbf24;
+  --text:#e8f1fb; --sub:#a9c2e0; --good:#34d399; --bad:#f87171;
+  --mono:'JetBrains Mono','Noto Sans KR',monospace;
+  --sans:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:17px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;}
+
+header.hero{padding:2.5rem 1.2rem 1.5rem;text-align:center;background:linear-gradient(180deg,#0c1e3d 0%,var(--bg) 100%);border-bottom:1px solid var(--line);}
+.hero .lab{font-family:var(--mono);color:var(--teal);font-size:.95rem;letter-spacing:.18em;font-weight:600;}
+.hero h1{font-size:2rem;font-weight:900;margin:.5rem 0 .3rem;line-height:1.35;}
+.hero h1 .fx{color:var(--cyan);}
+.hero .desc{color:var(--sub);font-size:1rem;}
+
+nav.tabs{position:sticky;top:0;z-index:50;display:flex;justify-content:center;flex-wrap:wrap;gap:.4rem;padding:.7rem .6rem;background:rgba(10,22,40,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+nav.tabs button{font-family:var(--sans);font-size:.96rem;font-weight:700;color:var(--sub);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.5rem .9rem;cursor:pointer;transition:all .15s;}
+nav.tabs button:hover{color:var(--text);border-color:var(--teal);}
+nav.tabs button.on{color:#06251f;background:var(--teal);border-color:var(--teal);}
+nav.tabs button:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+
+main{max-width:940px;margin:0 auto;padding:1.6rem 1.1rem 4rem;}
+section.page{display:none;}
+section.page.on{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.page-title{font-size:1.45rem;font-weight:900;margin:.6rem 0 .4rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.page-title .chip{font-family:var(--mono);font-size:.8rem;font-weight:700;color:#06251f;background:var(--teal);border-radius:6px;padding:.15rem .55rem;}
+.page-sub{color:var(--sub);margin-bottom:1.3rem;font-size:.98rem;}
+
+.tcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.25rem 1.35rem;margin-bottom:1.1rem;}
+.tcard h3{font-size:1.13rem;font-weight:900;color:var(--cyan);margin-bottom:.55rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.tcard h3 .num{font-family:var(--mono);font-size:.85rem;color:var(--orange);}
+.tcard p{margin:.35rem 0;}
+.tcard .note{color:var(--sub);font-size:.95rem;}
+pre.code{font-family:var(--mono);font-size:.93rem;line-height:1.65;background:#0b1730;border:1px solid var(--line);border-radius:10px;padding:.9rem 1.05rem;overflow-x:auto;color:#cfe6ff;margin:.6rem 0;white-space:pre;}
+pre.code .cm{color:#6f8db3;}
+
+.lab-box{background:#0b1e33;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:12px;padding:1rem 1.1rem;margin:.8rem 0;}
+.lab-box .lab-title{font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:.9rem;letter-spacing:.08em;margin-bottom:.6rem;}
+.boxes{display:flex;gap:.45rem;flex-wrap:wrap;align-items:flex-end;margin:.6rem 0;}
+.cell{position:relative;text-align:center;}
+.cell .pi{font-family:var(--mono);font-size:.78rem;color:var(--teal);display:block;}
+.cell .val{font-family:var(--mono);font-weight:700;font-size:1rem;min-width:48px;padding:.5rem .45rem;display:block;background:var(--panel2);border:2px solid var(--line);border-radius:10px;color:var(--text);transition:all .15s;}
+.cell.hl .val{background:rgba(45,212,191,.18);border-color:var(--teal);color:#c7fff4;}
+.cell.skip .val{background:rgba(251,191,36,.14);border-color:var(--orange);color:#ffe9b3;text-decoration:line-through;}
+.cell.stop .val{background:rgba(248,113,113,.16);border-color:var(--bad);color:#ffd9d9;}
+.cell.dim .val{opacity:.35;}
+.ctrl{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.55rem 0;}
+.ctrl label{font-size:.92rem;color:var(--sub);font-weight:700;}
+.ctrl input[type=text],.ctrl input[type=number]{font-family:var(--mono);font-size:.95rem;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.42rem .6rem;width:96px;}
+.ctrl input:focus-visible{outline:2px solid var(--orange);}
+.ctrl input.wide{width:190px;}
+button.act{font-family:var(--mono);font-size:.9rem;font-weight:700;color:#06251f;background:var(--teal);border:1px solid var(--teal);border-radius:8px;padding:.45rem .8rem;cursor:pointer;transition:all .12s;}
+button.act:hover{filter:brightness(1.12);}
+button.act.alt{background:transparent;color:var(--teal);}
+button.act.warn2{background:transparent;color:var(--orange);border-color:var(--orange);}
+button.act.on{background:var(--cyan);border-color:var(--cyan);color:#06251f;}
+button.act:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+.result{font-family:var(--mono);font-size:.95rem;background:#081426;border:1px solid var(--line);border-radius:8px;padding:.6rem .85rem;margin-top:.55rem;color:#d7fef7;min-height:2.3rem;white-space:pre-wrap;}
+.state{font-family:var(--mono);font-size:.92rem;color:var(--orange);font-weight:700;margin:.4rem 0;}
+.state .tv{color:var(--good);}
+.state .fv{color:var(--bad);}
+
+.grid3{display:grid;grid-template-columns:repeat(3,64px);gap:.5rem;margin:.6rem 0;}
+.grid3 .g{font-family:var(--mono);font-weight:700;font-size:.95rem;text-align:center;padding:.85rem 0;background:var(--panel2);border:2px solid var(--line);border-radius:10px;color:var(--sub);transition:all .15s;}
+.grid3 .g.done{background:rgba(45,212,191,.14);border-color:var(--teal);color:#c7fff4;}
+.grid3 .g.now{background:rgba(56,189,248,.22);border-color:var(--cyan);color:#dff4ff;transform:scale(1.06);}
+
+table.sum{width:100%;border-collapse:collapse;margin:.6rem 0;font-size:.97rem;}
+table.sum th,table.sum td{border:1px solid var(--line);padding:.55rem .8rem;text-align:left;}
+table.sum th{background:var(--panel2);color:var(--cyan);font-family:var(--mono);}
+table.sum td:first-child{font-family:var(--mono);color:var(--teal);font-weight:700;}
+
+.scorebar{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.8rem 1.1rem;margin-bottom:1.2rem;}
+.scorebar .sc{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--teal);}
+.scorebar button.reset{margin-left:auto;font-weight:700;font-size:.9rem;color:var(--sub);background:transparent;border:1px solid var(--line);border-radius:8px;padding:.35rem .85rem;cursor:pointer;font-family:var(--sans);}
+.scorebar button.reset:hover{color:var(--text);border-color:var(--teal);}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.3rem;margin-bottom:1.1rem;}
+.qcard .qhead{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.55rem;flex-wrap:wrap;}
+.qcard .qno{font-family:var(--mono);font-weight:700;color:var(--orange);white-space:nowrap;}
+.qcard .qtext{font-weight:700;font-size:1.03rem;flex:1;min-width:220px;}
+.qcard pre.code{margin:.4rem 0 .6rem;}
+.choices{display:grid;gap:.55rem;margin-top:.5rem;}
+.choices button{text-align:left;font-family:var(--mono);font-size:.97rem;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:.62rem .95rem;cursor:pointer;transition:all .12s;line-height:1.55;}
+.choices button:hover:not(:disabled){border-color:var(--cyan);}
+.choices button:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+.choices button:disabled{cursor:default;opacity:.92;}
+.choices button.correct{background:rgba(52,211,153,.14);border-color:var(--good);color:#c9f7e4;font-weight:700;}
+.choices button.wrong{background:rgba(248,113,113,.12);border-color:var(--bad);color:#ffd9d9;}
+.sol{display:none;margin-top:.8rem;background:#0b1e33;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:.7rem 1rem;font-size:.96rem;color:#d5e8fb;white-space:pre-wrap;}
+.sol.show{display:block;animation:fade .2s ease;}
+.sol .tag{font-family:var(--mono);font-weight:700;color:var(--cyan);margin-right:.4rem;}
+
+footer{text-align:center;color:var(--sub);font-family:var(--mono);font-size:.85rem;padding:2rem 1rem;border-top:1px solid var(--line);}
+
+@media (max-width:560px){
+  html{font-size:16.5px;}
+  .hero h1{font-size:1.45rem;}
+  nav.tabs button{font-size:.86rem;padding:.45rem .65rem;}
+  .grid3{grid-template-columns:repeat(3,56px);}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="lab">SEYEONG CODING LAB · PYTHON SERIES</div>
+  <h1>04강 반복문(Loop) <span class="fx">인터랙티브 강의</span></h1>
+  <div class="desc">한 단계씩 실행하며 배우는 for · while · break · continue · 중첩 반복문</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-p="0" class="on">1. for &amp; range</button>
+  <button data-p="1">2. while 문</button>
+  <button data-p="2">3. break·continue</button>
+  <button data-p="3">4. 중첩·별찍기·구구단</button>
+  <button data-p="4">5. 자주 쓰는 패턴</button>
+  <button data-p="5">6. 확인 퀴즈</button>
+</nav>
+
+<main>
+
+<!-- ============ 0. for & range ============ -->
+<section class="page on" id="page0">
+  <div class="page-title"><span class="chip">FOR</span>반복문 개념 · for 문 · range()</div>
+  <div class="page-sub">반복문은 같은 코드를 여러 번 반복해서 실행할 때 사용하는 문법입니다. for는 정해진 횟수, while은 조건이 참일 때 반복합니다.</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>for 문 기본 구조</h3>
+    <pre class="code">for 변수 in range(반복횟수):
+    실행할 코드
+
+for i in range(5):
+    print(i)      <span class="cm"># 0 1 2 3 4  ← 총 5번 반복!</span></pre>
+    <p class="note">range(5)는 0부터 4까지 만듭니다. 5는 포함되지 않는다는 것이 핵심!</p>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>range() 시뮬레이터 — 세 가지 형태를 직접 실험!</h3>
+    <pre class="code">range(n)              <span class="cm"># 0부터 n-1까지</span>
+range(start, end)     <span class="cm"># start부터 end-1까지</span>
+range(start, end, step) <span class="cm"># step씩 건너뛰며</span></pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · range(start, end, step)</div>
+      <div class="ctrl">
+        <label>start</label><input type="text" id="rgA" value="" placeholder="생략=0">
+        <label>end</label><input type="text" id="rgB" value="5">
+        <label>step</label><input type="text" id="rgC" value="" placeholder="생략=1">
+        <button class="act" id="rgBtn">생성 실행</button>
+      </div>
+      <div class="ctrl">
+        <button class="act alt" data-rg=",5,">range(5)</button>
+        <button class="act alt" data-rg="1,6,">range(1, 6)</button>
+        <button class="act alt" data-rg="0,10,2">range(0, 10, 2)</button>
+        <button class="act alt" data-rg="10,0,-1">range(10, 0, -1)</button>
+      </div>
+      <div class="boxes" id="rgBoxes"></div>
+      <div class="result" id="rgOut"></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">03</span>for 문 기초 예제 — 1~10 합 구하기</h3>
+    <pre class="code">sum = 0
+for i in range(1, 11):
+    sum += i
+print(sum)   <span class="cm"># 55</span></pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 합 누적 과정 한 단계씩 보기 (1~10)</div>
+      <div class="ctrl">
+        <button class="act" id="sumStep">다음 단계 ▶</button>
+        <button class="act alt" id="sumAll">끝까지 실행 ⏩</button>
+        <button class="act warn2" id="sumReset">처음부터</button>
+      </div>
+      <div class="state" id="sumState">i = ?, sum = 0</div>
+      <div class="boxes" id="sumBoxes"></div>
+      <div class="result" id="sumOut">「다음 단계」를 눌러 sum이 커지는 과정을 관찰하세요.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1. while ============ -->
+<section class="page" id="page1">
+  <div class="page-title"><span class="chip">WHILE</span>while 문 — 조건이 참인 동안 반복</div>
+  <div class="page-sub">while은 매 바퀴마다 조건을 검사합니다. 조건을 거짓으로 만드는 코드(i += 1)를 잊으면 무한 반복!</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>while 문 기본 구조</h3>
+    <pre class="code">while 조건:
+    실행할 코드
+
+i = 1
+while i <= 5:
+    print(i)
+    i += 1       <span class="cm"># 1 2 3 4 5</span></pre>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>while 스텝 실행기 — 조건 검사를 눈으로!</h3>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · i = 1 / while i &lt;= 5</div>
+      <div class="ctrl">
+        <button class="act" id="whStep">조건 검사 + 한 바퀴 ▶</button>
+        <button class="act warn2" id="whReset">처음부터</button>
+      </div>
+      <div class="state" id="whState">i = 1</div>
+      <div class="result" id="whOut">버튼을 누르면 「조건 검사 → 실행 → i 증가」가 한 단계씩 진행됩니다.</div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">03</span>while 예제 — 1~10 합</h3>
+    <pre class="code">i = 1
+s = 0
+while i <= 10:
+    s += i
+    i += 1
+print(s)     <span class="cm"># 55 — for와 결과가 같다!</span></pre>
+    <p class="note">같은 일을 for로도 while로도 할 수 있습니다. 횟수가 정해져 있으면 for, 조건 중심이면 while이 자연스럽습니다.</p>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">04</span>반복문 + 조건문 — 짝수만 출력</h3>
+    <pre class="code">for i in range(1, 11):
+    if i % 2 == 0:
+        print(i)    <span class="cm"># 2 4 6 8 10</span></pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 조건 필터 관찰기 — 배수를 바꿔보세요</div>
+      <div class="ctrl">
+        <label>i %</label>
+        <input type="number" id="filtK" value="2" min="2" max="9">
+        <label>== 0 인 것만 출력 (범위 1~10)</label>
+        <button class="act" id="filtBtn">실행</button>
+      </div>
+      <div class="boxes" id="filtBoxes"></div>
+      <div class="result" id="filtOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. break / continue ============ -->
+<section class="page" id="page2">
+  <div class="page-title"><span class="chip">CONTROL</span>break · continue — 반복 흐름 제어</div>
+  <div class="page-sub">break는 반복문을 강제로 종료, continue는 현재 바퀴만 건너뛰고 다음 바퀴로 이동합니다.</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>두 문법 비교</h3>
+    <pre class="code"><span class="cm"># break: i가 5가 되는 순간 반복 전체 종료</span>
+for i in range(10):
+    if i == 5:
+        break
+    print(i)        <span class="cm"># 0 1 2 3 4</span>
+
+<span class="cm"># continue: i가 3일 때만 건너뛰고 계속</span>
+for i in range(1, 6):
+    if i == 3:
+        continue
+    print(i)        <span class="cm"># 1 2 4 5</span></pre>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>흐름 시각화기 — 한 바퀴씩 실행하며 색으로 확인</h3>
+    <p class="note"><b style="color:var(--teal)">초록 테두리</b> = print 실행, <b style="color:var(--orange)">주황 취소선</b> = continue로 건너뜀, <b style="color:var(--bad)">빨강</b> = break로 종료, 흐림 = 아예 실행되지 않은 바퀴.</p>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 모드를 선택하고 단계 실행</div>
+      <div class="ctrl">
+        <button class="act bcMode on" data-m="break" id="bcB">break 데모: range(10), i==5에 break</button>
+        <button class="act bcMode" data-m="cont">continue 데모: range(1,6), i==3에 continue</button>
+      </div>
+      <div class="ctrl">
+        <button class="act" id="bcStep">다음 바퀴 ▶</button>
+        <button class="act alt" id="bcAll">끝까지 실행 ⏩</button>
+        <button class="act warn2" id="bcReset">처음부터</button>
+      </div>
+      <div class="boxes" id="bcBoxes"></div>
+      <div class="result" id="bcOut">「다음 바퀴」를 눌러 각 바퀴의 운명을 확인하세요.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. 중첩·별찍기·구구단 ============ -->
+<section class="page" id="page3">
+  <div class="page-title"><span class="chip">NESTED</span>중첩 반복문 · 별찍기 · 구구단</div>
+  <div class="page-sub">반복문 안에 반복문! 바깥 i가 한 번 돌 때 안쪽 j는 끝까지 돕니다.</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>중첩 반복문 격자 실행기</h3>
+    <pre class="code">for i in range(3):
+    for j in range(3):
+        print(i, j)   <span class="cm"># 총 3 × 3 = 9번 실행</span></pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · (i, j)가 도는 순서를 격자로!</div>
+      <div class="ctrl">
+        <button class="act" id="ntStep">다음 단계 ▶</button>
+        <button class="act alt" id="ntAll">끝까지 실행 ⏩</button>
+        <button class="act warn2" id="ntReset">처음부터</button>
+      </div>
+      <div class="grid3" id="ntGrid"></div>
+      <div class="result" id="ntOut">i가 0인 동안 j가 0→1→2로 먼저 다 돕니다.</div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>별찍기 실습기</h3>
+    <pre class="code">for i in range(5):        <span class="cm"># 일자 별찍기</span>
+    print("*")
+
+for i in range(1, 6):     <span class="cm"># 삼각형 별찍기</span>
+    print("*" * i)</pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 줄 수와 모양을 바꿔보세요</div>
+      <div class="ctrl">
+        <label>줄 수 N =</label>
+        <input type="number" id="stN" value="5" min="1" max="9">
+        <button class="act stMode on" data-m="flat">일자 print("*")</button>
+        <button class="act stMode" data-m="tri">삼각형 print("*"*i)</button>
+        <button class="act alt" id="stRun">그리기 실행</button>
+      </div>
+      <div class="result" id="stOut"></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">03</span>구구단 생성기</h3>
+    <pre class="code">for i in range(1, 10):
+    print("2 x", i, "=", 2 * i)</pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 원하는 단을 출력해 보세요</div>
+      <div class="ctrl">
+        <label>단 =</label>
+        <input type="number" id="ggN" value="2" min="2" max="9">
+        <button class="act" id="ggBtn">구구단 실행</button>
+      </div>
+      <div class="result" id="ggOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. 패턴 ============ -->
+<section class="page" id="page4">
+  <div class="page-title"><span class="chip">PATTERN</span>자주 쓰는 반복문 패턴 3가지</div>
+  <div class="page-sub">합 구하기 · 개수 세기 · 최댓값 찾기 — KOI/정올 문제의 뼈대가 되는 패턴입니다. 입력을 바꿔 실행해 보세요.</div>
+  <div id="patArea"></div>
+
+  <div class="tcard">
+    <h3><span class="num">04</span>리스트 반복 &amp; enumerate</h3>
+    <pre class="code">arr = [10, 20, 30, 40]
+for x in arr:
+    print(x)          <span class="cm"># 10 20 30 40</span>
+
+arr = ["a", "b", "c"]
+for i, v in enumerate(arr):
+    print(i, v)       <span class="cm"># 0 a / 1 b / 2 c</span></pre>
+    <p class="note">리스트를 다루는 자세한 내용은 08강 「리스트」에서 이어집니다.</p>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">05</span>반복문 핵심 정리</h3>
+    <table class="sum">
+      <tr><th>문법</th><th>설명</th></tr>
+      <tr><td>for</td><td>정해진 횟수 반복</td></tr>
+      <tr><td>while</td><td>조건이 참인 동안 반복</td></tr>
+      <tr><td>break</td><td>반복문 강제 종료</td></tr>
+      <tr><td>continue</td><td>현재 바퀴 건너뛰고 다음 반복으로</td></tr>
+      <tr><td>range</td><td>반복에 쓸 숫자 생성 (end는 미포함!)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 5. 퀴즈 ============ -->
+<section class="page" id="page5">
+  <div class="page-title"><span class="chip">QUIZ</span>확인 퀴즈 10제</div>
+  <div class="page-sub">출력 결과를 예측해 보세요. 클릭 즉시 채점과 해설이 표시됩니다.</div>
+  <div id="quizArea"></div>
+</section>
+
+</main>
+
+<footer>세영코딩연구소 · Python 시리즈 04강 — Loop</footer>
+
+<script>
+"use strict";
+
+function el(tag, cls, text){
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function pyRange(s, e, st){
+  var out = [];
+  if (st === 0) return null;
+  if (st > 0){ for (var i = s; i < e && out.length < 30; i += st) out.push(i); }
+  else { for (var j = s; j > e && out.length < 30; j += st) out.push(j); }
+  return out;
+}
+function renderVals(container, arr, opts){
+  while (container.firstChild) container.removeChild(container.firstChild);
+  opts = opts || {};
+  if (!arr.length){ container.appendChild(el("span", "state", "(생성된 값 없음)")); return []; }
+  var cells = [];
+  arr.forEach(function(v, i){
+    var c = el("div", "cell");
+    if (opts.showIdx) c.appendChild(el("span", "pi", String(i)));
+    c.appendChild(el("span", "val", String(v)));
+    container.appendChild(c);
+    cells.push(c);
+  });
+  return cells;
+}
+
+/* ============ 0. range 시뮬레이터 ============ */
+(function(){
+  var out = document.getElementById("rgOut");
+  var box = document.getElementById("rgBoxes");
+  function run(){
+    var aR = document.getElementById("rgA").value.trim();
+    var bR = document.getElementById("rgB").value.trim();
+    var cR = document.getElementById("rgC").value.trim();
+    var b = parseInt(bR, 10);
+    if (bR === "" || isNaN(b)){ out.textContent = "end 값은 반드시 입력해야 합니다."; return; }
+    var a = aR === "" ? 0 : parseInt(aR, 10);
+    var c = cR === "" ? 1 : parseInt(cR, 10);
+    if (isNaN(a) || isNaN(c)){ out.textContent = "정수만 입력해 주세요."; return; }
+    if (c === 0){
+      renderVals(box, []);
+      out.textContent = "ValueError: range() arg 3 must not be zero  (step은 0이 될 수 없습니다!)";
+      return;
+    }
+    var vals = pyRange(a, b, c);
+    renderVals(box, vals);
+    var expr = "range(" + (aR === "" && cR === "" ? bR : (aR === "" ? "0" : aR) + ", " + bR + (cR === "" ? "" : ", " + cR)) + ")";
+    out.textContent = expr + "  →  " + vals.join(" ") + (vals.length ? "" : "(없음)") + "\n생성된 값: " + vals.length + "개 → for 문이 " + vals.length + "번 반복됩니다." + (vals.length >= 30 ? " (30개까지만 표시)" : "");
+  }
+  document.getElementById("rgBtn").addEventListener("click", run);
+  document.querySelectorAll("button[data-rg]").forEach(function(bn){
+    bn.addEventListener("click", function(){
+      var p = bn.dataset.rg.split(",");
+      document.getElementById("rgA").value = p[0];
+      document.getElementById("rgB").value = p[1];
+      document.getElementById("rgC").value = p[2];
+      run();
+    });
+  });
+  run();
+})();
+
+/* ============ 0. 합 누적 스테퍼 ============ */
+(function(){
+  var i = 0, sum = 0, lines = [];
+  var st = document.getElementById("sumState");
+  var out = document.getElementById("sumOut");
+  var box = document.getElementById("sumBoxes");
+  function paint(){
+    var vals = [];
+    for (var k = 1; k <= 10; k++) vals.push(k);
+    var cells = renderVals(box, vals);
+    cells.forEach(function(c, idx){
+      if (idx + 1 < i) c.classList.add("hl");
+      if (idx + 1 === i) c.classList.add("hl");
+      if (idx + 1 > i) c.classList.add("dim");
+    });
+    st.textContent = i === 0 ? "i = ?, sum = 0" : "i = " + i + ", sum = " + sum;
+  }
+  function step(){
+    if (i >= 10){
+      out.textContent = lines.join("\n") + "\nprint(sum) → 55  (반복 종료!)";
+      return false;
+    }
+    i++; sum += i;
+    lines.push("i = " + (i < 10 ? " " : "") + i + " : sum += " + i + "  →  sum = " + sum);
+    paint();
+    out.textContent = lines.join("\n");
+    return true;
+  }
+  document.getElementById("sumStep").addEventListener("click", step);
+  document.getElementById("sumAll").addEventListener("click", function(){
+    while (step()){}
+    out.textContent = lines.join("\n") + "\nprint(sum) → " + sum;
+  });
+  document.getElementById("sumReset").addEventListener("click", function(){
+    i = 0; sum = 0; lines = []; paint();
+    out.textContent = "처음으로 돌아왔습니다.";
+  });
+  paint();
+})();
+
+/* ============ 1. while 스텝 ============ */
+(function(){
+  var i = 1, done = false, lines = [];
+  var st = document.getElementById("whState");
+  var out = document.getElementById("whOut");
+  function paint(){ st.textContent = "i = " + i + (done ? "  (반복 종료됨)" : ""); }
+  document.getElementById("whStep").addEventListener("click", function(){
+    if (done){ out.textContent = lines.join("\n"); return; }
+    var cond = i <= 5;
+    if (cond){
+      lines.push("조건 검사: i <= 5 → " + i + " <= 5 → True   | print(" + i + ") 실행 | i += 1 → i = " + (i + 1));
+      i++;
+    } else {
+      lines.push("조건 검사: i <= 5 → " + i + " <= 5 → False  → while 종료!");
+      done = true;
+    }
+    paint();
+    out.textContent = lines.join("\n") + (done ? "\n출력된 값: 1 2 3 4 5 (총 5번)" : "");
+  });
+  document.getElementById("whReset").addEventListener("click", function(){
+    i = 1; done = false; lines = []; paint();
+    out.textContent = "처음으로 돌아왔습니다. 조건 검사부터 다시!";
+  });
+  paint();
+})();
+
+/* ============ 1. 조건 필터 ============ */
+(function(){
+  function run(){
+    var k = parseInt(document.getElementById("filtK").value, 10);
+    if (isNaN(k) || k < 2){ k = 2; document.getElementById("filtK").value = 2; }
+    var vals = [], hlIdx = [], outs = [];
+    for (var i = 1; i <= 10; i++){
+      vals.push(i);
+      if (i % k === 0){ hlIdx.push(i - 1); outs.push(i); }
+    }
+    var cells = renderVals(document.getElementById("filtBoxes"), vals);
+    cells.forEach(function(c, idx){
+      if (hlIdx.indexOf(idx) !== -1) c.classList.add("hl"); else c.classList.add("dim");
+    });
+    document.getElementById("filtOut").textContent =
+      "for i in range(1, 11):\n    if i % " + k + " == 0:\n        print(i)\n출력 → " + (outs.length ? outs.join(" ") : "(없음)") + "   (조건을 만족한 " + outs.length + "개만!)";
+  }
+  document.getElementById("filtBtn").addEventListener("click", run);
+  run();
+})();
+
+/* ============ 2. break/continue ============ */
+(function(){
+  var mode = "break";
+  var pos = -1, stopped = false, outs = [];
+  var box = document.getElementById("bcBoxes");
+  var out = document.getElementById("bcOut");
+  function conf(){
+    return mode === "break"
+      ? {vals: [0,1,2,3,4,5,6,7,8,9], target: 5, code: "for i in range(10):\n    if i == 5:\n        break\n    print(i)"}
+      : {vals: [1,2,3,4,5], target: 3, code: "for i in range(1, 6):\n    if i == 3:\n        continue\n    print(i)"};
+  }
+  var cells = [];
+  function paint(){
+    var c = conf();
+    cells = renderVals(box, c.vals, {showIdx: false});
+    c.vals.forEach(function(v, idx){
+      var cell = cells[idx];
+      if (idx > pos || (stopped && idx > c.vals.indexOf(c.target))){
+        if (idx > pos) cell.classList.add("dim");
+      }
+      if (idx <= pos){
+        if (mode === "break"){
+          if (v < c.target) cell.classList.add("hl");
+          if (v === c.target) cell.classList.add("stop");
+        } else {
+          if (v === c.target) cell.classList.add("skip");
+          else cell.classList.add("hl");
+        }
+      }
+    });
+  }
+  function step(){
+    var c = conf();
+    if (stopped || pos >= c.vals.length - 1){
+      out.textContent = c.code + "\n\n출력 → " + outs.join(" ") + "\n(반복이 모두 끝났습니다. 「처음부터」로 다시!)";
+      return false;
+    }
+    pos++;
+    var v = c.vals[pos];
+    var line;
+    if (mode === "break"){
+      if (v === c.target){ stopped = true; line = "i = " + v + " : if i == 5 → True → break!  반복 전체 종료"; }
+      else { outs.push(v); line = "i = " + v + " : 조건 False → print(" + v + ")"; }
+    } else {
+      if (v === c.target){ line = "i = " + v + " : if i == 3 → True → continue!  이번 바퀴만 건너뜀"; }
+      else { outs.push(v); line = "i = " + v + " : 조건 False → print(" + v + ")"; }
+    }
+    paint();
+    out.textContent = line + "\n지금까지 출력 → " + (outs.length ? outs.join(" ") : "(없음)");
+    if (stopped) out.textContent += "\n남은 바퀴(6~9)는 실행되지 않습니다!";
+    return !stopped;
+  }
+  function reset(){
+    pos = -1; stopped = false; outs = []; paint();
+    out.textContent = "「다음 바퀴」를 눌러 각 바퀴의 운명을 확인하세요.";
+  }
+  document.querySelectorAll(".bcMode").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll(".bcMode").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+      mode = b.dataset.m === "break" ? "break" : "cont";
+      reset();
+    });
+  });
+  document.getElementById("bcStep").addEventListener("click", step);
+  document.getElementById("bcAll").addEventListener("click", function(){
+    var guard = 0;
+    while (step() && guard++ < 20){}
+    var c = conf();
+    out.textContent = c.code + "\n\n최종 출력 → " + outs.join(" ");
+    if (mode === "break") out.textContent += "\nbreak: 5부터는 아예 실행 안 됨 (0 1 2 3 4)";
+    else out.textContent += "\ncontinue: 3만 빠지고 계속 (1 2 4 5)";
+  });
+  document.getElementById("bcReset").addEventListener("click", reset);
+  reset();
+})();
+
+/* ============ 3. 중첩 격자 ============ */
+(function(){
+  var step = -1, lines = [];
+  var grid = document.getElementById("ntGrid");
+  var out = document.getElementById("ntOut");
+  var cells = [];
+  (function build(){
+    for (var i = 0; i < 3; i++){
+      for (var j = 0; j < 3; j++){
+        var g = el("div", "g", i + "," + j);
+        grid.appendChild(g);
+        cells.push(g);
+      }
+    }
+  })();
+  function paint(){
+    cells.forEach(function(g, k){
+      g.classList.remove("done", "now");
+      if (k < step) g.classList.add("done");
+      if (k === step) g.classList.add("now");
+    });
+  }
+  function doStep(){
+    if (step >= 8){
+      out.textContent = lines.join("\n") + "\n(총 9번 실행 완료 — 3 × 3 = 9!)";
+      return false;
+    }
+    step++;
+    var i = Math.floor(step / 3), j = step % 3;
+    lines.push("print(" + i + ", " + j + ")" + (j === 0 && step > 0 ? "   ← 바깥 i가 " + i + "로 증가, 안쪽 j는 다시 0부터!" : ""));
+    paint();
+    out.textContent = lines.join("\n");
+    return true;
+  }
+  document.getElementById("ntStep").addEventListener("click", doStep);
+  document.getElementById("ntAll").addEventListener("click", function(){ while (doStep()){} });
+  document.getElementById("ntReset").addEventListener("click", function(){
+    step = -1; lines = []; paint();
+    out.textContent = "i가 0인 동안 j가 0→1→2로 먼저 다 돕니다.";
+  });
+  paint();
+})();
+
+/* ============ 3. 별찍기 ============ */
+(function(){
+  var mode = "flat";
+  function run(){
+    var n = parseInt(document.getElementById("stN").value, 10);
+    if (isNaN(n) || n < 1) n = 1;
+    if (n > 9) n = 9;
+    document.getElementById("stN").value = n;
+    var lines = [], code;
+    if (mode === "flat"){
+      code = "for i in range(" + n + "):\n    print(\"*\")";
+      for (var i = 0; i < n; i++) lines.push("*");
+    } else {
+      code = "for i in range(1, " + (n + 1) + "):\n    print(\"*\" * i)";
+      for (var k = 1; k <= n; k++){
+        var s = "";
+        for (var m = 0; m < k; m++) s += "*";
+        lines.push(s);
+      }
+    }
+    document.getElementById("stOut").textContent = code + "\n\n출력:\n" + lines.join("\n");
+  }
+  document.querySelectorAll(".stMode").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll(".stMode").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+      mode = b.dataset.m;
+      run();
+    });
+  });
+  document.getElementById("stRun").addEventListener("click", run);
+  run();
+})();
+
+/* ============ 3. 구구단 ============ */
+(function(){
+  function run(){
+    var n = parseInt(document.getElementById("ggN").value, 10);
+    if (isNaN(n) || n < 2) n = 2;
+    if (n > 9) n = 9;
+    document.getElementById("ggN").value = n;
+    var lines = [];
+    for (var i = 1; i <= 9; i++) lines.push(n + " x " + i + " = " + (n * i));
+    document.getElementById("ggOut").textContent =
+      "for i in range(1, 10):\n    print(\"" + n + " x\", i, \"=\", " + n + " * i)\n\n출력:\n" + lines.join("\n");
+  }
+  document.getElementById("ggBtn").addEventListener("click", run);
+  run();
+})();
+
+/* ============ 4. 패턴 러너 ============ */
+(function(){
+  function parseInts(line){
+    var parts = line.trim().split(/\s+/);
+    if (parts.length === 1 && parts[0] === "") return null;
+    var out = [];
+    for (var i = 0; i < parts.length; i++){
+      var n = parseInt(parts[i], 10);
+      if (isNaN(n)) return null;
+      out.push(n);
+    }
+    return out;
+  }
+  var PATS = [
+    {
+      title: "패턴 1 · 합 구하기 (1부터 n까지)",
+      code: "s = 0\nfor i in range(1, n + 1):\n    s += i\nprint(s)",
+      inputs: [{label: "n", val: "10"}],
+      run: function(v){
+        var n = parseInt(v[0].trim(), 10);
+        if (isNaN(n) || n < 1) return null;
+        if (n > 100000) return "n이 너무 큽니다 (100000 이하).";
+        var s = 0;
+        for (var i = 1; i <= n; i++) s += i;
+        return String(s);
+      }
+    },
+    {
+      title: "패턴 2 · 개수 세기 (1~n 중 짝수)",
+      code: "cnt = 0\nfor i in range(1, n + 1):\n    if i % 2 == 0:\n        cnt += 1\nprint(cnt)",
+      inputs: [{label: "n", val: "10"}],
+      run: function(v){
+        var n = parseInt(v[0].trim(), 10);
+        if (isNaN(n) || n < 1) return null;
+        if (n > 100000) return "n이 너무 큽니다 (100000 이하).";
+        var c = 0;
+        for (var i = 1; i <= n; i++) if (i % 2 === 0) c++;
+        return String(c);
+      }
+    },
+    {
+      title: "패턴 3 · 최댓값 찾기",
+      code: "mx = arr[0]\nfor x in arr:\n    if x > mx:\n        mx = x\nprint(mx)",
+      inputs: [{label: "arr (공백 구분)", val: "3 9 2 7 5"}],
+      run: function(v){
+        var arr = parseInts(v[0]);
+        if (!arr) return null;
+        var mx = arr[0];
+        arr.forEach(function(x){ if (x > mx) mx = x; });
+        return String(mx);
+      }
+    }
+  ];
+  var area = document.getElementById("patArea");
+  PATS.forEach(function(px, n){
+    var card = el("div", "tcard");
+    var h = el("h3");
+    h.appendChild(el("span", "num", "0" + (n + 1)));
+    h.appendChild(document.createTextNode(px.title));
+    card.appendChild(h);
+    card.appendChild(el("pre", "code", px.code));
+
+    var lab = el("div", "lab-box");
+    lab.appendChild(el("div", "lab-title", "INTERACTIVE · 값을 바꿔 실행해 보세요"));
+    var fields = [];
+    px.inputs.forEach(function(inp){
+      var row = el("div", "ctrl");
+      row.appendChild(el("label", "", inp.label + " ="));
+      var f = el("input", "wide");
+      f.type = "text"; f.value = inp.val;
+      row.appendChild(f);
+      fields.push(f);
+      lab.appendChild(row);
+    });
+    var row2 = el("div", "ctrl");
+    var btn = el("button", "act", "실행 ▶");
+    btn.type = "button";
+    row2.appendChild(btn);
+    lab.appendChild(row2);
+    var out = el("div", "result", "「실행」을 누르면 print 결과가 표시됩니다.");
+    lab.appendChild(out);
+    card.appendChild(lab);
+    area.appendChild(card);
+
+    btn.addEventListener("click", function(){
+      var r = px.run(fields.map(function(f){ return f.value; }));
+      out.textContent = r === null ? "ValueError: 정수를 입력해 주세요." : "출력:\n" + r;
+    });
+  });
+})();
+
+/* ============ 5. 퀴즈 ============ */
+var QUIZ = [
+  {q: "출력되는 값을 순서대로 나열하면?", code: "for i in range(5):\n    print(i)",
+   c: ["0 1 2 3 4", "1 2 3 4 5", "0 1 2 3 4 5", "5 4 3 2 1"], a: 0,
+   s: "range(5)는 0부터 4까지 5개의 수를 만듭니다. 5는 포함되지 않습니다!"},
+  {q: "range(1, 6)이 만드는 수는?", code: "for i in range(1, 6):\n    print(i)",
+   c: ["1 2 3 4 5", "1 2 3 4 5 6", "0 1 2 3 4 5", "2 3 4 5 6"], a: 0,
+   s: "range(start, end)는 start부터 end 직전까지입니다. 1부터 5까지, end인 6은 미포함."},
+  {q: "출력되는 값은?", code: "for i in range(0, 10, 2):\n    print(i)",
+   c: ["0 2 4 6 8", "0 2 4 6 8 10", "2 4 6 8 10", "0 1 2 ... 9"], a: 0,
+   s: "step이 2이므로 0부터 2씩 커집니다. 10은 end라서 미포함 → 0 2 4 6 8."},
+  {q: "출력 결과는?", code: "sum = 0\nfor i in range(1, 11):\n    sum += i\nprint(sum)",
+   c: ["55", "45", "10", "66"], a: 0,
+   s: "1부터 10까지의 합 = 10 × 11 ÷ 2 = 55. range(1, 11)이 1~10을 만든다는 점이 핵심입니다."},
+  {q: "print(i)가 실행되는 총 횟수는?", code: "i = 1\nwhile i <= 5:\n    print(i)\n    i += 1",
+   c: ["5번", "4번", "6번", "무한히"], a: 0,
+   s: "i = 1, 2, 3, 4, 5일 때 조건이 참이므로 5번 출력됩니다. i가 6이 되면 조건이 거짓이 되어 종료."},
+  {q: "출력되는 값을 순서대로 나열하면?", code: "for i in range(10):\n    if i == 5:\n        break\n    print(i)",
+   c: ["0 1 2 3 4", "0 1 2 3 4 5", "6 7 8 9", "0 1 2 3 4 6 7 8 9"], a: 0,
+   s: "i가 5가 되는 순간 break로 반복 전체가 종료됩니다. 5는 print 전에 종료되므로 0~4만 출력."},
+  {q: "출력되는 값을 순서대로 나열하면?", code: "for i in range(1, 6):\n    if i == 3:\n        continue\n    print(i)",
+   c: ["1 2 4 5", "1 2 3 4 5", "1 2", "4 5"], a: 0,
+   s: "continue는 그 바퀴만 건너뜁니다. i = 3일 때만 print를 건너뛰고 반복은 계속 → 1 2 4 5."},
+  {q: "print(i, j)가 실행되는 총 횟수는?", code: "for i in range(3):\n    for j in range(3):\n        print(i, j)",
+   c: ["9번", "6번", "3번", "27번"], a: 0,
+   s: "바깥 3번 × 안쪽 3번 = 9번. 중첩 반복의 실행 횟수는 곱으로 계산합니다."},
+  {q: "3번째 줄에 출력되는 것은?", code: "for i in range(1, 6):\n    print(\"*\" * i)",
+   c: ["***", "**", "****", "*"], a: 0,
+   s: "i = 1, 2, 3, ... 순서로 별이 i개씩 출력됩니다. 3번째 줄은 i = 3일 때인 ***."},
+  {q: "출력되는 숫자의 개수는?", code: "for i in range(1, 11):\n    if i % 2 == 0:\n        print(i)",
+   c: ["5개", "10개", "4개", "6개"], a: 0,
+   s: "1~10 중 짝수는 2, 4, 6, 8, 10으로 5개입니다. 반복문 + 조건문 = 필터링 패턴!"}
+];
+
+(function(){
+  var solved = {};
+  var area = document.getElementById("quizArea");
+  var bar = el("div", "scorebar");
+  var sc = el("span", "sc", "점수 0 / " + QUIZ.length);
+  bar.appendChild(sc);
+  var rst = el("button", "reset", "다시 풀기");
+  rst.type = "button";
+  bar.appendChild(rst);
+  area.appendChild(bar);
+  var listWrap = el("div");
+  area.appendChild(listWrap);
+
+  function shuffle4(){
+    var idx = [0, 1, 2, 3];
+    for (var i = 3; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+    }
+    return idx;
+  }
+  function updateScore(){
+    var c = 0;
+    for (var k in solved) if (solved[k] === true) c++;
+    sc.textContent = "점수 " + c + " / " + QUIZ.length;
+  }
+  function build(){
+    while (listWrap.firstChild) listWrap.removeChild(listWrap.firstChild);
+    QUIZ.forEach(function(q, gi){
+      var card = el("div", "qcard");
+      var head = el("div", "qhead");
+      head.appendChild(el("span", "qno", "Q" + (gi + 1 < 10 ? "0" + (gi + 1) : gi + 1)));
+      head.appendChild(el("span", "qtext", q.q));
+      card.appendChild(head);
+      card.appendChild(el("pre", "code", q.code));
+
+      var box = el("div", "choices");
+      var order = shuffle4();
+      var btns = [];
+      var sol = el("div", "sol");
+      sol.appendChild(el("span", "tag", "해설"));
+      sol.appendChild(document.createTextNode(q.s));
+
+      order.forEach(function(orig, pos){
+        var b = el("button", "", String.fromCharCode(9312 + pos) + " " + q.c[orig]);
+        b.type = "button";
+        b.addEventListener("click", function(){
+          if (solved[gi] !== undefined) return;
+          var ok = (orig === q.a);
+          solved[gi] = ok;
+          btns.forEach(function(bb, k){
+            bb.disabled = true;
+            if (order[k] === q.a) bb.classList.add("correct");
+          });
+          if (!ok) b.classList.add("wrong");
+          sol.classList.add("show");
+          updateScore();
+        });
+        btns.push(b);
+        box.appendChild(b);
+      });
+      card.appendChild(box);
+      card.appendChild(sol);
+      listWrap.appendChild(card);
+    });
+    updateScore();
+  }
+  rst.addEventListener("click", function(){ solved = {}; build(); });
+  build();
+})();
+
+/* ============ 탭 ============ */
+document.getElementById("tabs").addEventListener("click", function(ev){
+  var b = ev.target.closest("button");
+  if (!b) return;
+  var n = Number(b.dataset.p);
+  document.querySelectorAll("section.page").forEach(function(p, i){ p.classList.toggle("on", i === n); });
+  document.querySelectorAll("nav.tabs button").forEach(function(t){ t.classList.toggle("on", Number(t.dataset.p) === n); });
+  window.scrollTo({top: 0, behavior: "auto"});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 딕셔너리 - 세영코딩연구소</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1208;
+    --bg2: #141a09;
+    --bg3: #1a2210;
+    --card: #1c2612;
+    --border: #2a3818;
+    --accent: #86efac;
+    --accent2: #fde047;
+    --accent3: #67e8f9;
+    --accent4: #fb923c;
+    --purple: #c084fc;
+    --red: #f87171;
+    --pink: #f472b6;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #3a4d28;
+    --code-bg: #070d04;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      radial-gradient(ellipse 65% 40% at 50% -8%, rgba(134,239,172,0.1) 0%, transparent 60%),
+      linear-gradient(rgba(134,239,172,0.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(134,239,172,0.022) 1px, transparent 1px);
+    background-size:100% 100%, 44px 44px, 44px 44px;
+  }
+  .container { max-width:980px; margin:0 auto; padding:0 20px 60px; position:relative; z-index:1; }
+
+  header { padding:36px 0 24px; text-align:center; border-bottom:1px solid var(--border); margin-bottom:32px; }
+  .lab-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(134,239,172,0.08); border:1px solid rgba(134,239,172,0.28); border-radius:100px; padding:6px 18px; font-size:11.5px; color:var(--accent); letter-spacing:0.1em; margin-bottom:16px; font-family:'JetBrains Mono',monospace; }
+  .lab-badge::before { content:''; width:7px; height:7px; background:var(--accent); border-radius:50%; box-shadow:0 0 10px var(--accent); animation:blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.12} }
+  header h1 { font-family:'Gmarket Sans',sans-serif; font-size:2.5rem; font-weight:700; background:linear-gradient(135deg,#fff 20%,var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  header h1 span { display:block; font-size:1rem; font-weight:300; color:var(--accent); -webkit-text-fill-color:var(--accent); letter-spacing:0.2em; margin-top:6px; }
+  .author-line { margin-top:12px; font-size:11.5px; color:var(--text3); font-family:'JetBrains Mono',monospace; color:#5a7040; }
+
+  .nav-tabs { display:flex; gap:4px; background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:6px; margin-bottom:28px; overflow-x:auto; scrollbar-width:none; }
+  .nav-tabs::-webkit-scrollbar { display:none; }
+  .tab-btn { flex:1; min-width:72px; padding:9px 7px; background:transparent; border:none; border-radius:8px; color:var(--text2); font-family:'Noto Sans KR',sans-serif; font-size:11.5px; font-weight:500; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .tab-btn.active { background:var(--card); color:var(--accent); box-shadow:inset 0 0 0 1px rgba(134,239,172,0.28); }
+  .tab-btn:hover:not(.active) { background:var(--bg3); color:var(--text); }
+
+  .section { display:none; animation:fadeUp 0.26s ease; }
+  .section.active { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(9px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-title { font-family:'Gmarket Sans',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border),transparent); }
+
+  .concept-box { background:linear-gradient(135deg,rgba(134,239,172,0.07),rgba(253,224,71,0.04)); border:1px solid rgba(134,239,172,0.2); border-radius:16px; padding:20px 24px; margin-bottom:20px; }
+  .concept-box h2 { font-size:0.93rem; color:var(--accent); margin-bottom:9px; display:flex; align-items:center; gap:8px; }
+  .concept-box p { color:var(--text2); line-height:1.85; font-size:0.88rem; }
+
+  .code-card { background:var(--card); border:1px solid var(--border); border-radius:13px; overflow:hidden; margin-bottom:13px; transition:border-color 0.2s; }
+  .code-card:hover { border-color:rgba(134,239,172,0.35); }
+  .code-header { display:flex; align-items:center; justify-content:space-between; padding:9px 16px; background:var(--bg2); border-bottom:1px solid var(--border); }
+  .code-title { font-size:0.8rem; color:var(--text); font-weight:600; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+  .tag { font-size:10px; padding:2px 7px; border-radius:100px; font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .t-dict { background:rgba(134,239,172,0.12); color:var(--accent);  border:1px solid rgba(134,239,172,0.28); }
+  .t-key  { background:rgba(253,224,71,0.1);   color:var(--accent2); border:1px solid rgba(253,224,71,0.28); }
+  .t-meth { background:rgba(103,232,249,0.1);  color:var(--accent3); border:1px solid rgba(103,232,249,0.28); }
+  .t-loop { background:rgba(251,146,60,0.1);   color:var(--accent4); border:1px solid rgba(251,146,60,0.28); }
+  .t-ex   { background:rgba(192,132,252,0.1);  color:var(--purple);  border:1px solid rgba(192,132,252,0.28); }
+  .t-warn { background:rgba(248,113,113,0.1);  color:var(--red);     border:1px solid rgba(248,113,113,0.28); }
+  .t-pat  { background:rgba(244,114,182,0.1);  color:var(--pink);    border:1px solid rgba(244,114,182,0.28); }
+
+  .dot-group { display:flex; gap:5px; }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+
+  .code-body { padding:14px 16px; }
+  pre.cblock { background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.75; color:#e2e8f0; overflow-x:auto; white-space:pre; margin-bottom:9px; }
+  .kw  { color:#86efac; } .fn  { color:#82aaff; } .str { color:#c3e88d; }
+  .num { color:#f78c6c; } .var { color:#ffcb6b; } .op  { color:#89ddff; } .cm  { color:#2a3d1a; }
+  .br  { color:#fde047; }
+
+  .oblock { background:rgba(103,232,249,0.06); border:1px solid rgba(103,232,249,0.2); border-radius:8px; padding:9px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--accent3); white-space:pre-wrap; }
+  .oblock::before { content:'▶ 출력'; display:block; font-size:10px; color:#3a5030; margin-bottom:4px; letter-spacing:0.06em; }
+
+  .warn-box { background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.22); border-radius:9px; padding:11px 15px; margin-top:9px; font-size:0.81rem; color:var(--red); line-height:1.7; }
+  .warn-box::before { content:'⚠️  주의  '; font-weight:700; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+
+  /* DICT VISUALIZER */
+  .dict-viz { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:18px; }
+  .dict-viz-label { font-size:11px; color:#5a7040; font-family:'JetBrains Mono',monospace; margin-bottom:12px; }
+  .dict-add-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .dict-add-row input { background:var(--code-bg); border:1px solid var(--border); border-radius:7px; padding:7px 11px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.81rem; width:110px; transition:border-color 0.2s; }
+  .dict-add-row input:focus { outline:none; border-color:var(--accent); }
+  .viz-btn { background:var(--accent); border:none; border-radius:7px; padding:7px 14px; color:var(--bg); font-family:'Noto Sans KR',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .viz-btn:hover { transform:translateY(-1px); box-shadow:0 3px 12px rgba(134,239,172,0.4); }
+  .viz-btn.danger { background:#ef4444; color:#fff; }
+  .dict-display { display:flex; flex-direction:column; gap:6px; min-height:40px; }
+  .dict-row { display:flex; align-items:center; gap:0; animation:popIn 0.2s ease; border-radius:8px; overflow:hidden; }
+  @keyframes popIn { from{transform:scale(0.92);opacity:0} to{transform:scale(1);opacity:1} }
+  .dict-key { background:rgba(253,224,71,0.12); border:1px solid rgba(253,224,71,0.28); color:var(--accent2); font-family:'JetBrains Mono',monospace; font-size:0.8rem; padding:7px 14px; font-weight:700; min-width:90px; text-align:center; border-radius:8px 0 0 8px; }
+  .dict-arrow { background:rgba(255,255,255,0.04); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:7px 8px; color:var(--text3); font-size:0.75rem; }
+  .dict-val { background:rgba(134,239,172,0.08); border:1px solid rgba(134,239,172,0.2); color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:0.8rem; padding:7px 14px; flex:1; border-radius:0 8px 8px 0; }
+  .dict-del { background:transparent; border:none; color:var(--red); cursor:pointer; padding:4px 8px; font-size:14px; opacity:0.6; transition:opacity 0.2s; }
+  .dict-del:hover { opacity:1; }
+  .dict-empty { color:#3a5030; font-family:'JetBrains Mono',monospace; font-size:12px; text-align:center; padding:12px; }
+  .viz-info { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); margin-top:10px; min-height:16px; }
+
+  /* TABLE */
+  .info-table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; font-size:0.84rem; margin-bottom:15px; }
+  .info-table th { background:var(--bg2); padding:9px 15px; text-align:left; font-size:10px; color:#5a7040; letter-spacing:0.07em; font-weight:600; border-bottom:1px solid var(--border); }
+  .info-table td { padding:9px 15px; border-bottom:1px solid rgba(42,56,24,0.5); color:var(--text2); }
+  .info-table tr:last-child td { border-bottom:none; }
+  .info-table code { font-family:'JetBrains Mono',monospace; color:var(--accent); background:rgba(134,239,172,0.09); padding:1px 6px; border-radius:4px; font-size:0.78rem; }
+
+  /* METHODS GRID */
+  .meth-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(285px,1fr)); gap:12px; }
+
+  /* QUIZ */
+  .quiz-score { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:13px 18px; margin-bottom:18px; display:flex; align-items:center; gap:14px; }
+  .quiz-score-label { font-size:12px; color:#5a7040; }
+  .score-track { flex:1; height:6px; background:var(--bg3); border-radius:100px; overflow:hidden; }
+  .score-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:100px; transition:width 0.4s ease; }
+  .score-count { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); white-space:nowrap; }
+  .quiz-card { background:var(--card); border:1px solid var(--border); border-radius:13px; padding:18px 20px; margin-bottom:13px; transition:border-color 0.2s; }
+  .quiz-card:hover { border-color:rgba(134,239,172,0.3); }
+  .quiz-q { font-size:0.88rem; color:var(--text); margin-bottom:12px; line-height:1.6; }
+  .quiz-q code { font-family:'JetBrains Mono',monospace; color:var(--accent3); background:rgba(103,232,249,0.08); padding:1px 6px; border-radius:4px; font-size:0.8rem; }
+  .quiz-opts { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .quiz-opt { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:7px 14px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:0.79rem; cursor:pointer; transition:all 0.18s; }
+  .quiz-opt:hover { border-color:var(--accent); color:var(--accent); }
+  .quiz-opt.correct { background:rgba(134,239,172,0.12); border-color:var(--accent); color:var(--accent); }
+  .quiz-opt.wrong { background:rgba(248,113,113,0.1); border-color:var(--red); color:var(--red); }
+  .quiz-feedback { font-size:0.79rem; color:#5a7040; min-height:18px; font-family:'JetBrains Mono',monospace; }
+
+  /* EXAMPLES */
+  .ex-grid { display:grid; gap:12px; }
+
+  /* SIMULATOR */
+  .simulator { background:var(--card); border:1px solid var(--border); border-radius:15px; overflow:hidden; margin-bottom:18px; }
+  .sim-header { padding:11px 20px; background:var(--bg2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .sim-header .dot-group { margin-right:auto; }
+  .sim-title { font-size:12px; color:var(--text2); font-family:'JetBrains Mono',monospace; }
+  .sim-body { padding:17px 20px; }
+  .sim-body label { display:block; font-size:11px; color:#5a7040; letter-spacing:0.07em; margin-bottom:5px; font-family:'JetBrains Mono',monospace; }
+  .sim-body input[type="text"] { width:100%; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.81rem; margin-bottom:11px; transition:border-color 0.2s; }
+  .sim-body input[type="text"]:focus { outline:none; border-color:var(--accent); }
+  .sim-body textarea { width:100%; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:11px 13px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:1.7; resize:vertical; min-height:120px; transition:border-color 0.2s; margin-bottom:10px; }
+  .sim-body textarea:focus { outline:none; border-color:var(--accent); }
+  .quick-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:11px; }
+  .qbtn { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:5px 11px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:10.5px; cursor:pointer; transition:all 0.18s; }
+  .qbtn:hover { border-color:var(--accent); color:var(--accent); }
+  .run-btn { background:linear-gradient(135deg,var(--accent),var(--accent3)); border:none; border-radius:8px; padding:10px 22px; color:var(--bg); font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px; }
+  .run-btn:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(134,239,172,0.35); }
+  .sim-output { margin-top:13px; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; min-height:48px; color:var(--accent3); white-space:pre-wrap; max-height:220px; overflow-y:auto; }
+  .sim-output.error { color:var(--red); }
+  .sim-output::before { content:'$ '; color:#3a5030; }
+
+  footer { text-align:center; padding:24px 0 16px; border-top:1px solid var(--border); color:#4a6035; font-size:11.5px; font-family:'JetBrains Mono',monospace; line-height:1.9; }
+  footer span { color:var(--accent); }
+
+  @media (max-width:600px) {
+    header h1 { font-size:1.8rem; }
+    .grid2, .meth-grid { grid-template-columns:1fr; }
+    .tab-btn { font-size:10.5px; padding:8px 5px; }
+    pre.cblock { font-size:0.73rem; }
+    .dict-add-row input { width:80px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="lab-badge">세영코딩연구소 · SEYYOUNG CODING LAB</div>
+  <h1>파이썬 딕셔너리<span>Python Dictionary</span></h1>
+  <div class="author-line">저자: ph.D kim &nbsp;|&nbsp; Python 3.x &nbsp;|&nbsp; dict / key / value / method</div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('개념',this)">📘 개념</button>
+  <button class="tab-btn" onclick="switchTab('접근',this)">🔑 접근·수정</button>
+  <button class="tab-btn" onclick="switchTab('메서드',this)">⚙️ 메서드</button>
+  <button class="tab-btn" onclick="switchTab('반복',this)">🔁 반복문</button>
+  <button class="tab-btn" onclick="switchTab('패턴',this)">⚡ 패턴</button>
+  <button class="tab-btn" onclick="switchTab('예제',this)">📝 예제15</button>
+  <button class="tab-btn" onclick="switchTab('퀴즈',this)">🧩 퀴즈</button>
+  <button class="tab-btn" onclick="switchTab('시뮬',this)">▶ 시뮬</button>
+</div>
+
+<!-- ① 개념 -->
+<div id="tab-개념" class="section active">
+  <div class="concept-box">
+    <h2>💡 딕셔너리란?</h2>
+    <p>딕셔너리는 <strong style="color:var(--accent2)">키(key)</strong>와 <strong style="color:var(--accent)">값(value)</strong>을 한 쌍으로 저장하는 자료형입니다.<br>
+    리스트는 번호(index)로 찾지만, 딕셔너리는 <strong style="color:var(--accent2)">키(key)</strong>로 찾습니다.<br><br>
+    학생 이름→점수, 과일→가격처럼 <strong style="color:var(--accent3)">짝을 이루는 데이터</strong>를 저장할 때 매우 유용합니다.</p>
+  </div>
+
+  <!-- Interactive Dict Visualizer -->
+  <div class="section-title">🔬 딕셔너리 인터랙티브 시각화</div>
+  <div class="dict-viz">
+    <div class="dict-viz-label">키와 값을 입력해서 딕셔너리를 직접 만들어보세요</div>
+    <div class="dict-add-row">
+      <input type="text" id="vizKey" placeholder="키 (key)" />
+      <span style="color:var(--text3);align-self:center;font-family:JetBrains Mono">:</span>
+      <input type="text" id="vizVal" placeholder="값 (value)" />
+      <button class="viz-btn" onclick="vizAdd()">+ 추가</button>
+      <button class="viz-btn danger" onclick="vizClear()" style="margin-left:auto">전체 삭제</button>
+    </div>
+    <div class="dict-display" id="dictDisplay">
+      <div class="dict-empty">아직 항목이 없습니다. 위에서 키:값을 추가해보세요!</div>
+    </div>
+    <div class="viz-info" id="dictVizInfo">dict = {}</div>
+  </div>
+
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-dict">만들기</span> 중괄호로 생성</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">student</span> <span class="op">=</span> <span class="br">{</span><span class="str">"name"</span>: <span class="str">"민수"</span>, <span class="str">"score"</span>: <span class="num">95</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="var">student</span>)</pre>
+        <div class="oblock">{'name': '민수', 'score': 95}</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-dict">만들기</span> 빈 딕셔너리</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{}</span>
+<span class="var">d2</span> <span class="op">=</span> <span class="fn">dict</span>()
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="var">d</span>))</pre>
+        <div class="oblock">&lt;class 'dict'&gt;</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">📋 리스트 vs 딕셔너리</div>
+  <table class="info-table">
+    <tr><th>구분</th><th>리스트</th><th>딕셔너리</th></tr>
+    <tr><td>생성</td><td><code>[1, 2, 3]</code></td><td><code>{"a":1, "b":2}</code></td></tr>
+    <tr><td>접근</td><td>인덱스 (0,1,2…)</td><td>키 (key)</td></tr>
+    <tr><td>순서</td><td>있음</td><td>삽입 순서 유지 (3.7+)</td></tr>
+    <tr><td>중복</td><td>값 중복 가능</td><td>키 중복 불가 (덮어씌움)</td></tr>
+    <tr><td>활용</td><td>순서 있는 나열</td><td>짝 데이터, 빈도수</td></tr>
+  </table>
+</div>
+
+<!-- ② 접근·수정·삭제 -->
+<div id="tab-접근" class="section">
+  <div class="section-title">🔑 값 꺼내기</div>
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-key">d[key]</span> 대괄호로 접근</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"apple"</span>: <span class="num">3</span>, <span class="str">"banana"</span>: <span class="num">5</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="var">d</span>[<span class="str">"apple"</span>])   <span class="cm"># 3</span></pre>
+        <div class="oblock">3</div>
+        <div class="warn-box">키가 없으면 <strong>오류(KeyError)</strong>!</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-key">get()</span> 안전하게 접근</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"apple"</span>: <span class="num">3</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="var">d</span>.get(<span class="str">"apple"</span>))    <span class="cm"># 3</span>
+<span class="fn">print</span>(<span class="var">d</span>.get(<span class="str">"grape"</span>))    <span class="cm"># None</span>
+<span class="fn">print</span>(<span class="var">d</span>.get(<span class="str">"grape"</span>, <span class="num">0</span>))  <span class="cm"># 0</span></pre>
+        <div class="oblock">3
+None
+0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">✏️ 추가 · 수정</div>
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-key">추가</span> 없는 키 → 새로 추가</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{}</span>
+<span class="var">d</span>[<span class="str">"name"</span>] <span class="op">=</span> <span class="str">"Jane"</span>
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+        <div class="oblock">{'name': 'Jane'}</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-key">수정</span> 있는 키 → 값 교체</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"score"</span>: <span class="num">80</span><span class="br">}</span>
+<span class="var">d</span>[<span class="str">"score"</span>] <span class="op">=</span> <span class="num">100</span>
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+        <div class="oblock">{'score': 100}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">🗑️ 삭제</div>
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-warn">del</span> 키 삭제</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"b"</span>: <span class="num">2</span><span class="br">}</span>
+<span class="kw">del</span> <span class="var">d</span>[<span class="str">"a"</span>]
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+        <div class="oblock">{'b': 2}</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-warn">pop()</span> 삭제 + 값 반환</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"b"</span>: <span class="num">2</span><span class="br">}</span>
+<span class="var">x</span> <span class="op">=</span> <span class="var">d</span>.pop(<span class="str">"a"</span>)
+<span class="fn">print</span>(<span class="var">x</span>)
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+        <div class="oblock">1
+{'b': 2}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">🔍 키 존재 확인 · 길이</div>
+  <div class="grid2">
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-dict">in</span> 키 존재 여부</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"apple"</span>: <span class="num">3</span>, <span class="str">"banana"</span>: <span class="num">5</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="str">"apple"</span> <span class="kw">in</span> <span class="var">d</span>)   <span class="cm"># True</span>
+<span class="fn">print</span>(<span class="str">"grape"</span> <span class="kw">in</span> <span class="var">d</span>)   <span class="cm"># False</span></pre>
+        <div class="oblock">True
+False</div>
+      </div>
+    </div>
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-dict">len()</span> 항목 수</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"b"</span>: <span class="num">2</span>, <span class="str">"c"</span>: <span class="num">3</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="fn">len</span>(<span class="var">d</span>))</pre>
+        <div class="oblock">3</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 메서드 -->
+<div id="tab-메서드" class="section">
+  <div class="section-title">⚙️ 딕셔너리 메서드</div>
+  <div class="meth-grid">
+
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-meth">keys()</span> 키만 보기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"name"</span>: <span class="str">"Tom"</span>, <span class="str">"age"</span>: <span class="num">13</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="fn">list</span>(<span class="var">d</span>.keys()))</pre>
+        <div class="oblock">['name', 'age']</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-meth">values()</span> 값만 보기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"name"</span>: <span class="str">"Tom"</span>, <span class="str">"age"</span>: <span class="num">13</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="fn">list</span>(<span class="var">d</span>.values()))</pre>
+        <div class="oblock">['Tom', 13]</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-meth">items()</span> 키+값 쌍</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"name"</span>: <span class="str">"Tom"</span>, <span class="str">"age"</span>: <span class="num">13</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="fn">list</span>(<span class="var">d</span>.items()))</pre>
+        <div class="oblock">[('name', 'Tom'), ('age', 13)]</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-meth">update()</span> 여러 개 추가/수정</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"b"</span>: <span class="num">2</span><span class="br">}</span>
+<span class="var">d</span>.update(<span class="br">{</span><span class="str">"b"</span>: <span class="num">20</span>, <span class="str">"c"</span>: <span class="num">30</span><span class="br">}</span>)
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+        <div class="oblock">{'a': 1, 'b': 20, 'c': 30}</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-meth">setdefault()</span> 없으면 기본값</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span><span class="br">}</span>
+<span class="var">d</span>.setdefault(<span class="str">"a"</span>, <span class="num">100</span>)  <span class="cm"># 이미 있음 → 유지</span>
+<span class="var">d</span>.setdefault(<span class="str">"b"</span>, <span class="num">200</span>)  <span class="cm"># 없음 → 추가</span>
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+        <div class="oblock">{'a': 1, 'b': 200}</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-meth">popitem()</span> 마지막 쌍 꺼내기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"b"</span>: <span class="num">2</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="var">d</span>.popitem())
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+        <div class="oblock">('b', 2)
+{'a': 1}</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-meth">copy()</span> 복사</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">a</span> <span class="op">=</span> <span class="br">{</span><span class="str">"x"</span>: <span class="num">1</span><span class="br">}</span>
+<span class="var">b</span> <span class="op">=</span> <span class="var">a</span>.copy()
+<span class="var">b</span>[<span class="str">"x"</span>] <span class="op">=</span> <span class="num">999</span>
+<span class="fn">print</span>(<span class="var">a</span>)  <span class="cm"># 원본 변화 없음</span>
+<span class="fn">print</span>(<span class="var">b</span>)</pre>
+        <div class="oblock">{'x': 1}
+{'x': 999}</div>
+      </div>
+    </div>
+
+    <div class="code-card">
+      <div class="code-header"><div class="code-title"><span class="tag t-meth">clear()</span> 전체 삭제</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <div class="code-body">
+        <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"b"</span>: <span class="num">2</span><span class="br">}</span>
+<span class="var">d</span>.clear()
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+        <div class="oblock">{}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title" style="margin-top:6px">📋 메서드 요약</div>
+  <table class="info-table">
+    <tr><th>메서드</th><th>기능</th><th>반환</th></tr>
+    <tr><td><code>keys()</code></td><td>모든 키</td><td>dict_keys</td></tr>
+    <tr><td><code>values()</code></td><td>모든 값</td><td>dict_values</td></tr>
+    <tr><td><code>items()</code></td><td>모든 (키,값) 쌍</td><td>dict_items</td></tr>
+    <tr><td><code>get(k,def)</code></td><td>키로 값 조회 (안전)</td><td>값 or None</td></tr>
+    <tr><td><code>pop(k)</code></td><td>키 삭제 + 값 반환</td><td>값</td></tr>
+    <tr><td><code>popitem()</code></td><td>마지막 쌍 꺼내기</td><td>튜플</td></tr>
+    <tr><td><code>update(d)</code></td><td>여러 항목 추가/수정</td><td>None</td></tr>
+    <tr><td><code>setdefault(k,v)</code></td><td>키 없으면 기본값 설정</td><td>값</td></tr>
+    <tr><td><code>copy()</code></td><td>얕은 복사</td><td>dict</td></tr>
+    <tr><td><code>clear()</code></td><td>전체 삭제</td><td>None</td></tr>
+  </table>
+</div>
+
+<!-- ④ 반복문 -->
+<div id="tab-반복" class="section">
+  <div class="section-title">🔁 딕셔너리 반복문</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-loop">방법 1</span> 키만 반복</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">10</span>, <span class="str">"b"</span>: <span class="num">20</span>, <span class="str">"c"</span>: <span class="num">30</span><span class="br">}</span>
+
+<span class="kw">for</span> <span class="var">key</span> <span class="kw">in</span> <span class="var">d</span>:
+    <span class="fn">print</span>(<span class="var">key</span>)</pre>
+      <div class="oblock">a
+b
+c</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-loop">방법 2</span> 키 + 값 함께</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">10</span>, <span class="str">"b"</span>: <span class="num">20</span>, <span class="str">"c"</span>: <span class="num">30</span><span class="br">}</span>
+
+<span class="kw">for</span> <span class="var">key</span> <span class="kw">in</span> <span class="var">d</span>:
+    <span class="fn">print</span>(<span class="var">key</span>, <span class="var">d</span>[<span class="var">key</span>])</pre>
+      <div class="oblock">a 10
+b 20
+c 30</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-loop">방법 3</span> items() 사용 — 가장 권장</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">10</span>, <span class="str">"b"</span>: <span class="num">20</span>, <span class="str">"c"</span>: <span class="num">30</span><span class="br">}</span>
+
+<span class="kw">for</span> <span class="var">key</span>, <span class="var">value</span> <span class="kw">in</span> <span class="var">d</span>.items():
+    <span class="fn">print</span>(<span class="var">key</span>, <span class="var">value</span>)</pre>
+      <div class="oblock">a 10
+b 20
+c 30</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">🔤 정렬해서 출력</div>
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-loop">sorted</span> 키 정렬 출력</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"banana"</span>: <span class="num">3</span>, <span class="str">"apple"</span>: <span class="num">5</span>, <span class="str">"cherry"</span>: <span class="num">2</span><span class="br">}</span>
+
+<span class="kw">for</span> <span class="var">key</span> <span class="kw">in</span> <span class="fn">sorted</span>(<span class="var">d</span>.keys()):
+    <span class="fn">print</span>(<span class="var">key</span>, <span class="var">d</span>[<span class="var">key</span>])</pre>
+      <div class="oblock">apple 5
+banana 3
+cherry 2</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 패턴 -->
+<div id="tab-패턴" class="section">
+  <div class="section-title">⚡ 자주 쓰는 패턴</div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-pat">패턴 1</span> 문자 등장 횟수 세기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">s</span> <span class="op">=</span> <span class="str">"banana"</span>
+<span class="var">d</span> <span class="op">=</span> <span class="br">{}</span>
+
+<span class="kw">for</span> <span class="var">ch</span> <span class="kw">in</span> <span class="var">s</span>:
+    <span class="var">d</span>[<span class="var">ch</span>] <span class="op">=</span> <span class="var">d</span>.get(<span class="var">ch</span>, <span class="num">0</span>) <span class="op">+</span> <span class="num">1</span>
+
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+      <div class="oblock">{'b': 1, 'a': 3, 'n': 2}</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-pat">패턴 2</span> 리스트 숫자 빈도수</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">1</span>, <span class="num">2</span>]
+<span class="var">d</span> <span class="op">=</span> <span class="br">{}</span>
+
+<span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">arr</span>:
+    <span class="var">d</span>[<span class="var">x</span>] <span class="op">=</span> <span class="var">d</span>.get(<span class="var">x</span>, <span class="num">0</span>) <span class="op">+</span> <span class="num">1</span>
+
+<span class="fn">print</span>(<span class="var">d</span>)</pre>
+      <div class="oblock">{1: 2, 2: 3, 3: 1}</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-pat">패턴 3</span> 최빈값 찾기</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">arr</span> <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">3</span>, <span class="num">3</span>, <span class="num">4</span>]
+<span class="var">d</span> <span class="op">=</span> <span class="br">{}</span>
+
+<span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">arr</span>:
+    <span class="var">d</span>[<span class="var">x</span>] <span class="op">=</span> <span class="var">d</span>.get(<span class="var">x</span>, <span class="num">0</span>) <span class="op">+</span> <span class="num">1</span>
+
+<span class="var">mx_key</span>, <span class="var">mx_cnt</span> <span class="op">=</span> <span class="kw">None</span>, <span class="num">0</span>
+<span class="kw">for</span> <span class="var">k</span>, <span class="var">v</span> <span class="kw">in</span> <span class="var">d</span>.items():
+    <span class="kw">if</span> <span class="var">v</span> <span class="op">></span> <span class="var">mx_cnt</span>:
+        <span class="var">mx_cnt</span> <span class="op">=</span> <span class="var">v</span>
+        <span class="var">mx_key</span> <span class="op">=</span> <span class="var">k</span>
+
+<span class="fn">print</span>(<span class="var">mx_key</span>, <span class="var">mx_cnt</span>)</pre>
+      <div class="oblock">3 3</div>
+    </div>
+  </div>
+
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-pat">패턴 4</span> 리스트 안에 딕셔너리</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="var">students</span> <span class="op">=</span> [
+    <span class="br">{</span><span class="str">"name"</span>: <span class="str">"Tom"</span>, <span class="str">"score"</span>: <span class="num">80</span><span class="br">}</span>,
+    <span class="br">{</span><span class="str">"name"</span>: <span class="str">"Jane"</span>, <span class="str">"score"</span>: <span class="num">95</span><span class="br">}</span>,
+    <span class="br">{</span><span class="str">"name"</span>: <span class="str">"Sam"</span>, <span class="str">"score"</span>: <span class="num">88</span><span class="br">}</span>
+]
+
+<span class="kw">for</span> <span class="var">s</span> <span class="kw">in</span> <span class="var">students</span>:
+    <span class="fn">print</span>(<span class="var">s</span>[<span class="str">"name"</span>], <span class="var">s</span>[<span class="str">"score"</span>])</pre>
+      <div class="oblock">Tom 80
+Jane 95
+Sam 88</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:18px">⚠️ 자주 헷갈리는 부분</div>
+  <div class="code-card">
+    <div class="code-header"><div class="code-title"><span class="tag t-warn">주의</span> 키 중복 불가 / d[k] vs get(k)</div><div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+    <div class="code-body">
+      <pre class="cblock"><span class="cm"># 키 중복 → 나중 값으로 덮어씌움</span>
+<span class="var">d</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"a"</span>: <span class="num">2</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="var">d</span>)        <span class="cm"># {'a': 2}</span>
+
+<span class="cm"># d["b"] → 오류,  d.get("b") → None</span>
+<span class="var">d2</span> <span class="op">=</span> <span class="br">{</span><span class="str">"a"</span>: <span class="num">1</span><span class="br">}</span>
+<span class="fn">print</span>(<span class="var">d2</span>.get(<span class="str">"b"</span>))     <span class="cm"># None (오류 없음)</span>
+<span class="fn">print</span>(<span class="var">d2</span>.get(<span class="str">"b"</span>, <span class="num">0</span>))   <span class="cm"># 0 (기본값)</span></pre>
+      <div class="oblock">{'a': 2}
+None
+0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑥ 예제 15개 -->
+<div id="tab-예제" class="section">
+  <div class="section-title">📝 예제 15개</div>
+  <div class="ex-grid" id="exGrid"></div>
+</div>
+
+<!-- ⑦ 퀴즈 -->
+<div id="tab-퀴즈" class="section">
+  <div class="quiz-score">
+    <span class="quiz-score-label">퀴즈 진행도</span>
+    <div class="score-track"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
+    <span class="score-count" id="scoreCount">0 / 10</span>
+  </div>
+  <div class="section-title">🧩 딕셔너리 퀴즈 10문항</div>
+  <div id="quizGrid"></div>
+</div>
+
+<!-- ⑧ 시뮬레이터 -->
+<div id="tab-시뮬" class="section">
+  <div class="section-title">▶ 코드 시뮬레이터</div>
+  <div class="simulator">
+    <div class="sim-header">
+      <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      <span class="sim-title">dict_simulator.py</span>
+    </div>
+    <div class="sim-body">
+      <label>빠른 예제 불러오기</label>
+      <div class="quick-btns">
+        <button class="qbtn" onclick="loadEx('basic')">기본 접근</button>
+        <button class="qbtn" onclick="loadEx('getset')">get/set</button>
+        <button class="qbtn" onclick="loadEx('loop_items')">items 반복</button>
+        <button class="qbtn" onclick="loadEx('freq_str')">문자 빈도수</button>
+        <button class="qbtn" onclick="loadEx('freq_list')">숫자 빈도수</button>
+        <button class="qbtn" onclick="loadEx('most')">최빈값</button>
+        <button class="qbtn" onclick="loadEx('sum_val')">값 합계</button>
+        <button class="qbtn" onclick="loadEx('sorted_key')">정렬 출력</button>
+      </div>
+      <label>INPUT (입력값)</label>
+      <input type="text" id="simInput" placeholder="입력이 필요한 경우 여기에 입력">
+      <label>CODE</label>
+      <textarea id="simCode" placeholder="코드를 입력하거나 위에서 예제를 불러오세요."></textarea>
+      <button class="run-btn" onclick="runSim()">▶ 실행하기</button>
+      <div id="simOutput" class="sim-output" style="opacity:0.4">실행 결과가 여기에 표시됩니다.</div>
+    </div>
+  </div>
+  <div class="concept-box">
+    <h2>⚠️ 안내</h2>
+    <p><strong style="color:var(--accent)">지원:</strong> 딕셔너리 생성·접근·수정·삭제·메서드 / for·while / if-elif-else / print / input / 리스트<br>
+    <strong style="color:var(--red)">미지원:</strong> 함수 정의, 클래스 등 고급 문법</p>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span>세영코딩연구소</span> &nbsp;|&nbsp; 저자: <span>ph.D kim</span><br>
+    Python 3.x · 딕셔너리(Dictionary) · key/value · 메서드 · 예제15 · 퀴즈10
+  </div>
+</footer>
+
+<script>
+// TAB
+function switchTab(n, b) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active'); b.classList.add('active');
+}
+
+// DICT VISUALIZER
+let vizDict = {};
+function vizAdd() {
+  const k = document.getElementById('vizKey').value.trim();
+  const v = document.getElementById('vizVal').value.trim();
+  if (!k) return;
+  vizDict[k] = v;
+  document.getElementById('vizKey').value = '';
+  document.getElementById('vizVal').value = '';
+  renderViz();
+}
+function vizClear() { vizDict = {}; renderViz(); }
+function vizDelete(key) { delete vizDict[key]; renderViz(); }
+function renderViz() {
+  const display = document.getElementById('dictDisplay');
+  const info = document.getElementById('dictVizInfo');
+  const keys = Object.keys(vizDict);
+  if (keys.length === 0) {
+    display.innerHTML = '<div class="dict-empty">아직 항목이 없습니다. 위에서 키:값을 추가해보세요!</div>';
+    info.textContent = 'dict = {}';
+    return;
+  }
+  display.innerHTML = keys.map(k => `
+    <div class="dict-row">
+      <div class="dict-key">"${k}"</div>
+      <div class="dict-arrow">→</div>
+      <div class="dict-val">${vizDict[k]}</div>
+      <button class="dict-del" onclick="vizDelete('${k}')">✕</button>
+    </div>
+  `).join('');
+  const pairs = keys.map(k=>`"${k}": "${vizDict[k]}"`).join(', ');
+  info.textContent = `dict = {${pairs}}  |  len = ${keys.length}`;
+}
+
+// EXAMPLES
+const examples = [
+  { n:1,  title:'학생 정보 출력',       inp:'', code:`student = {"name": "민수", "age": 12, "score": 95}\nprint(student["name"])\nprint(student["age"])\nprint(student["score"])` },
+  { n:2,  title:'과일 가격 추가',        inp:'', code:`fruit = {}\nfruit["apple"] = 1000\nfruit["banana"] = 1500\nprint(fruit)` },
+  { n:3,  title:'값 수정',              inp:'', code:`d = {"score": 80}\nd["score"] = 100\nprint(d)` },
+  { n:4,  title:'키 존재 여부 확인',     inp:'', code:`d = {"apple": 3, "banana": 5}\nif "apple" in d:\n    print("있음")\nelse:\n    print("없음")` },
+  { n:5,  title:'get 사용',             inp:'', code:`d = {"apple": 3}\nprint(d.get("apple"))\nprint(d.get("grape", 0))` },
+  { n:6,  title:'모든 키 출력',          inp:'', code:`d = {"name": "Tom", "age": 13}\nfor key in d.keys():\n    print(key)` },
+  { n:7,  title:'모든 값 출력',          inp:'', code:`d = {"name": "Tom", "age": 13}\nfor value in d.values():\n    print(value)` },
+  { n:8,  title:'키와 값 모두 출력',     inp:'', code:`d = {"a": 10, "b": 20, "c": 30}\nfor key, value in d.items():\n    print(key, value)` },
+  { n:9,  title:'문자열 등장 횟수',      inp:'', code:`s = "apple"\nd = {}\nfor ch in s:\n    d[ch] = d.get(ch, 0) + 1\nprint(d)` },
+  { n:10, title:'리스트 빈도수',         inp:'', code:`arr = [1, 1, 2, 3, 2, 1]\nd = {}\nfor x in arr:\n    d[x] = d.get(x, 0) + 1\nprint(d)` },
+  { n:11, title:'가장 많이 나온 문자',   inp:'', code:`s = "banana"\nd = {}\nfor ch in s:\n    d[ch] = d.get(ch, 0) + 1\nbest_char = ""\nbest_count = 0\nfor key, value in d.items():\n    if value > best_count:\n        best_count = value\n        best_char = key\nprint(best_char, best_count)` },
+  { n:12, title:'딕셔너리 값 합계',      inp:'', code:`d = {"a": 10, "b": 20, "c": 30}\ns = 0\nfor value in d.values():\n    s += value\nprint(s)` },
+  { n:13, title:'특정 키 삭제',          inp:'', code:`d = {"a": 1, "b": 2, "c": 3}\ndel d["b"]\nprint(d)` },
+  { n:14, title:'update 사용',           inp:'', code:`d = {"a": 1, "b": 2}\nd.update({"b": 20, "c": 30})\nprint(d)` },
+  { n:15, title:'sorted로 키 순서 출력', inp:'', code:`d = {"banana": 3, "apple": 5, "cherry": 2}\nfor key in sorted(d):\n    print(key, d[key])` },
+];
+
+function buildExamples() {
+  document.getElementById('exGrid').innerHTML = examples.map(e => `
+    <div class="code-card">
+      <div class="code-header">
+        <div class="code-title"><span class="tag t-ex">예제 ${e.n}</span> ${e.title}</div>
+        <div class="dot-group"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+      </div>
+      <div class="code-body">
+        <pre class="cblock">${hlCode(e.code)}</pre>
+        <button class="qbtn" style="margin-top:6px" onclick="tryEx(${e.n-1})">▶ 시뮬레이터 실행</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function tryEx(i) {
+  const e = examples[i];
+  document.getElementById('simInput').value = e.inp;
+  document.getElementById('simCode').value = e.code;
+  switchTab('시뮬', document.querySelectorAll('.tab-btn')[7]);
+}
+
+function hlCode(code) {
+  let s = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/\b(if|elif|else|for|while|in|not|and|or|del|True|False|None|break|continue)\b/g, '<span class="kw">$1</span>');
+  s = s.replace(/\b(print|input|len|range|int|str|sorted|list|dict|get|keys|values|items|update|pop|clear|copy|setdefault|popitem)\b/g, '<span class="fn">$1</span>');
+  s = s.replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+  s = s.replace(/'([^']*)'/g, "<span class='str'>'$1'</span>");
+  s = s.replace(/\b(-?\d+)\b/g, '<span class="num">$1</span>');
+  s = s.replace(/[{}]/g, m=>`<span class="br">${m}</span>`);
+  s = s.replace(/#.*/g, m=>'<span class="cm">'+m+'</span>');
+  return s;
+}
+
+buildExamples();
+
+// QUIZ
+const quizData = [
+  { q:`딕셔너리에서 키로 값을 안전하게 꺼내는 메서드는?`, opts:['d[key]','d.get(key)','d.find(key)','d.fetch(key)'], ans:1 },
+  { q:`<code>d = {"a":1,"a":2}</code> 의 결과는?`, opts:['{"a":1}','{"a":2}','{"a":1,"a":2}','오류'], ans:1 },
+  { q:`딕셔너리의 모든 (키,값) 쌍을 반환하는 메서드는?`, opts:['d.keys()','d.values()','d.pairs()','d.items()'], ans:3 },
+  { q:`<code>d = {"a":1} ; d.get("b", 0)</code> 의 결과는?`, opts:['None','오류','0','1'], ans:2 },
+  { q:`딕셔너리에서 키 "x"를 삭제하고 그 값을 돌려받는 코드는?`, opts:['del d["x"]','d.remove("x")','d.pop("x")','d.discard("x")'], ans:2 },
+  { q:`<code>{"a":1,"b":2,"c":3}</code> 의 len()은?`, opts:['2','3','6','오류'], ans:1 },
+  { q:`딕셔너리에서 키가 있는지 확인하는 방법은?`, opts:['"x" in d','d.has("x")','d.exists("x")','d.contains("x")'], ans:0 },
+  { q:`<code>d.update({"b":20})</code> 에서 "b"가 이미 있으면?`, opts:['오류 발생','무시','20으로 덮어씌움','리스트에 추가'], ans:2 },
+  { q:`키가 없을 때 기본값을 자동으로 넣어주는 메서드는?`, opts:['d.get()','d.default()','d.setdefault()','d.insert()'], ans:2 },
+  { q:`<code>d.get("z")</code> 에서 "z" 키가 없을 때 반환값은?`, opts:['0','False','오류','None'], ans:3 },
+];
+
+let quizAnswered = new Set();
+function buildQuiz() {
+  document.getElementById('quizGrid').innerHTML = quizData.map((q,i) => `
+    <div class="quiz-card" id="qcard-${i}">
+      <div class="quiz-q">Q${i+1}. ${q.q}</div>
+      <div class="quiz-opts">${q.opts.map((o,j)=>`<button class="quiz-opt" onclick="answerQuiz(${i},${j})">${o}</button>`).join('')}</div>
+      <div class="quiz-feedback" id="qfb-${i}"></div>
+    </div>
+  `).join('');
+}
+
+function answerQuiz(qi, oi) {
+  if (quizAnswered.has(qi)) return;
+  quizAnswered.add(qi);
+  const q = quizData[qi];
+  document.querySelectorAll(`#qcard-${qi} .quiz-opt`).forEach((el,j)=>{
+    if (j===q.ans) el.classList.add('correct');
+    else if (j===oi&&j!==q.ans) el.classList.add('wrong');
+  });
+  document.getElementById('qfb-'+qi).textContent = oi===q.ans ? '✅ 정답입니다!' : `❌ 오답. 정답: ${q.opts[q.ans]}`;
+  const pct = (quizAnswered.size/quizData.length)*100;
+  document.getElementById('scoreFill').style.width = pct+'%';
+  document.getElementById('scoreCount').textContent = `${quizAnswered.size} / ${quizData.length}`;
+}
+buildQuiz();
+
+// QUICK EXAMPLES for simulator
+const exMap = {
+  basic:      ['', `d = {"name": "Alice", "age": 12, "hobby": "soccer"}\nprint(d["name"])\nprint(d["age"])`],
+  getset:     ['', `d = {"apple": 3}\nprint(d.get("apple"))\nprint(d.get("grape", 0))\nd["banana"] = 5\nprint(d)`],
+  loop_items: ['', `d = {"a": 10, "b": 20, "c": 30}\nfor key, value in d.items():\n    print(key, value)`],
+  freq_str:   ['', `s = "banana"\nd = {}\nfor ch in s:\n    d[ch] = d.get(ch, 0) + 1\nprint(d)`],
+  freq_list:  ['', `arr = [1, 2, 2, 3, 1, 2]\nd = {}\nfor x in arr:\n    d[x] = d.get(x, 0) + 1\nprint(d)`],
+  most:       ['', `arr = [1, 2, 2, 3, 3, 3, 4]\nd = {}\nfor x in arr:\n    d[x] = d.get(x, 0) + 1\nmx_key = None\nmx_cnt = 0\nfor k, v in d.items():\n    if v > mx_cnt:\n        mx_cnt = v\n        mx_key = k\nprint(mx_key, mx_cnt)`],
+  sum_val:    ['', `d = {"a": 10, "b": 20, "c": 30}\ns = 0\nfor value in d.values():\n    s += value\nprint(s)`],
+  sorted_key: ['', `d = {"banana": 3, "apple": 5, "cherry": 2}\nfor key in sorted(d):\n    print(key, d[key])`],
+};
+
+function loadEx(name) {
+  const [inp, code] = exMap[name] || ['',''];
+  document.getElementById('simInput').value = inp;
+  document.getElementById('simCode').value = code;
+}
+
+// SIMULATOR ENGINE
+function runSim() {
+  const code = document.getElementById('simCode').value;
+  const rawInput = document.getElementById('simInput').value;
+  const outEl = document.getElementById('simOutput');
+  outEl.style.opacity = '1'; outEl.className = 'sim-output';
+  try {
+    const inputLines = rawInput.split('\n'); let inputIdx = 0;
+    const output = []; let totalOps = 0;
+    function inp() { return (inputLines[inputIdx++]||'').trim(); }
+
+    function reprVal(v) {
+      if (v===true) return 'True'; if (v===false) return 'False'; if (v===null) return 'None';
+      if (Array.isArray(v)) return '['+v.map(reprVal).join(', ')+']';
+      if (v !== null && typeof v === 'object') {
+        const pairs = Object.entries(v).map(([k,val])=>reprVal(k)+': '+reprVal(val)).join(', ');
+        return '{'+pairs+'}';
+      }
+      if (typeof v==='string') return "'"+v+"'";
+      return String(v);
+    }
+
+    function evalVal(expr, env) {
+      expr = expr.trim();
+      if (expr==='True') return true; if (expr==='False') return false; if (expr==='None') return null;
+      if ((expr.startsWith('"')&&expr.endsWith('"'))||(expr.startsWith("'")&&expr.endsWith("'"))) return expr.slice(1,-1);
+      if (/^-?\d+$/.test(expr)) return parseInt(expr);
+      if (/^-?\d+\.\d+$/.test(expr)) return parseFloat(expr);
+      if (expr==='[]') return [];
+      if (expr==='{}') return {};
+      // list literal
+      if (expr.startsWith('[')&&expr.endsWith(']')) {
+        const inner=expr.slice(1,-1).trim(); if(!inner) return [];
+        return splitCommas(inner).map(e=>evalVal(e.trim(),env));
+      }
+      // dict literal
+      if (expr.startsWith('{')&&expr.endsWith('}')) {
+        const inner=expr.slice(1,-1).trim(); if(!inner) return {};
+        const d={};
+        splitCommas(inner).forEach(pair=>{
+          const ci=pair.indexOf(':'); if(ci<0) return;
+          const k=evalVal(pair.slice(0,ci).trim(),env);
+          const v=evalVal(pair.slice(ci+1).trim(),env);
+          d[k]=v;
+        });
+        return d;
+      }
+      if (/^[a-zA-Z_]\w*$/.test(expr)) return env.hasOwnProperty(expr)?env[expr]:undefined;
+
+      let m;
+      // dict/list method calls
+      m=expr.match(/^([a-zA-Z_]\w*)\.([a-zA-Z_]\w*)\((.*?)?\)$/);
+      if (m) {
+        const obj=env[m[1]], method=m[2], argsRaw=(m[3]||'').trim();
+        const args=argsRaw?splitCommas(argsRaw).map(a=>evalVal(a.trim(),env)):[];
+        if (obj!==null&&typeof obj==='object'&&!Array.isArray(obj)) {
+          if (method==='get') return obj.hasOwnProperty(args[0])?obj[args[0]]:(args.length>1?args[1]:null);
+          if (method==='keys') return Object.keys(obj);
+          if (method==='values') return Object.values(obj);
+          if (method==='items') return Object.entries(obj).map(([k,v])=>[k,v]);
+          if (method==='pop') { const val=obj[args[0]]; delete obj[args[0]]; return val; }
+          if (method==='popitem') { const keys=Object.keys(obj); const last=keys[keys.length-1]; const val=[last,obj[last]]; delete obj[last]; return val; }
+          if (method==='update') { const upd=args[0]; if(upd&&typeof upd==='object') Object.assign(obj,upd); return null; }
+          if (method==='setdefault') { if(!obj.hasOwnProperty(args[0])) obj[args[0]]=args.length>1?args[1]:null; return obj[args[0]]; }
+          if (method==='clear') { for(const k of Object.keys(obj)) delete obj[k]; return null; }
+          if (method==='copy') return {...obj};
+        }
+        if (Array.isArray(obj)) {
+          if (method==='append'){obj.push(args[0]);return null;}
+          if (method==='sort'){obj.sort((a,b)=>typeof a==='string'?a.localeCompare(b):a-b);return null;}
+          if (method==='pop') return args.length?obj.splice(args[0],1)[0]:obj.pop();
+        }
+        if (typeof obj==='string') {
+          if (method==='split') return args.length?obj.split(String(args[0])):obj.trim().split(/\s+/).filter(s=>s!=='');
+          if (method==='upper') return obj.toUpperCase();
+          if (method==='lower') return obj.toLowerCase();
+          if (method==='strip') return obj.trim();
+          if (method==='replace') return obj.replaceAll(String(args[0]),String(args[1]));
+        }
+      }
+      // indexing: d["key"] or arr[i]
+      m=expr.match(/^(.+)\[(.+)\]$/);
+      if (m) {
+        const obj=evalVal(m[1].trim(),env);
+        const key=evalVal(m[2].trim(),env);
+        if (obj!==null&&typeof obj==='object'&&!Array.isArray(obj)) return obj[key];
+        if (Array.isArray(obj)||typeof obj==='string') {
+          let i=parseInt(key); if(i<0)i=obj.length+i; return typeof obj==='string'?obj[i]:obj[i];
+        }
+      }
+      // builtins
+      m=expr.match(/^int\(input\(\)\)$/); if(m) return parseInt(inp());
+      m=expr.match(/^input\(\)$/); if(m) return inp();
+      m=expr.match(/^input\(["'].*["']\)$/); if(m) return inp();
+      m=expr.match(/^int\((.+)\)$/); if(m) return parseInt(evalVal(m[1],env));
+      m=expr.match(/^str\((.+)\)$/); if(m) return String(evalVal(m[1],env));
+      m=expr.match(/^len\((.+)\)$/); if(m) { const v=evalVal(m[1],env); return Array.isArray(v)?v.length:typeof v==='object'&&v?Object.keys(v).length:typeof v==='string'?v.length:0; }
+      m=expr.match(/^list\((.+)\)$/); if(m) { const v=evalVal(m[1],env); return Array.isArray(v)?[...v]:v; }
+      m=expr.match(/^sorted\((.+)\)$/); if(m) { const v=evalVal(m[1],env); const arr=Array.isArray(v)?[...v]:Object.keys(v); return arr.sort(); }
+      m=expr.match(/^dict\(\)$/); if(m) return {};
+      m=expr.match(/^range\((.+)\)$/); if(m) {
+        const args=splitCommas(m[1]).map(a=>parseInt(evalVal(a.trim(),env)));
+        const [s,e,st]=args.length===1?[0,args[0],1]:args.length===2?[args[0],args[1],1]:args;
+        const arr=[]; if(st>0){for(let i=s;i<e;i+=st)arr.push(i);}else{for(let i=s;i>e;i+=st)arr.push(i);} return arr;
+      }
+      m=expr.match(/^list\(map\(int,\s*input\(\)\.split\(\)\)\)$/); if(m) return inp().split(/\s+/).map(Number);
+      // not
+      m=expr.match(/^not\s+(.+)$/); if(m) return !evalVal(m[1],env);
+      // binary ops
+      for (const op of ['//', '%', '**', '*', '/', '+', '-', '>=', '<=', '>', '<', '==', '!=', ' and ', ' or ', ' not in ', ' in ']) {
+        const oi=expr.indexOf(op);
+        if (oi>0) {
+          const L=expr.slice(0,oi).trim(), R=expr.slice(oi+op.length).trim();
+          if (L&&R) {
+            const l=evalVal(L,env), r=evalVal(R,env);
+            if (op==='//') return Math.trunc(l/r);
+            if (op==='%') return ((l%r)+Math.abs(r))%Math.abs(r);
+            if (op==='**') return Math.pow(l,r);
+            if (op==='*') return typeof l==='string'?l.repeat(r):typeof r==='string'?r.repeat(l):l*r;
+            if (op==='/') return l/r;
+            if (op==='+') return (typeof l==='string'||typeof r==='string')?String(l)+String(r):l+r;
+            if (op==='-') return l-r;
+            if (op==='>=') return l>=r; if (op==='<=') return l<=r;
+            if (op==='>') return l>r; if (op==='<') return l<r;
+            if (op==='==') return l==r; if (op==='!=') return l!=r;
+            if (op===' and ') return l&&r; if (op===' or ') return l||r;
+            if (op===' not in ') {
+              if (Array.isArray(r)) return !r.includes(l);
+              if (r!==null&&typeof r==='object') return !r.hasOwnProperty(String(l));
+              return true;
+            }
+            if (op===' in ') {
+              if (Array.isArray(r)) return r.includes(l);
+              if (r!==null&&typeof r==='object') return r.hasOwnProperty(String(l));
+              return false;
+            }
+          }
+        }
+      }
+      return expr;
+    }
+
+    function evalCond(c,env) {
+      if (c.startsWith('not ')) return !evalCond(c.slice(4).trim(),env);
+      const ands=c.split(' and '); if(ands.length>1) return ands.every(p=>evalCond(p.trim(),env));
+      const ors=c.split(' or '); if(ors.length>1) return ors.some(p=>evalCond(p.trim(),env));
+      return !!evalVal(c,env);
+    }
+
+    function splitCommas(str) {
+      const parts=[]; let depth=0,cur='';
+      for (const c of str) {
+        if ('([{'.includes(c)) depth++; else if (')]}'.includes(c)) depth--;
+        else if (c===','&&depth===0) { parts.push(cur); cur=''; continue; }
+        cur+=c;
+      }
+      if (cur.trim()) parts.push(cur); return parts;
+    }
+
+    function getIndent(line) { return (line.match(/^(\s*)/)||['',''])[1].length; }
+    function collectBody(lines,start,base) {
+      const body=[]; let j=start;
+      while (j<lines.length) { const l=lines[j]; if(!l.trim()){j++;continue;} if(getIndent(l)<=base) break; body.push(l); j++; }
+      return {body,end:j};
+    }
+
+    function runBlock(lines,env) {
+      let i=0;
+      while (i<lines.length) {
+        if (totalOps++>8000) throw new Error('최대 실행 횟수 초과');
+        const line=lines[i]; const t=line.trim();
+        if (!t||t.startsWith('#')) { i++; continue; }
+        if (t==='break') return {signal:'break'};
+        if (t==='continue') return {signal:'continue'};
+
+        // print
+        let m;
+        if (t==='print()') { output.push(''); i++; continue; }
+        m=t.match(/^print\((.+)\)$/);
+        if (m) {
+          let args=m[1]; let sep=' ';
+          const sm=args.match(/,\s*sep\s*=\s*["'](.*)["']/); if(sm){sep=sm[1];args=args.replace(/,\s*sep\s*=\s*["'].*?["']/,'');}
+          args=args.replace(/,\s*end\s*=\s*["'].*?["']/,'').trim().replace(/,$/,'').trim();
+          const parts=splitCommas(args).map(a=>{
+            const v=evalVal(a.trim(),env);
+            if (v===true) return 'True'; if(v===false) return 'False'; if(v===null) return 'None';
+            if (Array.isArray(v)) return reprVal(v);
+            if (v!==null&&typeof v==='object') return reprVal(v);
+            return String(v);
+          });
+          output.push(parts.join(sep)); i++; continue;
+        }
+
+        // del d["key"]
+        m=t.match(/^del\s+([a-zA-Z_]\w*)\[(.+)\]$/);
+        if (m) { const obj=env[m[1]]; const key=evalVal(m[2],env); if(obj&&typeof obj==='object') delete obj[key]; i++; continue; }
+
+        // dict method stmt: d.update(...) etc.
+        m=t.match(/^([a-zA-Z_]\w*)\.([a-zA-Z_]\w*)\((.*?)?\)$/);
+        if (m) { evalVal(t,env); i++; continue; }
+
+        // augmented assignment
+        m=t.match(/^([a-zA-Z_]\w*)\s*(\+=|-=|\*=|\/=|\/\/=|%=)\s*(.+)$/);
+        if (m) { const[,vn,op,rhs]=m; const r=evalVal(rhs,env); const l=env[vn]??0; if(op==='+=') env[vn]=(typeof l==='string'||typeof r==='string')?String(l)+String(r):l+r; else if(op==='-=') env[vn]=l-r; else if(op==='*=') env[vn]=l*r; else if(op==='/=') env[vn]=l/r; else if(op==='//=') env[vn]=Math.trunc(l/r); else if(op==='%=') env[vn]=l%r; i++; continue; }
+
+        // d["key"] = val  (dict item assignment)
+        m=t.match(/^([a-zA-Z_]\w*)\[(.+)\]\s*=\s*(.+)$/);
+        if (m) {
+          const obj=env[m[1]]; const key=evalVal(m[2],env); const val=evalVal(m[3],env);
+          if (obj!==null&&typeof obj==='object'&&!Array.isArray(obj)) obj[key]=val;
+          else if (Array.isArray(obj)) { let idx=parseInt(key); if(idx<0)idx=obj.length+idx; obj[idx]=val; }
+          i++; continue;
+        }
+
+        // for
+        if (/^for .+ in .+:$/.test(t)) {
+          const base=getIndent(line); const {body,end}=collectBody(lines,i+1,base);
+          const lm=t.match(/^for (.+) in (.+):$/);
+          if (lm) {
+            const varP=lm[1].trim(), iterV=evalVal(lm[2].trim(),env);
+            const iterable=typeof iterV==='string'?iterV.split(''):(Array.isArray(iterV)?iterV:(iterV&&typeof iterV==='object'?Object.keys(iterV):[]));
+            for (const item of iterable) {
+              if (totalOps++>8000) throw new Error('최대 실행 초과');
+              if (varP.includes(',')) { const vs=varP.split(',').map(v=>v.trim()); if(Array.isArray(item)) vs.forEach((v,j2)=>{env[v]=item[j2];}); else vs.forEach((v,j2)=>{env[v]=j2===0?item:undefined;}); }
+              else env[varP]=item;
+              const res=runBlock(body,env); if(res&&res.signal==='break') break;
+            }
+          }
+          i=end; continue;
+        }
+
+        // while
+        if (/^while .+:$/.test(t)) {
+          const base=getIndent(line); const {body,end}=collectBody(lines,i+1,base);
+          const condS=t.slice(6,-1).trim(); let lc=0;
+          while (evalCond(condS,env)) { if(++lc>500||totalOps++>8000) throw new Error('최대 반복 초과'); const res=runBlock(body,env); if(res&&res.signal==='break') break; }
+          i=end; continue;
+        }
+
+        // if/elif/else
+        if (/^if .+:$/.test(t)||/^elif .+:$/.test(t)||/^else:$/.test(t)) {
+          const base=getIndent(line); const branches=[]; let j=i;
+          while (j<lines.length) { const bl=lines[j].trim(); if(!bl){j++;continue;} const bi=getIndent(lines[j]); if(bi<base) break; if(bi===base) { if(/^if .+:$/.test(bl)||/^elif .+:$/.test(bl)) { const cond=bl.replace(/^(if|elif)\s+/,'').slice(0,-1).trim(); const {body,end}=collectBody(lines,j+1,base); branches.push({cond,body}); j=end; } else if(/^else:$/.test(bl)) { const {body,end}=collectBody(lines,j+1,base); branches.push({cond:'__else__',body}); j=end; } else break; } else break; }
+          let exec=false; for (const b of branches) { if(exec) break; if(b.cond==='__else__'||evalCond(b.cond,env)) { const res=runBlock(b.body,env); if(res&&res.signal) return res; exec=true; } }
+          i=j; continue;
+        }
+
+        // assignment: a, b = ... or var = ...
+        m=t.match(/^([a-zA-Z_,\s]+)\s*=\s*(.+)$/);
+        if (m) {
+          const lhs=m[1].trim(), rhs=m[2].trim();
+          const val=evalVal(rhs,env);
+          if (lhs.includes(',')) { const vars=lhs.split(',').map(v=>v.trim()); if(Array.isArray(val)) vars.forEach((v,j2)=>{env[v]=val[j2];}); else vars.forEach((v,j2)=>{env[v]=j2===0?val:undefined;}); }
+          else env[lhs]=val;
+          i++; continue;
+        }
+        i++;
+      }
+      return {signal:null};
+    }
+
+    runBlock(code.split('\n'),{});
+    outEl.textContent = output.join('\n') || '(출력 없음)';
+  } catch(e) { outEl.className='sim-output error'; outEl.textContent='오류: '+e.message; }
+}
+</script>
+</body>
+</html>

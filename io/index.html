@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01강 입출력문 인터랙티브 강의 | 세영코딩연구소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1628; --panel:#10203a; --panel2:#152848; --line:#24406b;
+  --teal:#2dd4bf; --cyan:#38bdf8; --orange:#fbbf24;
+  --text:#e8f1fb; --sub:#a9c2e0; --good:#34d399; --bad:#f87171;
+  --mono:'JetBrains Mono','Noto Sans KR',monospace;
+  --sans:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:17px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;}
+
+header.hero{padding:2.5rem 1.2rem 1.5rem;text-align:center;background:linear-gradient(180deg,#0c1e3d 0%,var(--bg) 100%);border-bottom:1px solid var(--line);}
+.hero .lab{font-family:var(--mono);color:var(--teal);font-size:.95rem;letter-spacing:.18em;font-weight:600;}
+.hero h1{font-size:2rem;font-weight:900;margin:.5rem 0 .3rem;line-height:1.35;}
+.hero h1 .fx{color:var(--cyan);}
+.hero .desc{color:var(--sub);font-size:1rem;}
+
+nav.tabs{position:sticky;top:0;z-index:50;display:flex;justify-content:center;flex-wrap:wrap;gap:.4rem;padding:.7rem .6rem;background:rgba(10,22,40,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+nav.tabs button{font-family:var(--sans);font-size:.96rem;font-weight:700;color:var(--sub);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.5rem .95rem;cursor:pointer;transition:all .15s;}
+nav.tabs button:hover{color:var(--text);border-color:var(--teal);}
+nav.tabs button.on{color:#06251f;background:var(--teal);border-color:var(--teal);}
+nav.tabs button:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+
+main{max-width:940px;margin:0 auto;padding:1.6rem 1.1rem 4rem;}
+section.page{display:none;}
+section.page.on{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.page-title{font-size:1.45rem;font-weight:900;margin:.6rem 0 .4rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.page-title .chip{font-family:var(--mono);font-size:.8rem;font-weight:700;color:#06251f;background:var(--teal);border-radius:6px;padding:.15rem .55rem;}
+.page-sub{color:var(--sub);margin-bottom:1.3rem;font-size:.98rem;}
+
+.tcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.25rem 1.35rem;margin-bottom:1.1rem;}
+.tcard h3{font-size:1.13rem;font-weight:900;color:var(--cyan);margin-bottom:.55rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.tcard h3 .num{font-family:var(--mono);font-size:.85rem;color:var(--orange);}
+.tcard p{margin:.35rem 0;}
+.tcard .note{color:var(--sub);font-size:.95rem;}
+.tcard .warn{color:var(--orange);font-weight:700;font-size:.96rem;}
+pre.code{font-family:var(--mono);font-size:.93rem;line-height:1.65;background:#0b1730;border:1px solid var(--line);border-radius:10px;padding:.9rem 1.05rem;overflow-x:auto;color:#cfe6ff;margin:.6rem 0;white-space:pre;}
+pre.code .cm{color:#6f8db3;}
+
+.lab-box{background:#0b1e33;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:12px;padding:1rem 1.1rem;margin:.8rem 0;}
+.lab-box .lab-title{font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:.9rem;letter-spacing:.08em;margin-bottom:.6rem;}
+.ctrl{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.55rem 0;}
+.ctrl label{font-size:.92rem;color:var(--sub);font-weight:700;}
+.ctrl input[type=text],.ctrl input[type=number]{font-family:var(--mono);font-size:.95rem;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.42rem .6rem;width:120px;}
+.ctrl input:focus-visible{outline:2px solid var(--orange);}
+.ctrl input.wide{width:200px;}
+.ctrl input.narrow{width:76px;}
+button.act{font-family:var(--mono);font-size:.9rem;font-weight:700;color:#06251f;background:var(--teal);border:1px solid var(--teal);border-radius:8px;padding:.45rem .8rem;cursor:pointer;transition:all .12s;}
+button.act:hover{filter:brightness(1.12);}
+button.act.alt{background:transparent;color:var(--teal);}
+button.act.warn2{background:transparent;color:var(--orange);border-color:var(--orange);}
+button.act.on{background:var(--cyan);border-color:var(--cyan);color:#06251f;}
+button.act:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+.result{font-family:var(--mono);font-size:.95rem;background:#081426;border:1px solid var(--line);border-radius:8px;padding:.6rem .85rem;margin-top:.55rem;color:#d7fef7;min-height:2.3rem;white-space:pre-wrap;}
+
+.flow{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;margin:.6rem 0;}
+.flow .fstep{font-family:var(--mono);font-size:.88rem;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.45rem .7rem;color:#cfe6ff;}
+.flow .fstep b{color:var(--teal);font-weight:700;}
+.flow .arrow{color:var(--sub);font-weight:700;}
+
+/* 연습문제 */
+.pcard{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:14px;padding:1.15rem 1.3rem;margin-bottom:1.1rem;}
+.pcard .phead{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.pcard .pno{font-family:var(--mono);font-weight:700;color:var(--orange);white-space:nowrap;}
+.pcard .ptitle{font-weight:700;font-size:1.05rem;flex:1;min-width:200px;}
+.pcard .spec{color:var(--sub);font-size:.93rem;margin:.15rem 0;}
+.pcard .spec b{color:var(--cyan);font-family:var(--mono);font-size:.85rem;}
+.exio{display:flex;gap:.6rem;flex-wrap:wrap;margin:.5rem 0;}
+.exio div{flex:1;min-width:130px;background:#0b1730;border:1px solid var(--line);border-radius:8px;padding:.5rem .75rem;}
+.exio .lbl{font-family:var(--mono);font-size:.78rem;color:var(--teal);font-weight:700;}
+.exio pre{font-family:var(--mono);font-size:.92rem;color:#d7fef7;white-space:pre-wrap;margin-top:.15rem;}
+.solwrap{display:none;margin-top:.6rem;}
+.solwrap.show{display:block;animation:fade .2s ease;}
+
+/* 퀴즈 */
+.scorebar{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.8rem 1.1rem;margin-bottom:1.2rem;}
+.scorebar .sc{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--teal);}
+.scorebar button.reset{margin-left:auto;font-weight:700;font-size:.9rem;color:var(--sub);background:transparent;border:1px solid var(--line);border-radius:8px;padding:.35rem .85rem;cursor:pointer;font-family:var(--sans);}
+.scorebar button.reset:hover{color:var(--text);border-color:var(--teal);}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.3rem;margin-bottom:1.1rem;}
+.qcard .qhead{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.55rem;flex-wrap:wrap;}
+.qcard .qno{font-family:var(--mono);font-weight:700;color:var(--orange);white-space:nowrap;}
+.qcard .qtext{font-weight:700;font-size:1.03rem;flex:1;min-width:220px;}
+.qcard pre.code{margin:.4rem 0 .6rem;}
+.choices{display:grid;gap:.55rem;margin-top:.5rem;}
+.choices button{text-align:left;font-family:var(--mono);font-size:.97rem;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:.62rem .95rem;cursor:pointer;transition:all .12s;line-height:1.55;}
+.choices button:hover:not(:disabled){border-color:var(--cyan);}
+.choices button:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+.choices button:disabled{cursor:default;opacity:.92;}
+.choices button.correct{background:rgba(52,211,153,.14);border-color:var(--good);color:#c9f7e4;font-weight:700;}
+.choices button.wrong{background:rgba(248,113,113,.12);border-color:var(--bad);color:#ffd9d9;}
+.sol{display:none;margin-top:.8rem;background:#0b1e33;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:.7rem 1rem;font-size:.96rem;color:#d5e8fb;white-space:pre-wrap;}
+.sol.show{display:block;animation:fade .2s ease;}
+.sol .tag{font-family:var(--mono);font-weight:700;color:var(--cyan);margin-right:.4rem;}
+
+footer{text-align:center;color:var(--sub);font-family:var(--mono);font-size:.85rem;padding:2rem 1rem;border-top:1px solid var(--line);}
+
+@media (max-width:560px){
+  html{font-size:16.5px;}
+  .hero h1{font-size:1.45rem;}
+  nav.tabs button{font-size:.87rem;padding:.45rem .68rem;}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="lab">SEYEONG CODING LAB · PYTHON SERIES</div>
+  <h1>01강 입출력문 <span class="fx">인터랙티브 강의</span></h1>
+  <div class="desc">print() · input() · 형변환 · 입력 패턴 — 그리고 직접 풀어보는 연습문제 15제</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-p="0" class="on">1. print() 출력</button>
+  <button data-p="1">2. input() 입력</button>
+  <button data-p="2">3. 4대 입력 패턴</button>
+  <button data-p="3">4. 연습문제 15제</button>
+  <button data-p="4">5. 확인 퀴즈</button>
+</nav>
+
+<main>
+
+<!-- ============ 0. print ============ -->
+<section class="page on" id="page0">
+  <div class="page-title"><span class="chip">OUTPUT</span>print() — 화면에 결과 보여주기</div>
+  <div class="page-sub">입력(Input)은 키보드로 값을 넣는 것, 출력(Output)은 프로그램이 화면에 결과를 보여주는 것입니다.</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>print() 여섯 가지 사용법</h3>
+    <pre class="code">print("Hello Python")      <span class="cm"># ① 기본 출력 → Hello Python</span>
+print("나이:", 13)          <span class="cm"># ② 여러 값 → 나이: 13</span>
+
+name = "민수"
+print(name)                 <span class="cm"># ③ 변수 출력 → 민수</span>
+
+a = 3
+b = 5
+print(a, b)                 <span class="cm"># ④ 여러 변수 → 3 5</span>
+
+print(1, 2, 3, sep="-")     <span class="cm"># ⑤ sep: 구분자 → 1-2-3</span>
+
+print("Hello", end=" ")     <span class="cm"># ⑥ end: 줄바꿈 변경</span>
+print("Python")             <span class="cm">#    → Hello Python (한 줄!)</span></pre>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>sep 실험실 — 구분자를 바꿔보세요</h3>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · print(값들, sep="?")</div>
+      <div class="ctrl">
+        <label>값들(쉼표 구분)</label>
+        <input type="text" id="sepVals" class="wide" value="1, 2, 3">
+        <label>sep =</label>
+        <input type="text" id="sepStr" class="narrow" value="-">
+        <button class="act" id="sepBtn">실행</button>
+      </div>
+      <div class="ctrl">
+        <button class="act alt" data-sep=" ">sep=" " (기본)</button>
+        <button class="act alt" data-sep="-">sep="-"</button>
+        <button class="act alt" data-sep="">sep=""</button>
+        <button class="act alt" data-sep=", ">sep=", "</button>
+      </div>
+      <div class="result" id="sepOut"></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">03</span>end 실험실 — 줄바꿈을 바꿔보세요</h3>
+    <p class="note">print는 끝에 자동으로 줄바꿈(\n)을 붙입니다. end 옵션으로 바꿀 수 있어요.</p>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · print("Hello", end="?") 다음 print("Python")</div>
+      <div class="ctrl">
+        <button class="act endMode on" data-e="nl">end="\n" (기본)</button>
+        <button class="act endMode" data-e="sp">end=" "</button>
+        <button class="act endMode" data-e="no">end=""</button>
+        <button class="act endMode" data-e="ar">end=" → "</button>
+      </div>
+      <div class="result" id="endOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1. input ============ -->
+<section class="page" id="page1">
+  <div class="page-title"><span class="chip">INPUT</span>input() — 키보드로 값 받기</div>
+  <div class="page-sub">input()은 무엇을 입력해도 항상 문자열(str)로 받습니다. 숫자로 쓰려면 int()로 바꿔야 해요!</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>input() 네 가지 사용법</h3>
+    <pre class="code">name = input()                    <span class="cm"># ① 문자열 입력</span>
+name = input("이름을 입력하세요: ")   <span class="cm"># ② 안내문과 함께</span>
+a = int(input())                  <span class="cm"># ③ 정수 입력 (형변환!)</span>
+a, b = map(int, input().split())  <span class="cm"># ④ 두 숫자 한 줄 입력</span></pre>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>"7"과 7은 다르다! — 자료형 비교 실험</h3>
+    <p class="note">같은 값을 입력해도 int()를 쓰느냐에 따라 a + a의 결과가 완전히 달라집니다.</p>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 입력값을 넣고 두 버튼을 비교해 보세요</div>
+      <div class="ctrl">
+        <label>키보드 입력:</label>
+        <input type="text" id="tyVal" class="narrow" value="7">
+        <button class="act" id="tyStr">a = input()</button>
+        <button class="act" id="tyInt">a = int(input())</button>
+      </div>
+      <div class="result" id="tyOut">버튼을 눌러 a + a 결과를 확인하세요.</div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">03</span>map 분해기 — a, b = map(int, input().split())</h3>
+    <p class="note">한 줄이지만 4단계가 숨어 있습니다. 각 단계에서 값이 어떻게 변하는지 보세요.</p>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 입력을 바꿔 단계별 변환 보기</div>
+      <div class="ctrl">
+        <label>키보드 입력:</label>
+        <input type="text" id="mpVal" class="wide" value="3 5">
+        <button class="act" id="mpBtn">분해 실행</button>
+      </div>
+      <div class="flow" id="mpFlow"></div>
+      <div class="result" id="mpOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. 패턴 ============ -->
+<section class="page" id="page2">
+  <div class="page-title"><span class="chip">PATTERN</span>자주 사용하는 입력 패턴 4가지</div>
+  <div class="page-sub">채점 사이트(코드업, 정올) 문제의 90%는 이 4가지 패턴으로 입력을 받습니다. 몸에 익혀두세요!</div>
+  <div id="patArea"></div>
+</section>
+
+<!-- ============ 3. 연습문제 ============ -->
+<section class="page" id="page3">
+  <div class="page-title"><span class="chip">PRACTICE</span>입출력 연습문제 15제 (우리형식)</div>
+  <div class="page-sub">입력값을 바꿔가며 「실행」으로 출력을 확인하고, 스스로 코드를 떠올린 뒤 「정답 코드」를 열어 비교하세요.</div>
+  <div id="probArea"></div>
+
+  <div class="tcard">
+    <h3><span class="num">★</span>다음 단계 — 코드업(CodeUp) 도전!</h3>
+    <p>① 코드업에 가입하세요! ② 「입출력문」 문제집을 검색해 오늘 배운 패턴으로 직접 채점받아 보세요.</p>
+    <p class="note">여기 15문제와 똑같은 형식이므로, 위에서 연습한 그대로 풀 수 있습니다.</p>
+  </div>
+</section>
+
+<!-- ============ 4. 퀴즈 ============ -->
+<section class="page" id="page4">
+  <div class="page-title"><span class="chip">QUIZ</span>확인 퀴즈 10제</div>
+  <div class="page-sub">출력 결과를 예측해 보세요. 클릭 즉시 채점과 해설이 표시됩니다.</div>
+  <div id="quizArea"></div>
+</section>
+
+</main>
+
+<footer>세영코딩연구소 · Python 시리즈 01강 — Input / Output</footer>
+
+<script>
+"use strict";
+
+function el(tag, cls, text){
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function pyRepr(v){
+  if (Array.isArray(v)) return "[" + v.map(pyRepr).join(", ") + "]";
+  return String(v);
+}
+
+/* ============ 0. sep 실험실 ============ */
+(function(){
+  var out = document.getElementById("sepOut");
+  function run(){
+    var raw = document.getElementById("sepVals").value;
+    var sep = document.getElementById("sepStr").value;
+    var vals = raw.split(",").map(function(s){ return s.trim(); }).filter(function(s){ return s !== ""; });
+    if (!vals.length){ out.textContent = "값을 1개 이상 입력해 주세요."; return; }
+    var sepShow = sep.replace(/ /g, "\u00b7");
+    out.textContent = "print(" + vals.join(", ") + ", sep=\"" + sep + "\")\n출력 → " + vals.join(sep)
+      + "\n(sep=\"" + sepShow + "\" : 값 사이사이에 끼워짐" + (sep === "" ? " — 빈 문자열이면 딱 붙어요!" : "") + ")";
+  }
+  document.getElementById("sepBtn").addEventListener("click", run);
+  document.querySelectorAll("button[data-sep]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.getElementById("sepStr").value = b.dataset.sep;
+      run();
+    });
+  });
+  run();
+})();
+
+/* ============ 0. end 실험실 ============ */
+(function(){
+  var out = document.getElementById("endOut");
+  var MAP = {nl: "\n", sp: " ", no: "", ar: " \u2192 "};
+  var NAME = {nl: "\"\\n\"", sp: "\" \"", no: "\"\"", ar: "\" \u2192 \""};
+  function run(mode){
+    var e = MAP[mode];
+    var line = "Hello" + e + "Python";
+    out.textContent = "print(\"Hello\", end=" + NAME[mode] + ")\nprint(\"Python\")\n\n출력:\n" + line
+      + (mode === "nl" ? "\n(기본값 \\n : 두 줄로 출력)" : "\n(줄바꿈 대신 " + NAME[mode] + "가 붙어 한 줄이 됩니다!)");
+  }
+  document.querySelectorAll(".endMode").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll(".endMode").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+      run(b.dataset.e);
+    });
+  });
+  run("nl");
+})();
+
+/* ============ 1. 자료형 비교 ============ */
+(function(){
+  var out = document.getElementById("tyOut");
+  document.getElementById("tyStr").addEventListener("click", function(){
+    var v = document.getElementById("tyVal").value;
+    out.textContent = "a = input()        # 입력: " + v + "\na 는 문자열 \"" + v + "\"  <str>\nprint(a + a)  →  " + (v + v) + "\n\n문자열끼리 + 는 \"이어붙이기\"입니다!";
+  });
+  document.getElementById("tyInt").addEventListener("click", function(){
+    var v = document.getElementById("tyVal").value.trim();
+    var n = parseInt(v, 10);
+    if (isNaN(n) || !/^-?\d+$/.test(v)){
+      out.textContent = "a = int(input())   # 입력: " + v + "\nValueError: invalid literal for int() with base 10: '" + v + "'\n\n숫자가 아닌 값은 int()로 바꿀 수 없습니다!";
+      return;
+    }
+    out.textContent = "a = int(input())   # 입력: " + v + "\na 는 정수 " + n + "  <int>\nprint(a + a)  →  " + (n + n) + "\n\n정수끼리 + 는 진짜 덧셈입니다!";
+  });
+})();
+
+/* ============ 1. map 분해기 ============ */
+(function(){
+  var flow = document.getElementById("mpFlow");
+  var out = document.getElementById("mpOut");
+  function run(){
+    var line = document.getElementById("mpVal").value;
+    while (flow.firstChild) flow.removeChild(flow.firstChild);
+    var parts = line.trim() === "" ? [] : line.trim().split(/\s+/);
+
+    function addStep(label, val){
+      var s = el("div", "fstep");
+      var b = el("b", "", label + " ");
+      s.appendChild(b);
+      s.appendChild(document.createTextNode(val));
+      flow.appendChild(s);
+    }
+    function addArrow(){ flow.appendChild(el("span", "arrow", "\u2192")); }
+
+    addStep("input()", "\"" + line + "\"");
+    addArrow();
+    addStep(".split()", "[" + parts.map(function(p){ return "'" + p + "'"; }).join(", ") + "]");
+    addArrow();
+
+    var nums = [], bad = null;
+    parts.forEach(function(p){
+      var n = parseInt(p, 10);
+      if (isNaN(n) || !/^-?\d+$/.test(p)) bad = p; else nums.push(n);
+    });
+
+    if (bad !== null){
+      addStep("map(int, ...)", "\u274c");
+      out.textContent = "ValueError: invalid literal for int() with base 10: '" + bad + "'\n숫자가 아닌 값이 섞여 있으면 int 변환에서 오류가 납니다.";
+      return;
+    }
+    addStep("map(int, ...)", nums.join("과 "));
+    addArrow();
+    if (nums.length !== 2){
+      addStep("a, b =", "\u274c");
+      out.textContent = (nums.length < 2
+        ? "ValueError: not enough values to unpack (expected 2, got " + nums.length + ")"
+        : "ValueError: too many values to unpack (expected 2)")
+        + "\na, b 두 변수에는 정확히 2개의 값이 필요합니다! (지금 " + nums.length + "개)";
+      return;
+    }
+    addStep("a, b =", "a=" + nums[0] + ", b=" + nums[1]);
+    out.textContent = "a = " + nums[0] + " <int>,  b = " + nums[1] + " <int>\nprint(a + b)  →  " + (nums[0] + nums[1]);
+  }
+  document.getElementById("mpBtn").addEventListener("click", run);
+  run();
+})();
+
+/* ============ 2. 패턴 4 ============ */
+(function(){
+  var PATS = [
+    {
+      title: "패턴 1 · 정수 1개 입력",
+      code: "n = int(input())",
+      def: "7",
+      run: function(v){
+        var t = v.trim();
+        if (!/^-?\d+$/.test(t)) return {err: "ValueError: '" + t + "' 는 정수가 아닙니다."};
+        return {msg: "n = " + parseInt(t, 10) + "  <int>"};
+      }
+    },
+    {
+      title: "패턴 2 · 문자열 입력",
+      code: "s = input()",
+      def: "Hello",
+      run: function(v){
+        return {msg: "s = \"" + v + "\"  <str>  (무엇을 넣어도 문자열!)"};
+      }
+    },
+    {
+      title: "패턴 3 · 정수 여러 개 입력",
+      code: "a, b = map(int, input().split())",
+      def: "3 5",
+      run: function(v){
+        var parts = v.trim() === "" ? [] : v.trim().split(/\s+/);
+        if (parts.length !== 2) return {err: "ValueError: 2개의 값이 필요합니다 (지금 " + parts.length + "개)."};
+        if (!/^-?\d+$/.test(parts[0]) || !/^-?\d+$/.test(parts[1])) return {err: "ValueError: 정수만 입력해 주세요."};
+        var a = parseInt(parts[0], 10), b = parseInt(parts[1], 10);
+        return {msg: "a = " + a + " <int>,  b = " + b + " <int>"};
+      }
+    },
+    {
+      title: "패턴 4 · 리스트 입력",
+      code: "arr = list(map(int, input().split()))",
+      def: "1 2 3 4",
+      run: function(v){
+        var parts = v.trim() === "" ? [] : v.trim().split(/\s+/);
+        var nums = [];
+        for (var i = 0; i < parts.length; i++){
+          if (!/^-?\d+$/.test(parts[i])) return {err: "ValueError: '" + parts[i] + "' 는 정수가 아닙니다."};
+          nums.push(parseInt(parts[i], 10));
+        }
+        return {msg: "arr = " + pyRepr(nums) + "  <list>  (len = " + nums.length + " — 개수 제한 없음!)"};
+      }
+    }
+  ];
+  var area = document.getElementById("patArea");
+  PATS.forEach(function(px, n){
+    var card = el("div", "tcard");
+    var h = el("h3");
+    h.appendChild(el("span", "num", "0" + (n + 1)));
+    h.appendChild(document.createTextNode(px.title));
+    card.appendChild(h);
+    card.appendChild(el("pre", "code", px.code));
+
+    var lab = el("div", "lab-box");
+    lab.appendChild(el("div", "lab-title", "INTERACTIVE · 키보드 입력을 흉내내 보세요"));
+    var row = el("div", "ctrl");
+    row.appendChild(el("label", "", "입력:"));
+    var f = el("input", "wide");
+    f.type = "text"; f.value = px.def;
+    row.appendChild(f);
+    var btn = el("button", "act", "실행 ▶");
+    btn.type = "button";
+    row.appendChild(btn);
+    lab.appendChild(row);
+    var out = el("div", "result", "「실행」으로 변수에 담기는 값과 자료형을 확인하세요.");
+    lab.appendChild(out);
+    card.appendChild(lab);
+    area.appendChild(card);
+
+    btn.addEventListener("click", function(){
+      var r = px.run(f.value);
+      out.textContent = r.err ? r.err : r.msg;
+    });
+  });
+})();
+
+/* ============ 3. 연습문제 15 ============ */
+(function(){
+  function intOf(s){
+    var t = s.trim();
+    if (!/^-?\d+$/.test(t)) return null;
+    return parseInt(t, 10);
+  }
+  function twoInts(s){
+    var p = s.trim().split(/\s+/);
+    if (p.length !== 2) return null;
+    var a = intOf(p[0]), b = intOf(p[1]);
+    if (a === null || b === null) return null;
+    return [a, b];
+  }
+  function threeInts(s){
+    var p = s.trim().split(/\s+/);
+    if (p.length !== 3) return null;
+    var a = intOf(p[0]), b = intOf(p[1]), c = intOf(p[2]);
+    if (a === null || b === null || c === null) return null;
+    return [a, b, c];
+  }
+  var VE = "ValueError: 입력 형식을 확인해 주세요.";
+
+  var PROBS = [
+    {t: "이름 그대로 출력", inS: "이름이 한 줄로 입력된다.", outS: "입력받은 이름을 출력한다.",
+     exIn: ["민수"], exOut: "민수",
+     code: "name = input()\nprint(name)",
+     fields: [{l: "입력", v: "민수"}],
+     run: function(v){ return v[0]; }},
+    {t: "정수 하나 그대로 출력", inS: "정수 하나가 입력된다.", outS: "입력받은 정수를 출력한다.",
+     exIn: ["7"], exOut: "7",
+     code: "n = int(input())\nprint(n)",
+     fields: [{l: "입력", v: "7"}],
+     run: function(v){ var n = intOf(v[0]); return n === null ? VE : String(n); }},
+    {t: "두 정수의 합", inS: "두 정수가 공백으로 구분되어 입력된다.", outS: "두 수의 합을 출력한다.",
+     exIn: ["3 4"], exOut: "7",
+     code: "a, b = map(int, input().split())\nprint(a + b)",
+     fields: [{l: "입력", v: "3 4"}],
+     run: function(v){ var p = twoInts(v[0]); return p ? String(p[0] + p[1]) : VE; }},
+    {t: "두 정수의 곱", inS: "두 정수가 공백으로 입력된다.", outS: "곱을 출력한다.",
+     exIn: ["3 5"], exOut: "15",
+     code: "a, b = map(int, input().split())\nprint(a * b)",
+     fields: [{l: "입력", v: "3 5"}],
+     run: function(v){ var p = twoInts(v[0]); return p ? String(p[0] * p[1]) : VE; }},
+    {t: "세 정수 모두 출력", inS: "세 정수가 공백으로 구분되어 입력된다.", outS: "세 수를 공백으로 출력한다.",
+     exIn: ["1 2 3"], exOut: "1 2 3",
+     code: "a, b, c = map(int, input().split())\nprint(a, b, c)",
+     fields: [{l: "입력", v: "1 2 3"}],
+     run: function(v){ var p = threeInts(v[0]); return p ? p.join(" ") : VE; }},
+    {t: "Hello와 함께 출력", inS: "문자열 한 줄", outS: "Hello 문자열",
+     exIn: ["Python"], exOut: "Hello Python",
+     code: "s = input()\nprint(\"Hello\", s)",
+     fields: [{l: "입력", v: "Python"}],
+     run: function(v){ return "Hello " + v[0].trim(); }},
+    {t: "두 정수의 차 (A−B)", inS: "두 정수", outS: "A-B",
+     exIn: ["9 3"], exOut: "6",
+     code: "a, b = map(int, input().split())\nprint(a - b)",
+     fields: [{l: "입력", v: "9 3"}],
+     run: function(v){ var p = twoInts(v[0]); return p ? String(p[0] - p[1]) : VE; }},
+    {t: "두 정수의 몫", inS: "두 정수", outS: "정수 나눗셈 결과",
+     exIn: ["8 2"], exOut: "4",
+     code: "a, b = map(int, input().split())\nprint(a // b)   # //는 몫!",
+     fields: [{l: "입력", v: "8 2"}],
+     run: function(v){
+       var p = twoInts(v[0]); if (!p) return VE;
+       if (p[1] === 0) return "ZeroDivisionError: integer division or modulo by zero";
+       return String(Math.floor(p[0] / p[1]));
+     }},
+    {t: "두 정수의 나머지", inS: "두 정수", outS: "나머지",
+     exIn: ["9 4"], exOut: "1",
+     code: "a, b = map(int, input().split())\nprint(a % b)    # %는 나머지!",
+     fields: [{l: "입력", v: "9 4"}],
+     run: function(v){
+       var p = twoInts(v[0]); if (!p) return VE;
+       if (p[1] === 0) return "ZeroDivisionError: integer division or modulo by zero";
+       return String(((p[0] % p[1]) + Math.abs(p[1])) % Math.abs(p[1]));
+     }},
+    {t: "세 정수의 합", inS: "세 정수", outS: "합",
+     exIn: ["1 2 3"], exOut: "6",
+     code: "a, b, c = map(int, input().split())\nprint(a + b + c)",
+     fields: [{l: "입력", v: "1 2 3"}],
+     run: function(v){ var p = threeInts(v[0]); return p ? String(p[0] + p[1] + p[2]) : VE; }},
+    {t: "두 배로 출력", inS: "정수 하나", outS: "두 배 값",
+     exIn: ["5"], exOut: "10",
+     code: "n = int(input())\nprint(n * 2)",
+     fields: [{l: "입력", v: "5"}],
+     run: function(v){ var n = intOf(v[0]); return n === null ? VE : String(n * 2); }},
+    {t: "세 배로 출력", inS: "정수", outS: "세 배",
+     exIn: ["4"], exOut: "12",
+     code: "n = int(input())\nprint(n * 3)",
+     fields: [{l: "입력", v: "4"}],
+     run: function(v){ var n = intOf(v[0]); return n === null ? VE : String(n * 3); }},
+    {t: "두 문자열 한 줄로 출력", inS: "두 문자열 (두 줄)", outS: "두 문자열",
+     exIn: ["Hello", "Python"], exOut: "Hello Python",
+     code: "a = input()\nb = input()\nprint(a, b)",
+     fields: [{l: "첫째 줄", v: "Hello"}, {l: "둘째 줄", v: "Python"}],
+     run: function(v){ return v[0].trim() + " " + v[1].trim(); }},
+    {t: "큰 수 출력", inS: "두 정수", outS: "큰 수",
+     exIn: ["3 9"], exOut: "9",
+     code: "a, b = map(int, input().split())\nif a > b:\n    print(a)\nelse:\n    print(b)",
+     fields: [{l: "입력", v: "3 9"}],
+     run: function(v){ var p = twoInts(v[0]); return p ? String(Math.max(p[0], p[1])) : VE; }},
+    {t: "세 정수의 평균 (정수)", inS: "세 정수", outS: "평균",
+     exIn: ["3 6 9"], exOut: "6",
+     code: "a, b, c = map(int, input().split())\nprint((a + b + c) // 3)   # 평균이 정수로 떨어지는 입력",
+     fields: [{l: "입력", v: "3 6 9"}],
+     run: function(v){ var p = threeInts(v[0]); return p ? String(Math.floor((p[0] + p[1] + p[2]) / 3)) : VE; }}
+  ];
+
+  var area = document.getElementById("probArea");
+  PROBS.forEach(function(pr, n){
+    var no = n + 1;
+    var card = el("div", "pcard");
+    var head = el("div", "phead");
+    head.appendChild(el("span", "pno", "문제 " + (no < 10 ? "0" + no : no)));
+    head.appendChild(el("span", "ptitle", pr.t));
+    card.appendChild(head);
+
+    var s1 = el("div", "spec");
+    s1.appendChild(el("b", "", "입력  "));
+    s1.appendChild(document.createTextNode(pr.inS));
+    card.appendChild(s1);
+    var s2 = el("div", "spec");
+    s2.appendChild(el("b", "", "출력  "));
+    s2.appendChild(document.createTextNode(pr.outS));
+    card.appendChild(s2);
+
+    var ex = el("div", "exio");
+    var e1 = el("div");
+    e1.appendChild(el("div", "lbl", "입출력 예제 — 입력"));
+    e1.appendChild(el("pre", "", pr.exIn.join("\n")));
+    var e2 = el("div");
+    e2.appendChild(el("div", "lbl", "입출력 예제 — 출력"));
+    e2.appendChild(el("pre", "", pr.exOut));
+    ex.appendChild(e1); ex.appendChild(e2);
+    card.appendChild(ex);
+
+    var lab = el("div", "lab-box");
+    lab.appendChild(el("div", "lab-title", "INTERACTIVE · 입력을 바꿔 실행해 보세요"));
+    var fields = [];
+    pr.fields.forEach(function(fd){
+      var row = el("div", "ctrl");
+      row.appendChild(el("label", "", fd.l + " :"));
+      var f = el("input", "wide");
+      f.type = "text"; f.value = fd.v;
+      row.appendChild(f);
+      fields.push(f);
+      lab.appendChild(row);
+    });
+    var row2 = el("div", "ctrl");
+    var runBtn = el("button", "act", "실행 ▶");
+    runBtn.type = "button";
+    row2.appendChild(runBtn);
+    var solBtn = el("button", "act alt", "정답 코드 보기");
+    solBtn.type = "button";
+    row2.appendChild(solBtn);
+    lab.appendChild(row2);
+    var out = el("div", "result", "「실행」을 누르면 출력이 표시됩니다.");
+    lab.appendChild(out);
+    card.appendChild(lab);
+
+    var solWrap = el("div", "solwrap");
+    solWrap.appendChild(el("pre", "code", pr.code));
+    card.appendChild(solWrap);
+
+    area.appendChild(card);
+
+    runBtn.addEventListener("click", function(){
+      var r = pr.run(fields.map(function(f){ return f.value; }));
+      out.textContent = "출력:\n" + r;
+    });
+    solBtn.addEventListener("click", function(){
+      var showing = solWrap.classList.toggle("show");
+      solBtn.textContent = showing ? "정답 코드 닫기" : "정답 코드 보기";
+    });
+  });
+})();
+
+/* ============ 4. 퀴즈 ============ */
+var QUIZ = [
+  {q: "출력 결과는?", code: "print(\"나이:\", 13)",
+   c: ["나이: 13", "나이:13", "\"나이:\" 13", "나이, 13"], a: 0,
+   s: "print는 쉼표로 구분한 값들을 공백 한 칸으로 이어 출력합니다. → 나이: 13"},
+  {q: "출력 결과는?", code: "print(1, 2, 3, sep=\"-\")",
+   c: ["1-2-3", "1 - 2 - 3", "1 2 3", "123"], a: 0,
+   s: "sep은 값 사이에 들어가는 구분자입니다. 기본값 공백 대신 \"-\"가 끼워져 1-2-3."},
+  {q: "출력 결과는? (전체 화면 기준)", code: "print(\"Hello\", end=\" \")\nprint(\"Python\")",
+   c: ["Hello Python (한 줄)", "Hello\nPython (두 줄)", "HelloPython", "Hello  Python"], a: 0,
+   s: "end=\" \"는 줄바꿈 대신 공백을 붙입니다. 그래서 다음 print가 같은 줄에 이어져 Hello Python."},
+  {q: "input()이 돌려주는 값의 자료형은? (무엇을 입력하든)",
+   code: "a = input()",
+   c: ["문자열(str)", "정수(int)", "입력에 따라 다름", "실수(float)"], a: 0,
+   s: "input()은 항상 문자열을 반환합니다. 7을 입력해도 \"7\"이라는 문자열! 숫자로 쓰려면 int()가 필요합니다."},
+  {q: "키보드로 7을 입력했을 때 출력 결과는?", code: "a = input()\nprint(a + a)",
+   c: ["77", "14", "7 7", "오류 발생"], a: 0,
+   s: "a는 문자열 \"7\"이므로 + 는 이어붙이기가 되어 \"77\"이 출력됩니다. 형변환의 중요성!"},
+  {q: "키보드로 7을 입력했을 때 출력 결과는?", code: "a = int(input())\nprint(a + a)",
+   c: ["14", "77", "7 7", "오류 발생"], a: 0,
+   s: "int()로 정수 7이 되었으므로 진짜 덧셈이 되어 14가 출력됩니다."},
+  {q: "입력이 \"3 5\"일 때 출력 결과는?", code: "a, b = map(int, input().split())\nprint(a + b)",
+   c: ["8", "35", "3 5", "오류 발생"], a: 0,
+   s: "split()으로 ['3','5'], map(int, ...)으로 정수 3과 5가 되어 a=3, b=5. 합은 8."},
+  {q: "출력 결과는?", code: "a = 3\nb = 5\nprint(a, b)",
+   c: ["3 5", "35", "3, 5", "a b"], a: 0,
+   s: "여러 값을 쉼표로 나열하면 공백 한 칸으로 구분되어 출력됩니다. → 3 5"},
+  {q: "입력이 \"1 2 3\"일 때 arr의 값은?", code: "arr = list(map(int, input().split()))",
+   c: ["[1, 2, 3]", "['1', '2', '3']", "\"1 2 3\"", "[123]"], a: 0,
+   s: "split → 문자열 리스트, map(int, ...) → 정수 변환, list() → 정수 리스트 [1, 2, 3]. 개수 제한 없이 받을 때 씁니다."},
+  {q: "출력 결과는?", code: "print(\"A\", \"B\", sep=\"\")",
+   c: ["AB", "A B", "A\"\"B", "A, B"], a: 0,
+   s: "sep=\"\"는 빈 문자열이므로 값 사이에 아무것도 없이 딱 붙어 AB가 됩니다."}
+];
+
+(function(){
+  var solved = {};
+  var area = document.getElementById("quizArea");
+  var bar = el("div", "scorebar");
+  var sc = el("span", "sc", "점수 0 / " + QUIZ.length);
+  bar.appendChild(sc);
+  var rst = el("button", "reset", "다시 풀기");
+  rst.type = "button";
+  bar.appendChild(rst);
+  area.appendChild(bar);
+  var listWrap = el("div");
+  area.appendChild(listWrap);
+
+  function shuffle4(){
+    var idx = [0, 1, 2, 3];
+    for (var i = 3; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+    }
+    return idx;
+  }
+  function updateScore(){
+    var c = 0;
+    for (var k in solved) if (solved[k] === true) c++;
+    sc.textContent = "점수 " + c + " / " + QUIZ.length;
+  }
+  function build(){
+    while (listWrap.firstChild) listWrap.removeChild(listWrap.firstChild);
+    QUIZ.forEach(function(q, gi){
+      var card = el("div", "qcard");
+      var head = el("div", "qhead");
+      head.appendChild(el("span", "qno", "Q" + (gi + 1 < 10 ? "0" + (gi + 1) : gi + 1)));
+      head.appendChild(el("span", "qtext", q.q));
+      card.appendChild(head);
+      card.appendChild(el("pre", "code", q.code));
+
+      var box = el("div", "choices");
+      var order = shuffle4();
+      var btns = [];
+      var sol = el("div", "sol");
+      sol.appendChild(el("span", "tag", "해설"));
+      sol.appendChild(document.createTextNode(q.s));
+
+      order.forEach(function(orig, pos){
+        var b = el("button", "", String.fromCharCode(9312 + pos) + " " + q.c[orig]);
+        b.type = "button";
+        b.addEventListener("click", function(){
+          if (solved[gi] !== undefined) return;
+          var ok = (orig === q.a);
+          solved[gi] = ok;
+          btns.forEach(function(bb, k){
+            bb.disabled = true;
+            if (order[k] === q.a) bb.classList.add("correct");
+          });
+          if (!ok) b.classList.add("wrong");
+          sol.classList.add("show");
+          updateScore();
+        });
+        btns.push(b);
+        box.appendChild(b);
+      });
+      card.appendChild(box);
+      card.appendChild(sol);
+      listWrap.appendChild(card);
+    });
+    updateScore();
+  }
+  rst.addEventListener("click", function(){ solved = {}; build(); });
+  build();
+})();
+
+/* ============ 탭 ============ */
+document.getElementById("tabs").addEventListener("click", function(ev){
+  var b = ev.target.closest("button");
+  if (!b) return;
+  var n = Number(b.dataset.p);
+  document.querySelectorAll("section.page").forEach(function(p, i){ p.classList.toggle("on", i === n); });
+  document.querySelectorAll("nav.tabs button").forEach(function(t){ t.classList.toggle("on", Number(t.dataset.p) === n); });
+  window.scrollTo({top: 0, behavior: "auto"});
+});
+</script>
+</body>
+</html>
