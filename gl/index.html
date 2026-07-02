@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>초등 사고력수학 | 최대공약수와 최소공배수</title>
+<style>
+  :root{
+    --bg:#f7fbff; --card:#ffffff; --ink:#1b2a38; --muted:#52677a;
+    --blue:#2563eb; --sky:#dbeafe; --green:#16a34a; --red:#dc2626;
+    --yellow:#fef3c7; --purple:#ede9fe; --border:#cbd5e1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;background:linear-gradient(135deg,#eef6ff,#fffaf0);color:var(--ink);font-size:18px;line-height:1.65}
+  header{padding:34px 18px;text-align:center;background:#fff;border-bottom:4px solid var(--sky)}
+  header h1{margin:0;font-size:34px;color:#0f3d7a}
+  header p{margin:10px 0 0;color:var(--muted);font-size:20px}
+  main{max-width:1120px;margin:0 auto;padding:24px 16px 70px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{background:var(--card);border:2px solid var(--border);border-radius:22px;padding:22px;box-shadow:0 8px 20px rgba(15,61,122,.08);margin-bottom:18px}
+  h2{margin:0 0 12px;color:#0f3d7a;font-size:27px}
+  h3{margin:14px 0 8px;color:#1d4ed8;font-size:22px}
+  .badge{display:inline-block;background:var(--sky);color:#1e40af;padding:5px 12px;border-radius:999px;font-weight:700;margin-right:6px}
+  .formula{background:#f8fafc;border-left:8px solid var(--blue);padding:14px 18px;border-radius:14px;font-size:20px;font-weight:700}
+  .numrow{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+  .pill{padding:8px 13px;border-radius:999px;border:2px solid #93c5fd;background:#eff6ff;font-weight:700}
+  input, select{font-size:20px;padding:10px 12px;border:2px solid var(--border);border-radius:12px;background:#fff;max-width:150px}
+  button{font-size:19px;font-weight:800;border:0;border-radius:14px;padding:12px 18px;background:var(--blue);color:#fff;cursor:pointer;margin:5px 4px 5px 0;box-shadow:0 4px 0 #1e40af}
+  button:hover{filter:brightness(1.07)} button:active{transform:translateY(2px);box-shadow:0 2px 0 #1e40af}
+  .btn2{background:#16a34a;box-shadow:0 4px 0 #166534}.btn3{background:#7c3aed;box-shadow:0 4px 0 #5b21b6}.btn4{background:#f97316;box-shadow:0 4px 0 #c2410c}
+  .result{margin-top:12px;padding:14px;border-radius:14px;background:#f1f5f9;border:2px dashed #94a3b8;min-height:58px}
+  .ok{color:var(--green);font-weight:900}.bad{color:var(--red);font-weight:900}
+  .factorBox{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}.factor{background:var(--yellow);border:2px solid #facc15;border-radius:14px;padding:10px 14px;font-weight:800}
+  .question{border:2px solid #dbeafe;background:#f8fbff;border-radius:18px;padding:16px;margin:14px 0}.qtitle{font-weight:900;font-size:21px;color:#0f3d7a}.answerLine{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}.small{font-size:15px;color:var(--muted)}
+  .visual{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.box{background:#f8fafc;border:2px solid #e2e8f0;border-radius:16px;padding:14px}.box strong{color:#0f3d7a}
+  .dot{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin:4px;border-radius:50%;background:#dbeafe;border:2px solid #60a5fa;font-weight:900}.dot.common{background:#dcfce7;border-color:#22c55e}.dot.multiple{background:#ede9fe;border-color:#a78bfa}.dot.hit{background:#fef3c7;border-color:#f59e0b}
+  table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #cbd5e1;padding:10px;text-align:center}th{background:#dbeafe}.hidden{display:none}
+  footer{text-align:center;color:#64748b;margin-top:30px;font-size:15px}
+  @media(max-width:820px){.grid,.visual{grid-template-columns:1fr} header h1{font-size:28px} body{font-size:17px} input{max-width:120px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>초등 사고력수학: 최대공약수 · 최소공배수 연습</h1>
+  <p>약수와 배수를 눈으로 확인하고, 10문제를 풀며 자동 채점해 보세요.</p>
+</header>
+<main>
+  <section class="grid">
+    <div class="card">
+      <h2>1. 핵심 개념</h2>
+      <p><span class="badge">최대공약수</span> 두 수의 <b>공통 약수</b> 중 가장 큰 수입니다.</p>
+      <p><span class="badge">최소공배수</span> 두 수의 <b>공통 배수</b> 중 가장 작은 수입니다.</p>
+      <div class="formula">두 수 a, b에 대해<br>최대공약수 × 최소공배수 = a × b</div>
+      <h3>생각 방법</h3>
+      <p>최대공약수는 “나누어 떨어지는 가장 큰 묶음”, 최소공배수는 “함께 만나는 가장 빠른 지점”으로 생각하면 쉽습니다.</p>
+    </div>
+
+    <div class="card">
+      <h2>2. 직접 계산 도구</h2>
+      <p>두 수를 입력하면 약수, 공통 약수, 배수를 시각적으로 보여줍니다.</p>
+      <div class="answerLine">
+        <label>첫 번째 수 <input id="a" type="number" value="12" min="1"></label>
+        <label>두 번째 수 <input id="b" type="number" value="18" min="1"></label>
+        <button onclick="analyzeNumbers()">분석하기</button>
+      </div>
+      <div id="analyzeResult" class="result"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>3. 눈으로 보는 약수와 배수</h2>
+    <div id="visualArea" class="visual"></div>
+  </section>
+
+  <section class="card">
+    <h2>4. 10문제 연습장</h2>
+    <p>각 문제마다 최대공약수와 최소공배수를 모두 입력하세요. <b>채점하기</b>를 누르면 정답과 해설이 나옵니다.</p>
+    <div id="quiz"></div>
+    <button class="btn2" onclick="gradeQuiz()">채점하기</button>
+    <button class="btn3" onclick="showAllSolutions()">전체 해설 보기</button>
+    <button class="btn4" onclick="resetQuiz()">다시 풀기</button>
+    <div id="score" class="result"></div>
+  </section>
+
+  <section class="card">
+    <h2>5. 선생님용 활용 팁</h2>
+    <p>1. 먼저 직접 계산 도구에서 작은 수를 넣어 약수와 배수를 눈으로 확인합니다.</p>
+    <p>2. 최대공약수는 “가장 큰 공통 약수”, 최소공배수는 “가장 작은 공통 배수”라는 말에 표시하게 합니다.</p>
+    <p>3. 심화 질문으로 “왜 최대공약수 × 최소공배수 = 두 수의 곱일까?”를 던져 사고력 활동으로 연결합니다.</p>
+  </section>
+
+  <footer>세영코딩연구소 수업자료 | HTML 단일 파일</footer>
+</main>
+<script>
+const problems = [
+  {a:8,b:12},{a:15,b:20},{a:18,b:24},{a:21,b:28},{a:16,b:40},
+  {a:27,b:36},{a:14,b:35},{a:30,b:45},{a:32,b:48},{a:42,b:56}
+];
+function gcd(x,y){x=Math.abs(x);y=Math.abs(y);while(y){let t=x%y;x=y;y=t;}return x;}
+function lcm(x,y){return x/gcd(x,y)*y;}
+function divisors(n){let arr=[];for(let i=1;i<=n;i++) if(n%i===0) arr.push(i);return arr;}
+function multiples(n,limit){let arr=[];for(let i=n;i<=limit;i+=n) arr.push(i);return arr;}
+function primeFactor(n){let temp=n, res=[];for(let p=2;p*p<=temp;p++){let c=0;while(temp%p===0){c++;temp/=p;}if(c)res.push(`${p}${c>1?'^'+c:''}`);}if(temp>1)res.push(String(temp));return res.join(' × ');}
+function analyzeNumbers(){
+  const a=Number(document.getElementById('a').value), b=Number(document.getElementById('b').value);
+  if(!a||!b||a<1||b<1){document.getElementById('analyzeResult').innerHTML='<span class="bad">1 이상의 자연수를 입력하세요.</span>';return;}
+  const g=gcd(a,b), l=lcm(a,b), da=divisors(a), db=divisors(b), common=da.filter(x=>db.includes(x));
+  document.getElementById('analyzeResult').innerHTML=`<b>${a}</b>와 <b>${b}</b>의 최대공약수는 <span class="ok">${g}</span>, 최소공배수는 <span class="ok">${l}</span>입니다.<br>확인: ${g} × ${l} = ${g*l}, ${a} × ${b} = ${a*b}`;
+  const limit=Math.min(l*2,160);
+  const ma=multiples(a,limit), mb=multiples(b,limit);
+  const commonM=ma.filter(x=>mb.includes(x));
+  document.getElementById('visualArea').innerHTML=`
+    <div class="box"><strong>${a}의 약수</strong><div>${da.map(x=>`<span class="dot ${common.includes(x)?'common':''}">${x}</span>`).join('')}</div></div>
+    <div class="box"><strong>${b}의 약수</strong><div>${db.map(x=>`<span class="dot ${common.includes(x)?'common':''}">${x}</span>`).join('')}</div></div>
+    <div class="box"><strong>${a}의 배수</strong><div>${ma.map(x=>`<span class="dot ${commonM.includes(x)?'hit':'multiple'}">${x}</span>`).join('')}</div><p class="small">노란색은 공통 배수입니다.</p></div>
+    <div class="box"><strong>${b}의 배수</strong><div>${mb.map(x=>`<span class="dot ${commonM.includes(x)?'hit':'multiple'}">${x}</span>`).join('')}</div><p class="small">가장 작은 노란색이 최소공배수입니다.</p></div>
+    <div class="box"><strong>소인수분해</strong><p>${a} = ${primeFactor(a)}</p><p>${b} = ${primeFactor(b)}</p></div>
+    <div class="box"><strong>정리</strong><p>공통 약수: ${common.join(', ')}</p><p>가장 큰 공통 약수: ${g}</p><p>가장 작은 공통 배수: ${l}</p></div>`;
+}
+function renderQuiz(){
+  const quiz=document.getElementById('quiz');
+  quiz.innerHTML=problems.map((p,i)=>`
+    <div class="question" id="q${i}">
+      <div class="qtitle">문제 ${i+1}. ${p.a}와 ${p.b}의 최대공약수와 최소공배수를 구하시오.</div>
+      <div class="answerLine">
+        <label>최대공약수 <input id="g${i}" type="number" min="1"></label>
+        <label>최소공배수 <input id="l${i}" type="number" min="1"></label>
+        <button onclick="checkOne(${i})">이 문제 확인</button>
+      </div>
+      <div id="fb${i}" class="result hidden"></div>
+    </div>`).join('');
+}
+function solutionHTML(p){
+  const g=gcd(p.a,p.b), l=lcm(p.a,p.b);
+  return `정답: 최대공약수 <span class="ok">${g}</span>, 최소공배수 <span class="ok">${l}</span><br>
+  해설: ${p.a} = ${primeFactor(p.a)}, ${p.b} = ${primeFactor(p.b)}입니다. 공통으로 나누어지는 가장 큰 수가 ${g}이고, 두 수가 함께 만나는 가장 작은 배수가 ${l}입니다.`;
+}
+function checkOne(i){
+  const p=problems[i], g=gcd(p.a,p.b), l=lcm(p.a,p.b);
+  const ug=Number(document.getElementById('g'+i).value), ul=Number(document.getElementById('l'+i).value);
+  const fb=document.getElementById('fb'+i); fb.classList.remove('hidden');
+  if(ug===g && ul===l) fb.innerHTML=`<span class="ok">정답입니다!</span><br>${solutionHTML(p)}`;
+  else fb.innerHTML=`<span class="bad">다시 확인해 보세요.</span><br>${solutionHTML(p)}`;
+}
+function gradeQuiz(){
+  let correct=0;
+  problems.forEach((p,i)=>{const g=gcd(p.a,p.b), l=lcm(p.a,p.b); if(Number(document.getElementById('g'+i).value)===g && Number(document.getElementById('l'+i).value)===l) correct++; checkOne(i);});
+  document.getElementById('score').innerHTML=`총 <b>10문제 중 ${correct}문제</b>를 맞혔습니다. ${correct===10?'<span class="ok">완벽합니다!</span>':'틀린 문제는 약수와 배수 표시를 다시 보며 복습하세요.'}`;
+}
+function showAllSolutions(){problems.forEach((_,i)=>checkOne(i));document.getElementById('score').innerHTML='전체 해설을 표시했습니다.';}
+function resetQuiz(){problems.forEach((_,i)=>{document.getElementById('g'+i).value='';document.getElementById('l'+i).value='';document.getElementById('fb'+i).classList.add('hidden');});document.getElementById('score').innerHTML='입력값을 모두 지웠습니다.';}
+renderQuiz();analyzeNumbers();
+</script>
+</body>
+</html>
