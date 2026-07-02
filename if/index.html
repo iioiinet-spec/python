@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02강 조건문(if) 인터랙티브 강의 | 세영코딩연구소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1628; --panel:#10203a; --panel2:#152848; --line:#24406b;
+  --teal:#2dd4bf; --cyan:#38bdf8; --orange:#fbbf24;
+  --text:#e8f1fb; --sub:#a9c2e0; --good:#34d399; --bad:#f87171;
+  --mono:'JetBrains Mono','Noto Sans KR',monospace;
+  --sans:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:17px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;}
+
+header.hero{padding:2.5rem 1.2rem 1.5rem;text-align:center;background:linear-gradient(180deg,#0c1e3d 0%,var(--bg) 100%);border-bottom:1px solid var(--line);}
+.hero .lab{font-family:var(--mono);color:var(--teal);font-size:.95rem;letter-spacing:.18em;font-weight:600;}
+.hero h1{font-size:2rem;font-weight:900;margin:.5rem 0 .3rem;line-height:1.35;}
+.hero h1 .fx{color:var(--cyan);}
+.hero .desc{color:var(--sub);font-size:1rem;}
+
+nav.tabs{position:sticky;top:0;z-index:50;display:flex;justify-content:center;flex-wrap:wrap;gap:.4rem;padding:.7rem .6rem;background:rgba(10,22,40,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+nav.tabs button{font-family:var(--sans);font-size:.96rem;font-weight:700;color:var(--sub);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.5rem .9rem;cursor:pointer;transition:all .15s;}
+nav.tabs button:hover{color:var(--text);border-color:var(--teal);}
+nav.tabs button.on{color:#06251f;background:var(--teal);border-color:var(--teal);}
+nav.tabs button:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+
+main{max-width:940px;margin:0 auto;padding:1.6rem 1.1rem 4rem;}
+section.page{display:none;}
+section.page.on{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.page-title{font-size:1.45rem;font-weight:900;margin:.6rem 0 .4rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.page-title .chip{font-family:var(--mono);font-size:.8rem;font-weight:700;color:#06251f;background:var(--teal);border-radius:6px;padding:.15rem .55rem;}
+.page-sub{color:var(--sub);margin-bottom:1.3rem;font-size:.98rem;}
+
+.tcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.25rem 1.35rem;margin-bottom:1.1rem;}
+.tcard h3{font-size:1.13rem;font-weight:900;color:var(--cyan);margin-bottom:.55rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+.tcard h3 .num{font-family:var(--mono);font-size:.85rem;color:var(--orange);}
+.tcard p{margin:.35rem 0;}
+.tcard .note{color:var(--sub);font-size:.95rem;}
+pre.code{font-family:var(--mono);font-size:.93rem;line-height:1.65;background:#0b1730;border:1px solid var(--line);border-radius:10px;padding:.9rem 1.05rem;overflow-x:auto;color:#cfe6ff;margin:.6rem 0;white-space:pre;}
+pre.code .cm{color:#6f8db3;}
+
+.lab-box{background:#0b1e33;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:12px;padding:1rem 1.1rem;margin:.8rem 0;}
+.lab-box .lab-title{font-family:var(--mono);font-weight:700;color:var(--cyan);font-size:.9rem;letter-spacing:.08em;margin-bottom:.6rem;}
+.ctrl{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.55rem 0;}
+.ctrl label{font-size:.92rem;color:var(--sub);font-weight:700;}
+.ctrl input[type=text],.ctrl input[type=number]{font-family:var(--mono);font-size:.95rem;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.42rem .6rem;width:110px;}
+.ctrl input:focus-visible{outline:2px solid var(--orange);}
+.ctrl input.wide{width:190px;}
+button.act{font-family:var(--mono);font-size:.9rem;font-weight:700;color:#06251f;background:var(--teal);border:1px solid var(--teal);border-radius:8px;padding:.45rem .8rem;cursor:pointer;transition:all .12s;}
+button.act:hover{filter:brightness(1.12);}
+button.act.alt{background:transparent;color:var(--teal);}
+button.act.on{background:var(--cyan);border-color:var(--cyan);color:#06251f;}
+button.act:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+.result{font-family:var(--mono);font-size:.95rem;background:#081426;border:1px solid var(--line);border-radius:8px;padding:.6rem .85rem;margin-top:.55rem;color:#d7fef7;min-height:2.3rem;white-space:pre-wrap;}
+
+/* 조건 사다리 / 흐름 */
+.ladder{display:flex;flex-direction:column;gap:.5rem;margin:.6rem 0;}
+.ladder .rung{
+  font-family:var(--mono);font-size:.95rem;
+  background:var(--panel2);border:2px solid var(--line);border-radius:10px;
+  padding:.6rem .9rem;color:#cfe6ff;transition:all .15s;
+  display:flex;justify-content:space-between;gap:.7rem;flex-wrap:wrap;align-items:center;
+}
+.ladder .rung .verdict{font-weight:700;font-size:.85rem;}
+.ladder .rung.hit{background:rgba(52,211,153,.14);border-color:var(--good);color:#c9f7e4;}
+.ladder .rung.hit .verdict{color:var(--good);}
+.ladder .rung.miss{border-color:var(--bad);}
+.ladder .rung.miss .verdict{color:var(--bad);}
+.ladder .rung.dim{opacity:.35;}
+
+.truth{width:100%;border-collapse:collapse;margin:.6rem 0;font-family:var(--mono);font-size:.92rem;}
+.truth th,.truth td{border:1px solid var(--line);padding:.45rem .7rem;text-align:center;}
+.truth th{background:var(--panel2);color:var(--cyan);}
+.truth td.T{color:var(--good);font-weight:700;}
+.truth td.F{color:var(--bad);font-weight:700;}
+
+table.optable{width:100%;border-collapse:collapse;margin:.6rem 0;font-size:.96rem;}
+table.optable th,table.optable td{border:1px solid var(--line);padding:.5rem .8rem;text-align:left;}
+table.optable th{background:var(--panel2);color:var(--cyan);font-family:var(--mono);}
+table.optable td:first-child{font-family:var(--mono);color:var(--teal);font-weight:700;}
+table.optable td.rv{font-family:var(--mono);font-weight:700;}
+table.optable td.rv.T{color:var(--good);}
+table.optable td.rv.F{color:var(--bad);}
+
+/* 연습문제 */
+.pcard{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:14px;padding:1.15rem 1.3rem;margin-bottom:1.1rem;}
+.pcard .phead{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.pcard .pno{font-family:var(--mono);font-weight:700;color:var(--orange);white-space:nowrap;}
+.pcard .ptitle{font-weight:700;font-size:1.05rem;flex:1;min-width:200px;}
+.pcard .spec{color:var(--sub);font-size:.93rem;margin:.15rem 0;}
+.pcard .spec b{color:var(--cyan);font-family:var(--mono);font-size:.85rem;}
+.exio{display:flex;gap:.6rem;flex-wrap:wrap;margin:.5rem 0;}
+.exio div{flex:1;min-width:130px;background:#0b1730;border:1px solid var(--line);border-radius:8px;padding:.5rem .75rem;}
+.exio .lbl{font-family:var(--mono);font-size:.78rem;color:var(--teal);font-weight:700;}
+.exio pre{font-family:var(--mono);font-size:.92rem;color:#d7fef7;white-space:pre-wrap;margin-top:.15rem;}
+.solwrap{display:none;margin-top:.6rem;}
+.solwrap.show{display:block;animation:fade .2s ease;}
+
+/* 퀴즈 */
+.scorebar{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:.8rem 1.1rem;margin-bottom:1.2rem;}
+.scorebar .sc{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--teal);}
+.scorebar button.reset{margin-left:auto;font-weight:700;font-size:.9rem;color:var(--sub);background:transparent;border:1px solid var(--line);border-radius:8px;padding:.35rem .85rem;cursor:pointer;font-family:var(--sans);}
+.scorebar button.reset:hover{color:var(--text);border-color:var(--teal);}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.3rem;margin-bottom:1.1rem;}
+.qcard .qhead{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.55rem;flex-wrap:wrap;}
+.qcard .qno{font-family:var(--mono);font-weight:700;color:var(--orange);white-space:nowrap;}
+.qcard .qtext{font-weight:700;font-size:1.03rem;flex:1;min-width:220px;}
+.qcard pre.code{margin:.4rem 0 .6rem;}
+.choices{display:grid;gap:.55rem;margin-top:.5rem;}
+.choices button{text-align:left;font-family:var(--mono);font-size:.97rem;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:.62rem .95rem;cursor:pointer;transition:all .12s;line-height:1.55;}
+.choices button:hover:not(:disabled){border-color:var(--cyan);}
+.choices button:focus-visible{outline:3px solid var(--orange);outline-offset:2px;}
+.choices button:disabled{cursor:default;opacity:.92;}
+.choices button.correct{background:rgba(52,211,153,.14);border-color:var(--good);color:#c9f7e4;font-weight:700;}
+.choices button.wrong{background:rgba(248,113,113,.12);border-color:var(--bad);color:#ffd9d9;}
+.sol{display:none;margin-top:.8rem;background:#0b1e33;border:1px solid var(--line);border-left:4px solid var(--cyan);border-radius:8px;padding:.7rem 1rem;font-size:.96rem;color:#d5e8fb;white-space:pre-wrap;}
+.sol.show{display:block;animation:fade .2s ease;}
+.sol .tag{font-family:var(--mono);font-weight:700;color:var(--cyan);margin-right:.4rem;}
+
+footer{text-align:center;color:var(--sub);font-family:var(--mono);font-size:.85rem;padding:2rem 1rem;border-top:1px solid var(--line);}
+
+@media (max-width:560px){
+  html{font-size:16.5px;}
+  .hero h1{font-size:1.45rem;}
+  nav.tabs button{font-size:.87rem;padding:.45rem .68rem;}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="lab">SEYEONG CODING LAB · PYTHON SERIES</div>
+  <h1>02강 조건문(if) <span class="fx">인터랙티브 강의</span></h1>
+  <div class="desc">if · else · elif · 비교/논리 연산자 · 중첩 · 삼항 — 그리고 연습문제 19제</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-p="0" class="on">1. if 기본</button>
+  <button data-p="1">2. elif 사다리</button>
+  <button data-p="2">3. 비교·논리 연산자</button>
+  <button data-p="3">4. 중첩·삼항</button>
+  <button data-p="4">5. 연습문제 19제</button>
+  <button data-p="5">6. 확인 퀴즈</button>
+</nav>
+
+<main>
+
+<!-- ============ 0. if 기본 ============ -->
+<section class="page on" id="page0">
+  <div class="page-title"><span class="chip">IF</span>조건문 — 참일 때만 실행!</div>
+  <div class="page-sub">조건문은 어떤 조건이 참(True)일 때만 실행되는 문장입니다.</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>if 문 기본 구조</h3>
+    <pre class="code">if 조건:
+    실행할 코드
+
+age = 15
+if age >= 14:
+    print("중학생입니다")   <span class="cm"># age가 14 이상이므로 실행!</span></pre>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>if 판정기 — 조건의 참/거짓을 눈으로!</h3>
+    <pre class="code">n = int(input())
+if n > 0:
+    print("양수입니다")</pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · n 값을 바꿔 조건 검사 결과 보기</div>
+      <div class="ctrl">
+        <label>n =</label>
+        <input type="number" id="j1N" value="5">
+        <button class="act" id="j1Btn">판정 실행</button>
+      </div>
+      <div class="ladder" id="j1Ladder"></div>
+      <div class="result" id="j1Out"></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">03</span>if - else — 참이면 if, 거짓이면 else!</h3>
+    <pre class="code">n = int(input())
+if n % 2 == 0:
+    print("짝수")
+else:
+    print("홀수")</pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 두 갈래 중 어느 길로 갈까?</div>
+      <div class="ctrl">
+        <label>n =</label>
+        <input type="number" id="j2N" value="7">
+        <button class="act" id="j2Btn">판정 실행</button>
+      </div>
+      <div class="ladder" id="j2Ladder"></div>
+      <div class="result" id="j2Out"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1. elif ============ -->
+<section class="page" id="page1">
+  <div class="page-title"><span class="chip">ELIF</span>if - elif - else 사다리</div>
+  <div class="page-sub">여러 조건을 위에서부터 순서대로 검사하다가, 처음으로 참이 되는 곳 하나만 실행됩니다!</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>성적 판정 시뮬레이터</h3>
+    <pre class="code">score = int(input())
+if score >= 90:
+    print("A")
+elif score >= 80:
+    print("B")
+else:
+    print("C")</pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 점수를 바꿔 검사 순서 관찰하기</div>
+      <div class="ctrl">
+        <label>score =</label>
+        <input type="number" id="grN" value="85" min="0" max="100">
+        <button class="act" id="grBtn">판정 실행</button>
+        <button class="act alt" data-gr="95">95점</button>
+        <button class="act alt" data-gr="90">90점 (경계!)</button>
+        <button class="act alt" data-gr="85">85점</button>
+        <button class="act alt" data-gr="60">60점</button>
+      </div>
+      <div class="ladder" id="grLadder"></div>
+      <div class="result" id="grOut"></div>
+    </div>
+    <p class="note">경계값(90점, 80점)을 꼭 넣어보세요. &gt;= 이므로 90점은 A입니다!</p>
+  </div>
+</section>
+
+<!-- ============ 2. 연산자 ============ -->
+<section class="page" id="page2">
+  <div class="page-title"><span class="chip">OPERATOR</span>비교 연산자 · 논리 연산자</div>
+  <div class="page-sub">조건문의 재료가 되는 연산자들입니다. 결과는 항상 True 아니면 False!</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>비교 연산자 실험기 — 6개를 한 번에!</h3>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · a, b 값을 바꾸면 표가 즉시 갱신됩니다</div>
+      <div class="ctrl">
+        <label>a =</label><input type="number" id="cmpA" value="5">
+        <label>b =</label><input type="number" id="cmpB" value="3">
+        <button class="act" id="cmpBtn">비교 실행</button>
+      </div>
+      <table class="optable" id="cmpTable">
+        <tr><th>연산자</th><th>의미</th><th>식</th><th>결과</th></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>논리 연산자 — and · or · not</h3>
+    <pre class="code">age = 15
+if age >= 14 and age <= 16:
+    print("중학생")     <span class="cm"># 두 조건이 모두 참이어야 실행!</span></pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · age를 바꿔 and 조건 분해 보기</div>
+      <div class="ctrl">
+        <label>age =</label>
+        <input type="number" id="lgN" value="15">
+        <button class="act" id="lgBtn">판정 실행</button>
+        <button class="act alt" data-lg="13">13세</button>
+        <button class="act alt" data-lg="15">15세</button>
+        <button class="act alt" data-lg="17">17세</button>
+      </div>
+      <div class="ladder" id="lgLadder"></div>
+      <div class="result" id="lgOut"></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">03</span>진리표 — and / or / not</h3>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · 연산자를 골라 진리표 확인</div>
+      <div class="ctrl">
+        <button class="act ttMode on" data-t="and">and (그리고)</button>
+        <button class="act ttMode" data-t="or">or (또는)</button>
+        <button class="act ttMode" data-t="not">not (부정)</button>
+      </div>
+      <table class="truth" id="ttTable"></table>
+      <div class="result" id="ttOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. 중첩·삼항 ============ -->
+<section class="page" id="page3">
+  <div class="page-title"><span class="chip">DEEP</span>중첩 if · 삼항 연산</div>
+  <div class="page-sub">조건문 안에 조건문을 넣거나, if-else를 한 줄로 줄여 쓸 수 있습니다.</div>
+
+  <div class="tcard">
+    <h3><span class="num">01</span>중첩 if — 2단계 관문 통과하기</h3>
+    <pre class="code">n = int(input())
+if n > 0:
+    if n % 2 == 0:
+        print("양수 짝수")   <span class="cm"># 두 관문을 모두 통과해야 출력!</span></pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · n이 두 관문을 통과하는지 확인</div>
+      <div class="ctrl">
+        <label>n =</label>
+        <input type="number" id="nsN" value="4">
+        <button class="act" id="nsBtn">판정 실행</button>
+        <button class="act alt" data-ns="4">n=4</button>
+        <button class="act alt" data-ns="7">n=7</button>
+        <button class="act alt" data-ns="-2">n=-2</button>
+      </div>
+      <div class="ladder" id="nsLadder"></div>
+      <div class="result" id="nsOut"></div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <h3><span class="num">02</span>삼항 연산 — if-else를 한 줄로!</h3>
+    <pre class="code">n = int(input())
+print("짝수" if n % 2 == 0 else "홀수")
+
+<span class="cm"># 구조:  참일_때_값  if  조건  else  거짓일_때_값</span></pre>
+    <div class="lab-box">
+      <div class="lab-title">INTERACTIVE · n을 바꿔 한 줄 조건식 결과 보기</div>
+      <div class="ctrl">
+        <label>n =</label>
+        <input type="number" id="trN" value="8">
+        <button class="act" id="trBtn">실행</button>
+      </div>
+      <div class="result" id="trOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. 연습문제 ============ -->
+<section class="page" id="page4">
+  <div class="page-title"><span class="chip">PRACTICE</span>조건문 연습문제 19제</div>
+  <div class="page-sub">입력을 바꿔 「실행」으로 확인하세요. 조건을 만족하지 않으면 아무것도 출력되지 않는 문제도 있습니다 — 그것도 정답!</div>
+  <div id="probArea"></div>
+</section>
+
+<!-- ============ 5. 퀴즈 ============ -->
+<section class="page" id="page5">
+  <div class="page-title"><span class="chip">QUIZ</span>확인 퀴즈 10제</div>
+  <div class="page-sub">출력 결과를 예측해 보세요. 클릭 즉시 채점과 해설이 표시됩니다.</div>
+  <div id="quizArea"></div>
+</section>
+
+</main>
+
+<footer>세영코딩연구소 · Python 시리즈 02강 — Conditional</footer>
+
+<script>
+"use strict";
+
+function el(tag, cls, text){
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function rung(codeText, verdictText, cls){
+  var r = el("div", "rung" + (cls ? " " + cls : ""));
+  r.appendChild(el("span", "", codeText));
+  if (verdictText !== null) r.appendChild(el("span", "verdict", verdictText));
+  return r;
+}
+function fillLadder(box, rows){
+  while (box.firstChild) box.removeChild(box.firstChild);
+  rows.forEach(function(r){ box.appendChild(r); });
+}
+function intVal(id){
+  var v = parseInt(document.getElementById(id).value, 10);
+  return isNaN(v) ? null : v;
+}
+
+/* ============ 0. if 판정기 ============ */
+(function(){
+  function run(){
+    var n = intVal("j1N");
+    var box = document.getElementById("j1Ladder");
+    var out = document.getElementById("j1Out");
+    if (n === null){ out.textContent = "정수를 입력해 주세요."; return; }
+    var ok = n > 0;
+    fillLadder(box, [
+      rung("if n > 0:        # " + n + " > 0 ?", ok ? "True ✔" : "False ✘", ok ? "hit" : "miss"),
+      rung('    print("양수입니다")', null, ok ? "hit" : "dim")
+    ]);
+    out.textContent = ok
+      ? "출력:\n양수입니다"
+      : "출력:\n(출력 없음)\n조건이 거짓이면 if 안의 코드는 실행되지 않습니다!";
+  }
+  document.getElementById("j1Btn").addEventListener("click", run);
+  run();
+})();
+
+/* ============ 0. if-else ============ */
+(function(){
+  function run(){
+    var n = intVal("j2N");
+    var box = document.getElementById("j2Ladder");
+    var out = document.getElementById("j2Out");
+    if (n === null){ out.textContent = "정수를 입력해 주세요."; return; }
+    var even = ((n % 2) + 2) % 2 === 0;
+    fillLadder(box, [
+      rung("if n % 2 == 0:   # " + n + " % 2 = " + (((n % 2) + 2) % 2), even ? "True ✔" : "False ✘", even ? "hit" : "miss"),
+      rung('    print("짝수")', null, even ? "hit" : "dim"),
+      rung("else:", null, even ? "dim" : "hit"),
+      rung('    print("홀수")', null, even ? "dim" : "hit")
+    ]);
+    out.textContent = "출력:\n" + (even ? "짝수" : "홀수") + "\n(참이면 if 쪽, 거짓이면 else 쪽 — 반드시 한 쪽만 실행!)";
+  }
+  document.getElementById("j2Btn").addEventListener("click", run);
+  run();
+})();
+
+/* ============ 1. 성적 사다리 ============ */
+(function(){
+  function run(){
+    var s = intVal("grN");
+    var box = document.getElementById("grLadder");
+    var out = document.getElementById("grOut");
+    if (s === null){ out.textContent = "정수를 입력해 주세요."; return; }
+    var rows = [];
+    var grade, path;
+    if (s >= 90){
+      rows.push(rung("검사 1) if score >= 90:    # " + s + " >= 90", "True ✔ 여기서 확정!", "hit"));
+      rows.push(rung('        print("A")', null, "hit"));
+      rows.push(rung("검사 안 함) elif score >= 80:", "건너뜀", "dim"));
+      rows.push(rung("검사 안 함) else:", "건너뜀", "dim"));
+      grade = "A"; path = "첫 번째 조건에서 바로 확정 — 아래 조건들은 검사조차 하지 않습니다.";
+    } else if (s >= 80){
+      rows.push(rung("검사 1) if score >= 90:    # " + s + " >= 90", "False ✘", "miss"));
+      rows.push(rung("검사 2) elif score >= 80:  # " + s + " >= 80", "True ✔ 여기서 확정!", "hit"));
+      rows.push(rung('        print("B")', null, "hit"));
+      rows.push(rung("검사 안 함) else:", "건너뜀", "dim"));
+      grade = "B"; path = "위에서부터 차례로 검사, 처음 참이 되는 곳 하나만 실행됩니다.";
+    } else {
+      rows.push(rung("검사 1) if score >= 90:    # " + s + " >= 90", "False ✘", "miss"));
+      rows.push(rung("검사 2) elif score >= 80:  # " + s + " >= 80", "False ✘", "miss"));
+      rows.push(rung("검사 3) else:", "모두 거짓 → else!", "hit"));
+      rows.push(rung('        print("C")', null, "hit"));
+      grade = "C"; path = "모든 조건이 거짓일 때 마지막 else가 실행됩니다.";
+    }
+    fillLadder(box, rows);
+    out.textContent = "출력:\n" + grade + "\n" + path;
+  }
+  document.getElementById("grBtn").addEventListener("click", run);
+  document.querySelectorAll("button[data-gr]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.getElementById("grN").value = b.dataset.gr;
+      run();
+    });
+  });
+  run();
+})();
+
+/* ============ 2. 비교 연산자 표 ============ */
+(function(){
+  var OPS = [
+    {op: ">",  mean: "크다",        f: function(a, b){ return a > b; }},
+    {op: "<",  mean: "작다",        f: function(a, b){ return a < b; }},
+    {op: ">=", mean: "크거나 같다", f: function(a, b){ return a >= b; }},
+    {op: "<=", mean: "작거나 같다", f: function(a, b){ return a <= b; }},
+    {op: "==", mean: "같다",        f: function(a, b){ return a === b; }},
+    {op: "!=", mean: "다르다",      f: function(a, b){ return a !== b; }}
+  ];
+  var table = document.getElementById("cmpTable");
+  function run(){
+    var a = intVal("cmpA"), b = intVal("cmpB");
+    while (table.rows.length > 1) table.deleteRow(1);
+    if (a === null || b === null) return;
+    OPS.forEach(function(o){
+      var tr = table.insertRow();
+      var c1 = tr.insertCell(); c1.textContent = "a " + o.op + " b";
+      var c2 = tr.insertCell(); c2.textContent = o.mean;
+      var c3 = tr.insertCell(); c3.textContent = a + " " + o.op + " " + b;
+      c3.style.fontFamily = "var(--mono)";
+      var v = o.f(a, b);
+      var c4 = tr.insertCell(); c4.textContent = v ? "True" : "False";
+      c4.className = "rv " + (v ? "T" : "F");
+    });
+  }
+  document.getElementById("cmpBtn").addEventListener("click", run);
+  run();
+})();
+
+/* ============ 2. and 분해 ============ */
+(function(){
+  function run(){
+    var a = intVal("lgN");
+    var box = document.getElementById("lgLadder");
+    var out = document.getElementById("lgOut");
+    if (a === null){ out.textContent = "정수를 입력해 주세요."; return; }
+    var c1 = a >= 14, c2 = a <= 16, all = c1 && c2;
+    fillLadder(box, [
+      rung("age >= 14   # " + a + " >= 14", c1 ? "True ✔" : "False ✘", c1 ? "hit" : "miss"),
+      rung("age <= 16   # " + a + " <= 16", c2 ? "True ✔" : "False ✘", c2 ? "hit" : "miss"),
+      rung("and 결과 = " + (c1 ? "True" : "False") + " and " + (c2 ? "True" : "False"), all ? "True ✔" : "False ✘", all ? "hit" : "miss")
+    ]);
+    out.textContent = "출력:\n" + (all ? "중학생" : "(출력 없음)") + "\nand는 두 조건이 모두 True일 때만 True입니다!";
+  }
+  document.getElementById("lgBtn").addEventListener("click", run);
+  document.querySelectorAll("button[data-lg]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.getElementById("lgN").value = b.dataset.lg;
+      run();
+    });
+  });
+  run();
+})();
+
+/* ============ 2. 진리표 ============ */
+(function(){
+  var table = document.getElementById("ttTable");
+  var out = document.getElementById("ttOut");
+  var TF = function(v){ return v ? "True" : "False"; };
+  function build(mode){
+    while (table.firstChild) table.removeChild(table.firstChild);
+    function headRow(cols){
+      var tr = document.createElement("tr");
+      cols.forEach(function(c){ var th = document.createElement("th"); th.textContent = c; tr.appendChild(th); });
+      table.appendChild(tr);
+    }
+    function row(vals){
+      var tr = document.createElement("tr");
+      vals.forEach(function(v){
+        var td = document.createElement("td");
+        td.textContent = TF(v);
+        td.className = v ? "T" : "F";
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+    }
+    if (mode === "and"){
+      headRow(["A", "B", "A and B"]);
+      [[true,true],[true,false],[false,true],[false,false]].forEach(function(p){ row([p[0], p[1], p[0] && p[1]]); });
+      out.textContent = "and(그리고): 둘 다 True일 때만 True. 하나라도 False면 False!";
+    } else if (mode === "or"){
+      headRow(["A", "B", "A or B"]);
+      [[true,true],[true,false],[false,true],[false,false]].forEach(function(p){ row([p[0], p[1], p[0] || p[1]]); });
+      out.textContent = "or(또는): 하나라도 True면 True. 둘 다 False일 때만 False!";
+    } else {
+      headRow(["A", "not A"]);
+      [[true],[false]].forEach(function(p){ row([p[0], !p[0]]); });
+      out.textContent = "not(부정): True는 False로, False는 True로 뒤집습니다!";
+    }
+  }
+  document.querySelectorAll(".ttMode").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll(".ttMode").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+      build(b.dataset.t);
+    });
+  });
+  build("and");
+})();
+
+/* ============ 3. 중첩 if ============ */
+(function(){
+  function run(){
+    var n = intVal("nsN");
+    var box = document.getElementById("nsLadder");
+    var out = document.getElementById("nsOut");
+    if (n === null){ out.textContent = "정수를 입력해 주세요."; return; }
+    var g1 = n > 0;
+    var g2 = g1 && (((n % 2) + 2) % 2 === 0);
+    var rows = [
+      rung("관문 1) if n > 0:        # " + n + " > 0", g1 ? "통과 ✔" : "탈락 ✘", g1 ? "hit" : "miss")
+    ];
+    if (g1){
+      rows.push(rung("관문 2)     if n % 2 == 0:  # " + n + " % 2 = " + (((n % 2) + 2) % 2), g2 ? "통과 ✔" : "탈락 ✘", g2 ? "hit" : "miss"));
+      rows.push(rung('            print("양수 짝수")', null, g2 ? "hit" : "dim"));
+    } else {
+      rows.push(rung("관문 2)     if n % 2 == 0:", "검사조차 안 함", "dim"));
+      rows.push(rung('            print("양수 짝수")', null, "dim"));
+    }
+    fillLadder(box, rows);
+    out.textContent = "출력:\n" + (g2 ? "양수 짝수" : "(출력 없음)")
+      + "\n" + (g1
+        ? (g2 ? "두 관문을 모두 통과했습니다!" : "관문 1은 통과했지만 관문 2에서 탈락 (홀수).")
+        : "관문 1에서 탈락하면 안쪽 if는 아예 검사하지 않습니다!");
+  }
+  document.getElementById("nsBtn").addEventListener("click", run);
+  document.querySelectorAll("button[data-ns]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.getElementById("nsN").value = b.dataset.ns;
+      run();
+    });
+  });
+  run();
+})();
+
+/* ============ 3. 삼항 ============ */
+(function(){
+  function run(){
+    var n = intVal("trN");
+    var out = document.getElementById("trOut");
+    if (n === null){ out.textContent = "정수를 입력해 주세요."; return; }
+    var even = ((n % 2) + 2) % 2 === 0;
+    out.textContent = 'print("짝수" if n % 2 == 0 else "홀수")\n\n조건 n % 2 == 0 → ' + (even ? "True → 앞의 \"짝수\" 선택" : "False → 뒤의 \"홀수\" 선택")
+      + "\n출력:\n" + (even ? "짝수" : "홀수");
+  }
+  document.getElementById("trBtn").addEventListener("click", run);
+  run();
+})();
+
+/* ============ 4. 연습문제 19 ============ */
+(function(){
+  function intOf(s){
+    var t = String(s).trim();
+    if (!/^-?\d+$/.test(t)) return null;
+    return parseInt(t, 10);
+  }
+  function twoInts(s){
+    var p = String(s).trim().split(/\s+/);
+    if (p.length !== 2) return null;
+    var a = intOf(p[0]), b = intOf(p[1]);
+    if (a === null || b === null) return null;
+    return [a, b];
+  }
+  var VE = "ValueError: 입력 형식을 확인해 주세요.";
+  var NONE = "(출력 없음)";
+  function mod(n, k){ return ((n % k) + k) % k; }
+
+  var PROBS = [
+    {t: "양수 판별", inS: "정수 N", outS: '양수이면 "양수"',
+     exIn: "5", exOut: "양수",
+     code: "n = int(input())\nif n > 0:\n    print(\"양수\")",
+     def: "5",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n > 0 ? "양수" : NONE; }},
+    {t: "짝수 판별", inS: "정수 N", outS: "짝수",
+     exIn: "4", exOut: "짝수",
+     code: "n = int(input())\nif n % 2 == 0:\n    print(\"짝수\")",
+     def: "4",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return mod(n, 2) === 0 ? "짝수" : NONE; }},
+    {t: "홀수 판별", inS: "정수", outS: "홀수",
+     exIn: "7", exOut: "홀수",
+     code: "n = int(input())\nif n % 2 == 1:\n    print(\"홀수\")",
+     def: "7",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return mod(n, 2) === 1 ? "홀수" : NONE; }},
+    {t: "큰 수 출력", inS: "두 정수", outS: "큰 수",
+     exIn: "3 8", exOut: "8",
+     code: "a, b = map(int, input().split())\nif a > b:\n    print(a)\nelse:\n    print(b)",
+     def: "3 8",
+     run: function(v){ var p = twoInts(v); return p ? String(Math.max(p[0], p[1])) : VE; }},
+    {t: "0 판별", inS: "정수", outS: "ZERO",
+     exIn: "0", exOut: "ZERO",
+     code: "n = int(input())\nif n == 0:\n    print(\"ZERO\")",
+     def: "0",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n === 0 ? "ZERO" : NONE; }},
+    {t: "합격 판별", inS: "점수", outS: "합격 (60점 이상)",
+     exIn: "75", exOut: "합격",
+     code: "score = int(input())\nif score >= 60:\n    print(\"합격\")",
+     def: "75",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n >= 60 ? "합격" : NONE; }},
+    {t: "불합격 판별", inS: "점수", outS: "불합격 (60점 미만)",
+     exIn: "40", exOut: "불합격",
+     code: "score = int(input())\nif score < 60:\n    print(\"불합격\")",
+     def: "40",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n < 60 ? "불합격" : NONE; }},
+    {t: "음수 판별", inS: "정수", outS: "음수",
+     exIn: "-5", exOut: "음수",
+     code: "n = int(input())\nif n < 0:\n    print(\"음수\")",
+     def: "-5",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n < 0 ? "음수" : NONE; }},
+    {t: "같은 수 판별", inS: "두 정수", outS: "같다",
+     exIn: "5 5", exOut: "같다",
+     code: "a, b = map(int, input().split())\nif a == b:\n    print(\"같다\")",
+     def: "5 5",
+     run: function(v){ var p = twoInts(v); if (!p) return VE; return p[0] === p[1] ? "같다" : NONE; }},
+    {t: "성인 판별", inS: "나이", outS: "성인 (20세 이상)",
+     exIn: "25", exOut: "성인",
+     code: "age = int(input())\nif age >= 20:\n    print(\"성인\")",
+     def: "25",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n >= 20 ? "성인" : NONE; }},
+    {t: "EVEN 출력", inS: "정수", outS: "EVEN (짝수일 때)",
+     exIn: "4", exOut: "EVEN",
+     code: "n = int(input())\nif n % 2 == 0:\n    print(\"EVEN\")",
+     def: "4",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return mod(n, 2) === 0 ? "EVEN" : NONE; }},
+    {t: "ODD 출력", inS: "정수", outS: "ODD (홀수일 때)",
+     exIn: "7", exOut: "ODD",
+     code: "n = int(input())\nif n % 2 == 1:\n    print(\"ODD\")",
+     def: "7",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return mod(n, 2) === 1 ? "ODD" : NONE; }},
+    {t: "작은 수 출력", inS: "두 정수", outS: "작은 수",
+     exIn: "3 8", exOut: "3",
+     code: "a, b = map(int, input().split())\nif a < b:\n    print(a)\nelse:\n    print(b)",
+     def: "3 8",
+     run: function(v){ var p = twoInts(v); return p ? String(Math.min(p[0], p[1])) : VE; }},
+    {t: "성적 A/B/C", inS: "점수", outS: "90이상 A · 80이상 B · 그 외 C",
+     exIn: "85", exOut: "B",
+     code: "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelse:\n    print(\"C\")",
+     def: "85",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n >= 90 ? "A" : (n >= 80 ? "B" : "C"); }},
+    {t: "3의 배수 출력", inS: "정수", outS: "3의 배수이면 그 수를 출력",
+     exIn: "9", exOut: "9",
+     code: "n = int(input())\nif n % 3 == 0:\n    print(n)",
+     def: "9",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return mod(n, 3) === 0 ? String(n) : NONE; }},
+    {t: "100 초과 판별", inS: "정수", outS: '100보다 크면 "100보다큼"',
+     exIn: "150", exOut: "100보다큼",
+     code: "n = int(input())\nif n > 100:\n    print(\"100보다큼\")",
+     def: "150",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n > 100 ? "100보다큼" : NONE; }},
+    {t: "한자리수 판별", inS: "양의 정수(자연수)", outS: '10보다 작으면 "한자리수"',
+     exIn: "7", exOut: "한자리수",
+     code: "n = int(input())\nif n < 10:\n    print(\"한자리수\")",
+     def: "7",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return n < 10 ? "한자리수" : NONE; }},
+    {t: "큰 수 출력 (복습)", inS: "두 정수", outS: "큰 수",
+     exIn: "2 9", exOut: "9",
+     code: "a, b = map(int, input().split())\nprint(a if a > b else b)   # 삼항 연산으로도!",
+     def: "2 9",
+     run: function(v){ var p = twoInts(v); return p ? String(Math.max(p[0], p[1])) : VE; }},
+    {t: "5의 배수 출력", inS: "정수", outS: "5의 배수이면 그 수를 출력",
+     exIn: "10", exOut: "10",
+     code: "n = int(input())\nif n % 5 == 0:\n    print(n)",
+     def: "10",
+     run: function(v){ var n = intOf(v); if (n === null) return VE; return mod(n, 5) === 0 ? String(n) : NONE; }}
+  ];
+
+  var area = document.getElementById("probArea");
+  PROBS.forEach(function(pr, n){
+    var no = n + 1;
+    var card = el("div", "pcard");
+    var head = el("div", "phead");
+    head.appendChild(el("span", "pno", "문제 " + (no < 10 ? "0" + no : no)));
+    head.appendChild(el("span", "ptitle", pr.t));
+    card.appendChild(head);
+
+    var s1 = el("div", "spec");
+    s1.appendChild(el("b", "", "입력  "));
+    s1.appendChild(document.createTextNode(pr.inS));
+    card.appendChild(s1);
+    var s2 = el("div", "spec");
+    s2.appendChild(el("b", "", "출력  "));
+    s2.appendChild(document.createTextNode(pr.outS));
+    card.appendChild(s2);
+
+    var ex = el("div", "exio");
+    var e1 = el("div");
+    e1.appendChild(el("div", "lbl", "입출력 예제 — 입력"));
+    e1.appendChild(el("pre", "", pr.exIn));
+    var e2 = el("div");
+    e2.appendChild(el("div", "lbl", "입출력 예제 — 출력"));
+    e2.appendChild(el("pre", "", pr.exOut));
+    ex.appendChild(e1); ex.appendChild(e2);
+    card.appendChild(ex);
+
+    var lab = el("div", "lab-box");
+    lab.appendChild(el("div", "lab-title", "INTERACTIVE · 입력을 바꿔 실행해 보세요"));
+    var row = el("div", "ctrl");
+    row.appendChild(el("label", "", "입력 :"));
+    var f = el("input", "wide");
+    f.type = "text"; f.value = pr.def;
+    row.appendChild(f);
+    var runBtn = el("button", "act", "실행 ▶");
+    runBtn.type = "button";
+    row.appendChild(runBtn);
+    var solBtn = el("button", "act alt", "정답 코드 보기");
+    solBtn.type = "button";
+    row.appendChild(solBtn);
+    lab.appendChild(row);
+    var out = el("div", "result", "「실행」을 누르면 출력이 표시됩니다.");
+    lab.appendChild(out);
+    card.appendChild(lab);
+
+    var solWrap = el("div", "solwrap");
+    solWrap.appendChild(el("pre", "code", pr.code));
+    card.appendChild(solWrap);
+
+    area.appendChild(card);
+
+    runBtn.addEventListener("click", function(){
+      out.textContent = "출력:\n" + pr.run(f.value);
+    });
+    solBtn.addEventListener("click", function(){
+      var showing = solWrap.classList.toggle("show");
+      solBtn.textContent = showing ? "정답 코드 닫기" : "정답 코드 보기";
+    });
+  });
+})();
+
+/* ============ 5. 퀴즈 ============ */
+var QUIZ = [
+  {q: "출력 결과는?", code: "age = 15\nif age >= 14:\n    print(\"중학생입니다\")",
+   c: ["중학생입니다", "(출력 없음)", "14", "True"], a: 0,
+   s: "15 >= 14는 True이므로 if 안의 print가 실행됩니다."},
+  {q: "출력 결과는?", code: "n = 5\nif n % 2 == 0:\n    print(\"짝수\")\nelse:\n    print(\"홀수\")",
+   c: ["홀수", "짝수", "5", "(출력 없음)"], a: 0,
+   s: "5 % 2 = 1이므로 조건은 False → else 쪽의 \"홀수\"가 출력됩니다."},
+  {q: "출력 결과는?", code: "score = 85\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelse:\n    print(\"C\")",
+   c: ["B", "A", "C", "A와 B 둘 다"], a: 0,
+   s: "85 >= 90은 False, 85 >= 80은 True → B에서 확정. elif 사다리는 처음 참이 되는 한 곳만 실행합니다!"},
+  {q: "score가 정확히 90일 때 출력 결과는?", code: "if score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")",
+   c: ["A", "B", "(출력 없음)", "A와 B 둘 다"], a: 0,
+   s: ">= 는 \"크거나 같다\"이므로 90 >= 90은 True → A. 경계값은 늘 조심!"},
+  {q: "연산자 != 의 의미는?", code: "if a != b:\n    print(\"?\")",
+   c: ["다르다", "같다", "크거나 같다", "부정"], a: 0,
+   s: "!= 는 \"다르다\"입니다. a와 b가 다를 때 True. \"같다\"는 == 입니다."},
+  {q: "age = 15일 때 조건의 결과는?", code: "age >= 14 and age <= 16",
+   c: ["True", "False", "15", "오류 발생"], a: 0,
+   s: "15 >= 14 → True, 15 <= 16 → True. and는 둘 다 True일 때 True입니다."},
+  {q: "n = 13일 때 조건의 결과는?", code: "n > 10 or n < 5",
+   c: ["True", "False", "13", "오류 발생"], a: 0,
+   s: "13 > 10 → True. or는 하나라도 True면 전체가 True이므로 뒤 조건은 볼 필요도 없습니다."},
+  {q: "결과는?", code: "not (3 > 5)",
+   c: ["True", "False", "3", "5"], a: 0,
+   s: "3 > 5는 False, not은 뒤집으므로 True가 됩니다."},
+  {q: "출력 결과는?", code: "n = 4\nif n > 0:\n    if n % 2 == 0:\n        print(\"양수 짝수\")",
+   c: ["양수 짝수", "(출력 없음)", "양수", "짝수"], a: 0,
+   s: "4 > 0 통과, 4 % 2 == 0 통과 — 두 관문을 모두 지나므로 \"양수 짝수\"가 출력됩니다."},
+  {q: "n = 7일 때 출력 결과는?", code: "print(\"짝수\" if n % 2 == 0 else \"홀수\")",
+   c: ["홀수", "짝수", "7", "오류 발생"], a: 0,
+   s: "삼항 연산: 조건 7 % 2 == 0이 False이므로 else 뒤의 \"홀수\"가 선택됩니다."}
+];
+
+(function(){
+  var solved = {};
+  var area = document.getElementById("quizArea");
+  var bar = el("div", "scorebar");
+  var sc = el("span", "sc", "점수 0 / " + QUIZ.length);
+  bar.appendChild(sc);
+  var rst = el("button", "reset", "다시 풀기");
+  rst.type = "button";
+  bar.appendChild(rst);
+  area.appendChild(bar);
+  var listWrap = el("div");
+  area.appendChild(listWrap);
+
+  function shuffle4(){
+    var idx = [0, 1, 2, 3];
+    for (var i = 3; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+    }
+    return idx;
+  }
+  function updateScore(){
+    var c = 0;
+    for (var k in solved) if (solved[k] === true) c++;
+    sc.textContent = "점수 " + c + " / " + QUIZ.length;
+  }
+  function build(){
+    while (listWrap.firstChild) listWrap.removeChild(listWrap.firstChild);
+    QUIZ.forEach(function(q, gi){
+      var card = el("div", "qcard");
+      var head = el("div", "qhead");
+      head.appendChild(el("span", "qno", "Q" + (gi + 1 < 10 ? "0" + (gi + 1) : gi + 1)));
+      head.appendChild(el("span", "qtext", q.q));
+      card.appendChild(head);
+      card.appendChild(el("pre", "code", q.code));
+
+      var box = el("div", "choices");
+      var order = shuffle4();
+      var btns = [];
+      var sol = el("div", "sol");
+      sol.appendChild(el("span", "tag", "해설"));
+      sol.appendChild(document.createTextNode(q.s));
+
+      order.forEach(function(orig, pos){
+        var b = el("button", "", String.fromCharCode(9312 + pos) + " " + q.c[orig]);
+        b.type = "button";
+        b.addEventListener("click", function(){
+          if (solved[gi] !== undefined) return;
+          var ok = (orig === q.a);
+          solved[gi] = ok;
+          btns.forEach(function(bb, k){
+            bb.disabled = true;
+            if (order[k] === q.a) bb.classList.add("correct");
+          });
+          if (!ok) b.classList.add("wrong");
+          sol.classList.add("show");
+          updateScore();
+        });
+        btns.push(b);
+        box.appendChild(b);
+      });
+      card.appendChild(box);
+      card.appendChild(sol);
+      listWrap.appendChild(card);
+    });
+    updateScore();
+  }
+  rst.addEventListener("click", function(){ solved = {}; build(); });
+  build();
+})();
+
+/* ============ 탭 ============ */
+document.getElementById("tabs").addEventListener("click", function(ev){
+  var b = ev.target.closest("button");
+  if (!b) return;
+  var n = Number(b.dataset.p);
+  document.querySelectorAll("section.page").forEach(function(p, i){ p.classList.toggle("on", i === n); });
+  document.querySelectorAll("nav.tabs button").forEach(function(t){ t.classList.toggle("on", Number(t.dataset.p) === n); });
+  window.scrollTo({top: 0, behavior: "auto"});
+});
+</script>
+</body>
+</html>
