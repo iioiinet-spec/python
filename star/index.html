@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 중첩 반복문 별찍기 시각화 실습실</title>
+<style>
+:root{
+  --bg:#0b1526; --panel:#12203a; --panel2:#0e1a30; --line:#1e3a5f;
+  --teal:#2dd4bf; --teal-dim:#14b8a6; --amber:#fbbf24; --red:#f87171;
+  --text:#e2e8f0; --muted:#8aa3c4; --code-bg:#0a1322;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;min-height:100vh;}
+.wrap{max-width:1280px;margin:0 auto;padding:20px 18px 48px;}
+header{padding:22px 4px 18px;border-bottom:2px solid var(--line);margin-bottom:20px;display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;}
+header h1{font-size:1.5rem;letter-spacing:-0.5px;}
+header h1 span{color:var(--teal);}
+.badge{background:rgba(45,212,191,0.12);border:1px solid var(--teal-dim);color:var(--teal);font-size:0.78rem;padding:3px 10px;border-radius:999px;}
+.sub{color:var(--muted);font-size:0.88rem;width:100%;line-height:1.6;}
+.sub b{color:var(--text);}
+.grid{display:grid;grid-template-columns:minmax(420px,46%) 1fr;gap:18px;align-items:start;}
+@media(max-width:960px){.grid{grid-template-columns:1fr;}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.card h2{font-size:0.92rem;padding:11px 16px;border-bottom:1px solid var(--line);color:var(--teal);display:flex;align-items:center;gap:8px;font-weight:600;}
+.card h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block;}
+.card .body{padding:14px 16px;}
+/* preset chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel2);}
+.chips button{background:transparent;border:1px solid var(--line);color:var(--muted);font-size:0.78rem;padding:5px 11px;border-radius:999px;cursor:pointer;transition:all .15s;font-family:inherit;}
+.chips button:hover{border-color:var(--teal-dim);color:var(--teal);}
+/* editor */
+.editor{display:flex;background:var(--code-bg);height:360px;}
+.gutter{width:44px;background:#08101d;color:#3d5878;text-align:right;padding:12px 8px 12px 0;font:13px/1.55 Consolas,'D2Coding',monospace;user-select:none;overflow:hidden;white-space:pre;}
+textarea#code{flex:1;background:transparent;border:none;outline:none;resize:none;color:var(--text);font:13px/1.55 Consolas,'D2Coding',monospace;padding:12px 14px;white-space:pre;overflow:auto;tab-size:4;}
+/* viewer */
+.viewer{display:none;background:var(--code-bg);height:360px;overflow:auto;padding:12px 0;font:13px/1.55 Consolas,'D2Coding',monospace;}
+.viewer .cline{display:flex;}
+.viewer .ln{width:44px;flex:none;text-align:right;padding-right:12px;color:#3d5878;user-select:none;}
+.viewer .txt{white-space:pre;flex:1;padding-right:14px;}
+.viewer .cline.cur{background:rgba(45,212,191,0.14);box-shadow:inset 3px 0 0 var(--teal);}
+.viewer .cline.cur .txt{color:#a7f3ea;}
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid var(--line);background:var(--panel2);align-items:center;}
+.controls button{background:#173052;border:1px solid var(--line);color:var(--text);font-size:0.83rem;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.controls button:hover:not(:disabled){border-color:var(--teal-dim);color:var(--teal);}
+.controls button:disabled{opacity:0.35;cursor:default;}
+.controls button.primary{background:var(--teal-dim);border-color:var(--teal-dim);color:#04211c;font-weight:700;}
+.controls button.primary:hover{background:var(--teal);color:#04211c;}
+.controls select{background:#173052;border:1px solid var(--line);color:var(--text);font-size:0.82rem;padding:6px 8px;border-radius:8px;font-family:inherit;}
+.stepbar{padding:11px 16px;border-top:1px solid var(--line);font-size:0.86rem;min-height:44px;display:flex;gap:10px;align-items:flex-start;}
+.stepbar .cnt{flex:none;background:rgba(45,212,191,0.12);color:var(--teal);border-radius:6px;padding:2px 9px;font-size:0.78rem;font-family:Consolas,monospace;margin-top:2px;}
+.stepbar .desc{color:var(--text);line-height:1.5;}
+/* star canvas */
+.canvasWrap{overflow-x:auto;padding-bottom:4px;}
+table.starGrid{border-collapse:separate;border-spacing:3px;}
+.sg-corner{font:10px Consolas,monospace;color:#4e6a8f;text-align:center;padding-right:4px;white-space:nowrap;}
+.sg-h{font:600 11px Consolas,monospace;color:var(--muted);text-align:center;min-width:27px;transition:color .15s;}
+.sg-h.cur{color:var(--teal);}
+.sg-rl{font:600 11px Consolas,monospace;color:var(--muted);text-align:center;padding-right:5px;transition:color .15s;}
+.sg-rl.cur{color:var(--teal);}
+.sg-cell{width:27px;height:27px;text-align:center;vertical-align:middle;border-radius:6px;font:700 15px Consolas,'D2Coding',monospace;border:1px dashed rgba(30,58,95,0.55);}
+.sg-cell.star{background:rgba(251,191,36,0.12);border:1.5px solid rgba(251,191,36,0.55);color:var(--amber);}
+.sg-cell.space{background:rgba(45,212,191,0.05);border:1.5px dashed rgba(45,212,191,0.3);color:rgba(45,212,191,0.5);font-size:11px;font-weight:400;}
+.sg-cell.new{box-shadow:0 0 0 2px var(--teal);animation:pulse .45s ease;}
+@keyframes pulse{0%{transform:scale(1);}40%{transform:scale(1.16);}100%{transform:scale(1);}}
+.legend{display:flex;gap:14px;margin-top:10px;font-size:0.76rem;color:var(--muted);flex-wrap:wrap;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend .sw{width:14px;height:14px;border-radius:4px;display:inline-block;}
+/* vars */
+.varchips{display:flex;flex-wrap:wrap;gap:8px;min-height:36px;}
+.varchip{background:var(--code-bg);border:1.5px solid var(--line);border-radius:8px;padding:7px 12px;font:600 13px Consolas,'D2Coding',monospace;transition:all .2s;}
+.varchip.hit{border-color:var(--amber);color:var(--amber);background:rgba(251,191,36,0.10);animation:pulse .5s ease;}
+/* output */
+pre#outputRaw{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;min-height:56px;padding:10px 12px;font:13px/1.4 Consolas,'D2Coding',monospace;white-space:pre;color:#a7f3ea;overflow-x:auto;}
+/* error */
+#errorBox{display:none;background:rgba(248,113,113,0.10);border:1px solid var(--red);color:#fecaca;border-radius:10px;padding:12px 14px;font-size:0.87rem;margin-bottom:16px;line-height:1.5;}
+/* tips */
+.tips{font-size:0.83rem;color:var(--muted);line-height:1.75;}
+.tips b{color:var(--teal);}
+.tips code{background:var(--code-bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font:12px Consolas,monospace;color:var(--amber);}
+.rightcol{display:flex;flex-direction:column;gap:16px;}
+.placeholder{color:var(--muted);font-size:0.85rem;padding:6px 0;}
+@media(prefers-reduced-motion:reduce){.sg-cell.new,.varchip.hit{animation:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1><span>파이썬</span> 중첩 반복문 별찍기 실습실</h1>
+  <span class="badge">for 안의 for — 5가지 패턴</span>
+  <p class="sub">왼쪽 파이썬 코드를 실행하면 오른쪽 캔버스에서 <b>별이 한 칸씩 찍히는 과정</b>을 볼 수 있습니다. <b>바깥 for i는 "몇 번째 줄"</b>, <b>안쪽 for j는 "그 줄의 몇 번째 칸"</b> — <code>print("*", end="")</code>는 줄바꿈 없이 이어 찍고, <code>print()</code>가 줄을 끝냅니다. 코드는 자유롭게 수정 가능합니다 (n을 바꿔 보세요!).</p>
+</header>
+
+<div class="grid">
+  <!-- LEFT -->
+  <section class="card">
+    <h2><span class="dot"></span>코드 작성 · 실행</h2>
+    <div class="chips" id="presetChips"></div>
+    <div class="editor" id="editorWrap">
+      <div class="gutter" id="gutter">1</div>
+      <textarea id="code" spellcheck="false" aria-label="C code editor"></textarea>
+    </div>
+    <div class="viewer" id="viewerWrap"></div>
+    <div class="controls">
+      <button id="runBtn" class="primary">&#9654; 실행</button>
+      <button id="editBtn" style="display:none">&#9998; 코드 수정</button>
+      <span style="flex:1"></span>
+      <button id="homeBtn" disabled>&#9198;</button>
+      <button id="prevBtn" disabled>&#9664; 이전</button>
+      <button id="nextBtn" disabled>다음 &#9654;</button>
+      <button id="lineBtn" disabled>한 줄 완성 &#9654;&#9654;</button>
+      <button id="endBtn" disabled>끝 &#9197;</button>
+      <button id="playBtn" disabled>자동 재생</button>
+      <select id="speedSel" aria-label="재생 속도">
+        <option value="700">보통</option>
+        <option value="300" selected>빠르게</option>
+        <option value="120">매우 빠르게</option>
+        <option value="45">초고속</option>
+      </select>
+    </div>
+    <div class="stepbar">
+      <span class="cnt" id="stepCnt">- / -</span>
+      <span class="desc" id="stepDesc">패턴을 고르고 실행 버튼을 누르세요.</span>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <div class="rightcol">
+    <div id="errorBox"></div>
+    <section class="card">
+      <h2><span class="dot"></span>별 캔버스 — 행(i) &#215; 열(j)</h2>
+      <div class="body">
+        <div class="canvasWrap" id="canvasWrap"><p class="placeholder">코드를 실행하면 별이 찍히는 과정이 여기에 나타납니다.</p></div>
+        <div class="legend">
+          <span><span class="sw" style="background:rgba(251,191,36,0.12);border:1.5px solid rgba(251,191,36,0.55);"></span>별 *</span>
+          <span><span class="sw" style="background:rgba(45,212,191,0.05);border:1.5px dashed rgba(45,212,191,0.3);"></span>공백 (이것도 출력!)</span>
+          <span><span class="sw" style="border:1px dashed rgba(30,58,95,0.9);"></span>아직 안 찍힘</span>
+          <span><span class="sw" style="box-shadow:0 0 0 2px var(--teal);border-radius:4px;"></span>방금 찍힘</span>
+        </div>
+      </div>
+    </section>
+    <section class="card">
+      <h2><span class="dot"></span>변수</h2>
+      <div class="body"><div class="varchips" id="varsBox"><p class="placeholder">선언된 변수가 없습니다.</p></div></div>
+    </section>
+    <section class="card">
+      <h2><span class="dot"></span>실제 콘솔 출력</h2>
+      <div class="body"><pre id="outputRaw"></pre></div>
+    </section>
+    <section class="card">
+      <h2><span class="dot"></span>학습 포인트</h2>
+      <div class="body tips">
+        <b>1. 역할 분담</b> — 바깥 <code>for i</code>가 한 번 돌 때마다 <b>한 줄</b>이 완성되고, 안쪽 <code>for j</code>는 그 줄의 <b>칸</b>을 채웁니다. <code>print("*", end="")</code>의 <code>end=""</code>가 자동 줄바꿈을 없애고, 안쪽 반복이 끝난 뒤 <code>print()</code> 한 번이 줄을 끝냅니다 — C의 <code>printf("\n")</code> 역할.<br>
+        <b>2. range의 끝은 미포함!</b> — <code>range(1, n + 1)</code>이 1~n을 도는 이유입니다. 역삼각형의 <code>range(1, n - i + 2)</code>, 피라미드의 <code>range(1, 2 * i)</code>(별 2i-1개)도 같은 원리이고, 거꾸로 돌 때는 <code>range(n - 1, 0, -1)</code>처럼 음수 step을 씁니다.<br>
+        <b>3. 공백도 문자다</b> — 오른쪽 정렬과 피라미드는 별보다 먼저 <code>print(" ", end="")</code>로 공백을 찍어 별을 밀어냅니다. 캔버스의 점선 칸이 바로 그 공백입니다.<br>
+        <b>4. 파이썬다운 지름길</b> — <code>print("*" * i)</code> 문자열 곱하기 한 줄로도 같은 모양이 나옵니다! 중첩 반복문으로 원리를 이해했다면, 코드를 직접 이렇게 바꿔 실행해 보세요 (이 실습기에서 실제로 동작합니다).
+      </div>
+    </section>
+  </div>
+</div>
+</div>
+<script>
+/* ===================== 미니 파이썬 인터프리터 (실행 추적 생성) ===================== */
+var PY_KW = ['for','in','if','elif','else','while','and','or','not','True','False'];
+
+function pyTokenizeLine(text, line){
+  var toks = [], i = 0, n = text.length;
+  function push(t, v){ toks.push({type:t, value:v, line:line}); }
+  while(i < n){
+    var c = text[i];
+    if(c === ' ' || c === '\t'){ i++; continue; }
+    if(c === '#') break;
+    if(c >= '0' && c <= '9'){
+      var s = i;
+      while(i < n && text[i] >= '0' && text[i] <= '9') i++;
+      if(text[i] === '.'){ i++; while(i < n && text[i] >= '0' && text[i] <= '9') i++; }
+      push('num', parseFloat(text.slice(s, i)));
+      continue;
+    }
+    if(/[A-Za-z_\uAC00-\uD7A3]/.test(c)){
+      var s2 = i;
+      while(i < n && /[A-Za-z0-9_\uAC00-\uD7A3]/.test(text[i])) i++;
+      var w = text.slice(s2, i);
+      push(PY_KW.indexOf(w) >= 0 ? 'kw' : 'ident', w);
+      continue;
+    }
+    if(c === '"' || c === "'"){
+      var q = c;
+      i++;
+      var buf = '';
+      while(i < n && text[i] !== q){
+        if(text[i] === '\\'){
+          var e = text[i+1];
+          if(e === 'n') buf += '\n';
+          else if(e === 't') buf += '\t';
+          else if(e === '\\') buf += '\\';
+          else buf += e;
+          i += 2;
+        } else { buf += text[i]; i++; }
+      }
+      if(i >= n) throw {line:line, msg:'문자열이 닫히지 않았습니다 (' + q + ' 필요)'};
+      i++;
+      push('str', buf);
+      continue;
+    }
+    if(text.substr(i, 3) === '//='){ push('op','//='); i += 3; continue; }
+    var two = text.substr(i, 2);
+    if(['**','//','==','!=','\u003c=','\u003e=','+=','-=','*=','/=','%='].indexOf(two) >= 0){
+      push('op', two); i += 2; continue;
+    }
+    if('+-*/%()=,:\u003c\u003e'.indexOf(c) >= 0){ push('op', c); i++; continue; }
+    throw {line:line, msg:'이해할 수 없는 문자입니다: ' + c};
+  }
+  return toks;
+}
+
+function pyPrepLines(src){
+  var raw = src.split('\n'), out = [];
+  for(var i = 0; i < raw.length; i++){
+    var lead = raw[i].match(/^[\t ]*/)[0];
+    var toks = pyTokenizeLine(raw[i], i + 1);
+    if(toks.length === 0) continue;
+    if(lead.indexOf('\t') >= 0) throw {line:i+1, msg:'탭 문자로 들여쓰기했습니다 — 스페이스(4칸 권장)로 바꿔 주세요'};
+    out.push({indent:lead.length, toks:toks, line:i+1});
+  }
+  return out;
+}
+
+/* ----- 토큰 스트림 헬퍼 ----- */
+function scur(s){ return s.toks[s.p] || null; }
+function sat(s, type, val){
+  var t = scur(s);
+  return !!t && t.type === type && (val === undefined || t.value === val);
+}
+function seat(s, type, val){
+  if(!sat(s, type, val)){
+    var t = scur(s);
+    var need = (val !== undefined) ? val : type;
+    throw {line:s.line, msg:'문법 오류: "' + need + '"이(가) 필요합니다' + (t ? ' (현재: "' + t.value + '")' : ' (줄이 끝났습니다)')};
+  }
+  return s.toks[s.p++];
+}
+function sopt(s, type, val){ if(sat(s, type, val)){ s.p++; return true; } return false; }
+function sExpectEnd(s){
+  if(s.p < s.toks.length) throw {line:s.line, msg:'줄 끝에 이해할 수 없는 내용이 있습니다: "' + scur(s).value + '"'};
+}
+
+/* ----- 식 파서 ----- */
+function pExpr(s){ return pOr(s); }
+function pOr(s){
+  var l = pAnd(s);
+  while(sat(s,'kw','or')){ s.p++; l = {type:'bin', op:'or', l:l, r:pAnd(s)}; }
+  return l;
+}
+function pAnd(s){
+  var l = pNot(s);
+  while(sat(s,'kw','and')){ s.p++; l = {type:'bin', op:'and', l:l, r:pNot(s)}; }
+  return l;
+}
+function pNot(s){
+  if(sat(s,'kw','not')){ s.p++; return {type:'unary', op:'not', e:pNot(s)}; }
+  return pCmp(s);
+}
+function isCmpOp(s){
+  return sat(s,'op','==') || sat(s,'op','!=') || sat(s,'op','\u003c') || sat(s,'op','\u003e') || sat(s,'op','\u003c=') || sat(s,'op','\u003e=');
+}
+function pCmp(s){
+  var l = pAdd(s);
+  if(isCmpOp(s)){
+    var o = seat(s,'op').value;
+    l = {type:'bin', op:o, l:l, r:pAdd(s)};
+    if(isCmpOp(s)) throw {line:s.line, msg:'연쇄 비교(a \u003c b \u003c c)는 지원하지 않습니다'};
+  }
+  return l;
+}
+function pAdd(s){
+  var l = pMul(s);
+  while(sat(s,'op','+') || sat(s,'op','-')){
+    var o = seat(s,'op').value;
+    l = {type:'bin', op:o, l:l, r:pMul(s)};
+  }
+  return l;
+}
+function pMul(s){
+  var l = pUnary(s);
+  while(sat(s,'op','*') || sat(s,'op','/') || sat(s,'op','//') || sat(s,'op','%')){
+    var o = seat(s,'op').value;
+    l = {type:'bin', op:o, l:l, r:pUnary(s)};
+  }
+  return l;
+}
+function pUnary(s){
+  if(sat(s,'op','-')){ s.p++; return {type:'unary', op:'-', e:pUnary(s)}; }
+  return pPower(s);
+}
+function pPower(s){
+  var l = pPrimary(s);
+  if(sat(s,'op','**')){ s.p++; return {type:'bin', op:'**', l:l, r:pUnary(s)}; }
+  return l;
+}
+function pPrimary(s){
+  var t = scur(s);
+  if(!t) throw {line:s.line, msg:'문법 오류: 값이 필요한데 줄이 끝났습니다'};
+  if(t.type === 'num'){ s.p++; return {type:'num', value:t.value}; }
+  if(t.type === 'str'){ s.p++; return {type:'str', value:t.value}; }
+  if(t.type === 'kw' && (t.value === 'True' || t.value === 'False')){ s.p++; return {type:'bool', value:t.value === 'True'}; }
+  if(t.type === 'ident'){ s.p++; return {type:'name', name:t.value}; }
+  if(t.type === 'op' && t.value === '('){
+    s.p++;
+    var e = pExpr(s);
+    seat(s,'op',')');
+    return e;
+  }
+  throw {line:s.line, msg:'문법 오류: 값(숫자, 문자열, 변수)이 필요합니다 (현재: "' + t.value + '")'};
+}
+
+function pyExprToStr(e){
+  switch(e.type){
+    case 'num': return String(e.value);
+    case 'str': return '"' + e.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/"/g,'\\"') + '"';
+    case 'bool': return e.value ? 'True' : 'False';
+    case 'name': return e.name;
+    case 'bin': return pyExprToStr(e.l) + ' ' + e.op + ' ' + pyExprToStr(e.r);
+    case 'unary': return (e.op === 'not' ? 'not ' : e.op) + pyExprToStr(e.e);
+  }
+  return '';
+}
+
+/* ----- 문장 파서 (들여쓰기 블록) ----- */
+function parseBlockAt(lines, p, indent){
+  var body = [];
+  while(p.i < lines.length){
+    var ln = lines[p.i];
+    if(ln.indent < indent) break;
+    if(ln.indent > indent) throw {line:ln.line, msg:'들여쓰기가 갑자기 깊어졌습니다 — 위 줄과 맞춰 주세요'};
+    body.push(parseStmtLine(lines, p, indent));
+  }
+  return body;
+}
+function parseStmtLine(lines, p, indent){
+  var ln = lines[p.i];
+  p.i++;
+  var s = {p:0, toks:ln.toks, line:ln.line};
+  var t = scur(s);
+  if(t.type === 'kw' && t.value === 'for'){ s.p++; return pFor(s, lines, p, indent); }
+  if(t.type === 'kw' && t.value === 'while'){ s.p++; return pWhile(s, lines, p, indent); }
+  if(t.type === 'kw' && t.value === 'if'){ s.p++; return pIf(s, lines, p, indent); }
+  if(t.type === 'kw' && (t.value === 'elif' || t.value === 'else')){
+    throw {line:ln.line, msg:'"' + t.value + '"는 짝이 되는 if가 필요합니다 (들여쓰기를 확인하세요)'};
+  }
+  var st = pSimple(s);
+  sExpectEnd(s);
+  return st;
+}
+function parseBody(s, lines, p, indent){
+  if(s.p < s.toks.length){
+    var st = pSimple(s);
+    sExpectEnd(s);
+    return [st];
+  }
+  if(p.i >= lines.length || lines[p.i].indent <= indent){
+    throw {line:s.line, msg:'콜론(:) 다음 줄에는 들여쓰기된 코드가 필요합니다'};
+  }
+  var childIndent = lines[p.i].indent;
+  return parseBlockAt(lines, p, childIndent);
+}
+function pFor(s, lines, p, indent){
+  var line = s.line;
+  var name = seat(s,'ident').value;
+  seat(s,'kw','in');
+  var rt = seat(s,'ident');
+  if(rt.value !== 'range') throw {line:line, msg:'for는 range(...)만 지원합니다 (예: for i in range(1, 6):)'};
+  seat(s,'op','(');
+  var args = [pExpr(s)];
+  while(sopt(s,'op',',')) args.push(pExpr(s));
+  if(args.length > 3) throw {line:line, msg:'range 인자는 최대 3개입니다'};
+  seat(s,'op',')');
+  seat(s,'op',':');
+  var body = parseBody(s, lines, p, indent);
+  return {type:'for', name:name, args:args, body:body, line:line};
+}
+function pWhile(s, lines, p, indent){
+  var line = s.line;
+  var cond = pExpr(s);
+  seat(s,'op',':');
+  var body = parseBody(s, lines, p, indent);
+  return {type:'while', cond:cond, body:body, line:line};
+}
+function pIf(s, lines, p, indent){
+  var line = s.line;
+  var cond = pExpr(s);
+  seat(s,'op',':');
+  var body = parseBody(s, lines, p, indent);
+  var node = {type:'if', cond:cond, then:body, els:null, line:line};
+  if(p.i < lines.length && lines[p.i].indent === indent){
+    var ft = lines[p.i].toks[0];
+    if(ft.type === 'kw' && ft.value === 'elif'){
+      var ln2 = lines[p.i];
+      p.i++;
+      var s2 = {p:1, toks:ln2.toks, line:ln2.line};
+      node.els = [pIf(s2, lines, p, indent)];
+    } else if(ft.type === 'kw' && ft.value === 'else'){
+      var ln3 = lines[p.i];
+      p.i++;
+      var s3 = {p:1, toks:ln3.toks, line:ln3.line};
+      seat(s3,'op',':');
+      node.els = parseBody(s3, lines, p, indent);
+    }
+  }
+  return node;
+}
+function pPrint(s){
+  var line = s.line;
+  seat(s,'ident');
+  seat(s,'op','(');
+  var args = [], endE = null, sepE = null;
+  if(!sat(s,'op',')')){
+    while(true){
+      var t = scur(s);
+      if(t && t.type === 'ident' && (t.value === 'end' || t.value === 'sep') && s.toks[s.p+1] && s.toks[s.p+1].type === 'op' && s.toks[s.p+1].value === '='){
+        var kw = t.value;
+        s.p += 2;
+        var ke = pExpr(s);
+        if(kw === 'end') endE = ke; else sepE = ke;
+      } else {
+        args.push(pExpr(s));
+      }
+      if(!sopt(s,'op',',')) break;
+    }
+  }
+  seat(s,'op',')');
+  return {type:'print', args:args, endE:endE, sepE:sepE, line:line};
+}
+function pSimple(s){
+  var t = scur(s);
+  if(!t) throw {line:s.line, msg:'빈 문장입니다'};
+  if(t.type === 'ident' && t.value === 'print' && s.toks[s.p+1] && s.toks[s.p+1].type === 'op' && s.toks[s.p+1].value === '(') return pPrint(s);
+  if(t.type === 'ident'){
+    var name = t.value;
+    s.p++;
+    var op = scur(s);
+    var AUG = ['=','+=','-=','*=','/=','//=','%='];
+    if(!op || op.type !== 'op' || AUG.indexOf(op.value) < 0){
+      throw {line:s.line, msg:'문장을 이해할 수 없습니다 — 대입문(=)이나 print(...)만 사용할 수 있습니다'};
+    }
+    s.p++;
+    var e = pExpr(s);
+    return {type:'assign', name:name, op:op.value, value:e, line:s.line};
+  }
+  throw {line:s.line, msg:'문장을 이해할 수 없습니다'};
+}
+
+/* ----- 값 표시/판정 ----- */
+function pyStr(v){
+  if(typeof v === 'boolean') return v ? 'True' : 'False';
+  return String(v);
+}
+function pyDisp(v){
+  if(typeof v === 'string') return '"' + v.replace(/\n/g,'\\n') + '"';
+  return pyStr(v);
+}
+function pyTruthy(v){
+  if(typeof v === 'string') return v.length > 0;
+  if(typeof v === 'boolean') return v;
+  return v !== 0;
+}
+
+/* ----- 실행기 ----- */
+function runProgram(src){
+  var lines = pyPrepLines(src);
+  if(lines.length === 0) throw {line:1, msg:'실행할 코드가 없습니다'};
+  if(lines[0].indent !== 0) throw {line:lines[0].line, msg:'첫 문장은 들여쓰기 없이 시작해야 합니다'};
+  var p = {i:0};
+  var ast = parseBlockAt(lines, p, 0);
+  if(p.i < lines.length) throw {line:lines[p.i].line, msg:'들여쓰기가 맞지 않습니다'};
+
+  var I = {vars:{}, steps:[], output:'', count:0};
+  function tick(line){
+    I.count++;
+    if(I.count > 20000) throw {line:line, msg:'실행이 너무 깁니다. 무한 루프가 아닌지 확인하세요.'};
+  }
+  function record(line, desc, changed){
+    if(I.steps.length >= 600) throw {line:line, msg:'표시할 실행 단계가 600개를 넘었습니다. n을 줄여 보세요.'};
+    I.steps.push({line:line, desc:desc, vars:Object.assign({}, I.vars), output:I.output, changed:changed || null});
+  }
+  function asNum(v, line){
+    if(typeof v === 'boolean') return v ? 1 : 0;
+    if(typeof v !== 'number') throw {line:line, msg:'숫자가 필요한 자리에 문자열이 왔습니다: ' + pyDisp(v)};
+    return v;
+  }
+  function evalE(e, line){
+    tick(line);
+    switch(e.type){
+      case 'lit': return e.v;
+      case 'num': return e.value;
+      case 'str': return e.value;
+      case 'bool': return e.value;
+      case 'name': {
+        if(!(e.name in I.vars)) throw {line:line, msg:'정의되지 않은 이름입니다: ' + e.name + ' (NameError)'};
+        return I.vars[e.name];
+      }
+      case 'unary': {
+        if(e.op === 'not') return !pyTruthy(evalE(e.e, line));
+        return -asNum(evalE(e.e, line), line);
+      }
+      case 'bin': {
+        if(e.op === 'and'){ var lv = evalE(e.l, line); return pyTruthy(lv) ? pyTruthy(evalE(e.r, line)) : false; }
+        if(e.op === 'or'){ var lv2 = evalE(e.l, line); return pyTruthy(lv2) ? true : pyTruthy(evalE(e.r, line)); }
+        var a = evalE(e.l, line), b = evalE(e.r, line);
+        var sa = typeof a === 'string', sb = typeof b === 'string';
+        switch(e.op){
+          case '+':
+            if(sa && sb) return a + b;
+            if(sa || sb) throw {line:line, msg:'문자열과 숫자는 + 로 연결할 수 없습니다 (TypeError)'};
+            return asNum(a,line) + asNum(b,line);
+          case '-': return asNum(a,line) - asNum(b,line);
+          case '*':
+            if(sa && sb) throw {line:line, msg:'문자열끼리는 곱할 수 없습니다'};
+            if(sa || sb){
+              var strv = sa ? a : b;
+              var num = asNum(sa ? b : a, line);
+              if(!Number.isInteger(num)) throw {line:line, msg:'문자열 반복 횟수는 정수여야 합니다'};
+              if(num <= 0) return '';
+              var r = '';
+              for(var k = 0; k < num; k++){ r += strv; if(r.length > 5000) throw {line:line, msg:'문자열이 너무 깁니다'}; }
+              return r;
+            }
+            return asNum(a,line) * asNum(b,line);
+          case '/':
+            if(asNum(b,line) === 0) throw {line:line, msg:'0으로 나눌 수 없습니다 (ZeroDivisionError)'};
+            return asNum(a,line) / asNum(b,line);
+          case '//':
+            if(asNum(b,line) === 0) throw {line:line, msg:'0으로 나눌 수 없습니다 (ZeroDivisionError)'};
+            return Math.floor(asNum(a,line) / asNum(b,line));
+          case '%': {
+            var bb = asNum(b,line);
+            if(bb === 0) throw {line:line, msg:'0으로 나눈 나머지는 없습니다 (ZeroDivisionError)'};
+            var aa = asNum(a,line);
+            return ((aa % bb) + bb) % bb;
+          }
+          case '**': return Math.pow(asNum(a,line), asNum(b,line));
+          case '==': return (sa === sb) && a === b;
+          case '!=': return !((sa === sb) && a === b);
+          case '\u003c': case '\u003e': case '\u003c=': case '\u003e=': {
+            if(sa !== sb) throw {line:line, msg:'서로 다른 타입은 크기 비교할 수 없습니다'};
+            if(e.op === '\u003c') return a < b;
+            if(e.op === '\u003e') return a > b;
+            if(e.op === '\u003c=') return a <= b;
+            return a >= b;
+          }
+        }
+      }
+    }
+    throw {line:line, msg:'식을 계산할 수 없습니다'};
+  }
+  function makeRange(vals, line){
+    for(var i = 0; i < vals.length; i++){
+      var v = asNum(vals[i], line);
+      if(!Number.isInteger(v)) throw {line:line, msg:'range 인자는 정수여야 합니다'};
+      vals[i] = v;
+    }
+    var start, stop, step;
+    if(vals.length === 1){ start = 0; stop = vals[0]; step = 1; }
+    else if(vals.length === 2){ start = vals[0]; stop = vals[1]; step = 1; }
+    else { start = vals[0]; stop = vals[1]; step = vals[2]; if(step === 0) throw {line:line, msg:'range의 step은 0이 될 수 없습니다'}; }
+    var list = [], v2 = start, g = 0;
+    while(step > 0 ? v2 < stop : v2 > stop){
+      list.push(v2);
+      v2 += step;
+      g++;
+      if(g > 2000) throw {line:line, msg:'반복이 너무 많습니다'};
+    }
+    return list;
+  }
+  function rangePreview(list){
+    if(list.length <= 7) return '[' + list.join(', ') + ']';
+    return '[' + list.slice(0, 5).join(', ') + ', ..., ' + list[list.length - 1] + ']';
+  }
+  function execBlock(body){
+    for(var i = 0; i < body.length; i++) execStmt(body[i]);
+  }
+  function execStmt(st){
+    switch(st.type){
+      case 'assign': {
+        var v = evalE(st.value, st.line);
+        if(st.op !== '='){
+          if(!(st.name in I.vars)) throw {line:st.line, msg:'정의되지 않은 이름입니다: ' + st.name};
+          var cur = I.vars[st.name];
+          var op2 = st.op.slice(0, st.op.length - 1);
+          v = evalE({type:'bin', op:op2, l:{type:'lit', v:cur}, r:{type:'lit', v:v}}, st.line);
+        }
+        I.vars[st.name] = v;
+        record(st.line, st.name + ' ' + st.op + ' ' + pyExprToStr(st.value) + '  \u2192  ' + st.name + ' = ' + pyDisp(v), {kind:'var', name:st.name});
+        break;
+      }
+      case 'print': {
+        var vals = st.args.map(function(a){ return evalE(a, st.line); });
+        var sep = ' ', end = '\n';
+        if(st.sepE){ sep = evalE(st.sepE, st.line); if(typeof sep !== 'string') throw {line:st.line, msg:'sep은 문자열이어야 합니다'}; }
+        if(st.endE){ end = evalE(st.endE, st.line); if(typeof end !== 'string') throw {line:st.line, msg:'end는 문자열이어야 합니다'}; }
+        var text = vals.map(pyStr).join(sep) + end;
+        I.output += text;
+        if(vals.length === 0 && end === '\n'){
+          record(st.line, 'print() 실행 \u2192 줄바꿈(\\n) — 현재 줄 완성!');
+        } else {
+          var note = (st.endE && end === '') ? ' (end="" — 줄바꿈 없이 이어 찍기)' : '';
+          record(st.line, 'print 실행 \u2192 "' + text.replace(/\n/g,'\\n') + '" 출력' + note);
+        }
+        break;
+      }
+      case 'for': {
+        var argv = st.args.map(function(a){ return evalE(a, st.line); });
+        var rangeStr = 'range(' + st.args.map(pyExprToStr).join(', ') + ')';
+        var list = makeRange(argv, st.line);
+        if(list.length === 0){
+          record(st.line, 'for ' + st.name + ' in ' + rangeStr + ' — 반복할 값이 없습니다(빈 range) \u2192 건너뜁니다');
+          break;
+        }
+        for(var k = 0; k < list.length; k++){
+          tick(st.line);
+          I.vars[st.name] = list[k];
+          var d = (k === 0)
+            ? 'for ' + st.name + ' in ' + rangeStr + ' 시작 — 반복할 값: ' + rangePreview(list) + '. ' + st.name + '에 ' + list[k] + ' 대입'
+            : st.name + '에 다음 값 ' + list[k] + ' 대입 (' + (k + 1) + '번째 반복)';
+          record(st.line, d, {kind:'var', name:st.name});
+          execBlock(st.body);
+        }
+        record(st.line, rangeStr + '의 값을 모두 사용 \u2192 반복 종료');
+        break;
+      }
+      case 'while': {
+        var g2 = 0;
+        while(true){
+          tick(st.line);
+          var c = evalE(st.cond, st.line);
+          record(st.line, '조건 검사: ' + pyExprToStr(st.cond) + ' \u2192 ' + (pyTruthy(c) ? 'True' : 'False'));
+          if(!pyTruthy(c)) break;
+          execBlock(st.body);
+          g2++;
+          if(g2 > 2000) throw {line:st.line, msg:'반복이 너무 많습니다'};
+        }
+        break;
+      }
+      case 'if': {
+        var c2 = evalE(st.cond, st.line);
+        record(st.line, '조건 검사: ' + pyExprToStr(st.cond) + ' \u2192 ' + (pyTruthy(c2) ? 'True' : 'False'));
+        if(pyTruthy(c2)) execBlock(st.then);
+        else if(st.els) execBlock(st.els);
+        break;
+      }
+    }
+  }
+  record(0, '실행 준비 완료 — [다음 \u25b6] 버튼으로 한 단계씩 진행하거나 [자동 재생]을 누르세요');
+  execBlock(ast);
+  record(-1, '프로그램 종료 \u2714 (총 ' + (I.steps.length - 1) + '단계 실행)');
+  return I;
+}
+
+</script>
+<script>
+
+/* ===================== UI ===================== */
+var els = {};
+['gutter','code','editorWrap','viewerWrap','runBtn','editBtn','homeBtn','prevBtn','nextBtn','lineBtn','endBtn','playBtn','speedSel','stepCnt','stepDesc','canvasWrap','varsBox','outputRaw','errorBox','presetChips'].forEach(function(id){
+  els[id] = document.getElementById(id);
+});
+
+var P_HEAD = 'n = 5\n\n';
+var PRESETS = [
+  {name:'\u2460 왼쪽 직각삼각형', code:P_HEAD + 'for i in range(1, n + 1):\n    for j in range(1, i + 1):\n        print("*", end="")\n    print()'},
+  {name:'\u2461 역직각삼각형', code:P_HEAD + 'for i in range(1, n + 1):\n    for j in range(1, n - i + 2):\n        print("*", end="")\n    print()'},
+  {name:'\u2462 오른쪽 정렬', code:P_HEAD + 'for i in range(1, n + 1):\n    for j in range(1, n - i + 1):\n        print(" ", end="")\n    for j in range(1, i + 1):\n        print("*", end="")\n    print()'},
+  {name:'\u2463 피라미드', code:P_HEAD + 'for i in range(1, n + 1):\n    for j in range(1, n - i + 1):\n        print(" ", end="")\n    for j in range(1, 2 * i):\n        print("*", end="")\n    print()'},
+  {name:'\u2464 다이아몬드', code:P_HEAD + 'for i in range(1, n + 1):\n    for j in range(1, n - i + 1):\n        print(" ", end="")\n    for j in range(1, 2 * i):\n        print("*", end="")\n    print()\n\nfor i in range(n - 1, 0, -1):\n    for j in range(1, n - i + 1):\n        print(" ", end="")\n    for j in range(1, 2 * i):\n        print("*", end="")\n    print()'}
+];
+
+var trace = null, cur = 0, timer = null, finalW = 0, finalH = 0;
+
+/* ----- 편집기 ----- */
+function refreshGutter(){
+  var lines = els.code.value.split('\n').length;
+  var buf = [];
+  for(var i = 1; i <= lines; i++) buf.push(i);
+  els.gutter.textContent = buf.join('\n');
+  els.gutter.scrollTop = els.code.scrollTop;
+}
+els.code.addEventListener('input', refreshGutter);
+els.code.addEventListener('scroll', function(){ els.gutter.scrollTop = els.code.scrollTop; });
+els.code.addEventListener('keydown', function(e){
+  if(e.key === 'Tab'){
+    e.preventDefault();
+    var s = els.code.selectionStart, t = els.code.selectionEnd;
+    els.code.value = els.code.value.substring(0, s) + '    ' + els.code.value.substring(t);
+    els.code.selectionStart = els.code.selectionEnd = s + 4;
+    refreshGutter();
+  }
+});
+
+/* ----- 예제 버튼 ----- */
+PRESETS.forEach(function(ps){
+  var b = document.createElement('button');
+  b.textContent = ps.name;
+  b.addEventListener('click', function(){
+    stopTimer();
+    els.code.value = ps.code;
+    refreshGutter();
+    setMode(true);
+    clearError();
+    resetPanels();
+    els.stepCnt.textContent = '- / -';
+    els.stepDesc.textContent = '패턴을 불러왔습니다. 그대로 실행하거나 자유롭게 고쳐 보세요.';
+  });
+  els.presetChips.appendChild(b);
+});
+
+/* ----- 모드 ----- */
+function setMode(edit){
+  els.editorWrap.style.display = edit ? 'flex' : 'none';
+  els.viewerWrap.style.display = edit ? 'none' : 'block';
+  els.editBtn.style.display = edit ? 'none' : 'inline-block';
+  var on = !edit && trace !== null;
+  ['homeBtn','prevBtn','nextBtn','lineBtn','endBtn','playBtn'].forEach(function(k){ els[k].disabled = !on; });
+}
+function buildViewer(src){
+  while(els.viewerWrap.firstChild) els.viewerWrap.removeChild(els.viewerWrap.firstChild);
+  var lines = src.split('\n');
+  for(var i = 0; i < lines.length; i++){
+    var row = document.createElement('div');
+    row.className = 'cline';
+    var ln = document.createElement('span');
+    ln.className = 'ln';
+    ln.textContent = String(i + 1);
+    var tx = document.createElement('span');
+    tx.className = 'txt';
+    tx.textContent = lines[i] === '' ? ' ' : lines[i];
+    row.appendChild(ln);
+    row.appendChild(tx);
+    els.viewerWrap.appendChild(row);
+  }
+}
+
+/* ----- 오류/패널 ----- */
+function showError(err){
+  var msg = (err && err.msg) ? err.msg : String(err);
+  var lineTxt = (err && err.line && err.line > 0) ? err.line + '번째 줄 근처: ' : '';
+  els.errorBox.textContent = '\u26a0 ' + lineTxt + msg;
+  els.errorBox.style.display = 'block';
+}
+function clearError(){ els.errorBox.style.display = 'none'; els.errorBox.textContent = ''; }
+function resetPanels(){
+  while(els.canvasWrap.firstChild) els.canvasWrap.removeChild(els.canvasWrap.firstChild);
+  var p = document.createElement('p');
+  p.className = 'placeholder';
+  p.textContent = '코드를 실행하면 별이 찍히는 과정이 여기에 나타납니다.';
+  els.canvasWrap.appendChild(p);
+  while(els.varsBox.firstChild) els.varsBox.removeChild(els.varsBox.firstChild);
+  var p2 = document.createElement('p');
+  p2.className = 'placeholder';
+  p2.textContent = '선언된 변수가 없습니다.';
+  els.varsBox.appendChild(p2);
+  els.outputRaw.textContent = '';
+}
+
+/* ----- 별 캔버스 ----- */
+function renderCanvas(st, prevLen){
+  while(els.canvasWrap.firstChild) els.canvasWrap.removeChild(els.canvasWrap.firstChild);
+  if(finalW === 0 || finalH === 0){
+    var p = document.createElement('p');
+    p.className = 'placeholder';
+    p.textContent = '이 코드는 출력이 없습니다. printf("*")를 사용해 보세요.';
+    els.canvasWrap.appendChild(p);
+    return;
+  }
+  var out = st.output;
+  var newRows = {}, newCols = {};
+  var table = document.createElement('table');
+  table.className = 'starGrid';
+  var thead = document.createElement('tr');
+  var corner = document.createElement('td');
+  corner.className = 'sg-corner';
+  corner.textContent = 'i\\j';
+  thead.appendChild(corner);
+  var headCells = [];
+  for(var c = 0; c < finalW; c++){
+    var h = document.createElement('td');
+    h.className = 'sg-h';
+    h.textContent = String(c + 1);
+    headCells.push(h);
+    thead.appendChild(h);
+  }
+  table.appendChild(thead);
+  var gi = 0, r = 0, cc = 0;
+  var rowsData = [];
+  for(r = 0; r < finalH; r++){
+    rowsData.push(new Array(finalW).fill(null));
+  }
+  r = 0; cc = 0;
+  for(gi = 0; gi < out.length; gi++){
+    var ch = out[gi];
+    if(ch === '\n'){ r++; cc = 0; continue; }
+    if(r < finalH && cc < finalW){
+      rowsData[r][cc] = {ch:ch, isNew: gi >= prevLen};
+      if(gi >= prevLen){ newRows[r] = true; newCols[cc] = true; }
+    }
+    cc++;
+  }
+  var rowEls = [];
+  for(r = 0; r < finalH; r++){
+    var tr = document.createElement('tr');
+    var rl = document.createElement('td');
+    rl.className = 'sg-rl' + (newRows[r] ? ' cur' : '');
+    rl.textContent = String(r + 1);
+    tr.appendChild(rl);
+    for(var c2 = 0; c2 < finalW; c2++){
+      var cell = document.createElement('td');
+      var d = rowsData[r][c2];
+      if(d === null){
+        cell.className = 'sg-cell';
+        cell.textContent = '';
+      } else if(d.ch === ' '){
+        cell.className = 'sg-cell space' + (d.isNew ? ' new' : '');
+        cell.textContent = '\u00b7';
+      } else {
+        cell.className = 'sg-cell star' + (d.isNew ? ' new' : '');
+        cell.textContent = d.ch;
+      }
+      tr.appendChild(cell);
+    }
+    table.appendChild(tr);
+    rowEls.push(tr);
+  }
+  for(var hc = 0; hc < headCells.length; hc++){
+    if(newCols[hc]) headCells[hc].className = 'sg-h cur';
+  }
+  els.canvasWrap.appendChild(table);
+}
+
+function renderVars(st){
+  while(els.varsBox.firstChild) els.varsBox.removeChild(els.varsBox.firstChild);
+  var names = Object.keys(st.vars);
+  if(names.length === 0){
+    var p = document.createElement('p');
+    p.className = 'placeholder';
+    p.textContent = '선언된 변수가 없습니다.';
+    els.varsBox.appendChild(p);
+    return;
+  }
+  names.forEach(function(name){
+    var chip = document.createElement('div');
+    var hit = st.changed && st.changed.kind === 'var' && st.changed.name === name;
+    chip.className = hit ? 'varchip hit' : 'varchip';
+    var v = st.vars[name];
+    chip.textContent = name + ' = ' + (v === null ? '?' : pyDisp(v));
+    els.varsBox.appendChild(chip);
+  });
+}
+
+function renderStep(){
+  if(!trace) return;
+  var st = trace.steps[cur];
+  var prevLen = cur > 0 ? trace.steps[cur - 1].output.length : 0;
+  var rows = els.viewerWrap.children;
+  for(var i = 0; i < rows.length; i++) rows[i].classList.remove('cur');
+  if(st.line >= 1 && st.line <= rows.length){
+    rows[st.line - 1].classList.add('cur');
+    rows[st.line - 1].scrollIntoView({block:'nearest'});
+  }
+  els.stepCnt.textContent = (cur + 1) + ' / ' + trace.steps.length;
+  els.stepDesc.textContent = st.desc;
+  renderCanvas(st, prevLen);
+  renderVars(st);
+  els.outputRaw.textContent = st.output;
+  window.currentOutput = st.output;
+  els.homeBtn.disabled = (cur === 0);
+  els.prevBtn.disabled = (cur === 0);
+  els.nextBtn.disabled = (cur >= trace.steps.length - 1);
+  els.lineBtn.disabled = (cur >= trace.steps.length - 1);
+  els.endBtn.disabled = (cur >= trace.steps.length - 1);
+}
+
+/* ----- 재생 ----- */
+function stopTimer(){
+  if(timer){ clearInterval(timer); timer = null; }
+  els.playBtn.textContent = '자동 재생';
+}
+function startTimer(){
+  stopTimer();
+  els.playBtn.textContent = '\u23f8 정지';
+  timer = setInterval(function(){
+    if(trace && cur < trace.steps.length - 1){ cur++; renderStep(); }
+    else stopTimer();
+  }, parseInt(els.speedSel.value, 10));
+}
+function countNl(s){
+  var k = 0;
+  for(var i = 0; i < s.length; i++) if(s[i] === '\n') k++;
+  return k;
+}
+
+/* ----- 버튼 ----- */
+els.runBtn.addEventListener('click', function(){
+  stopTimer();
+  clearError();
+  var src = els.code.value;
+  try {
+    trace = runProgram(src);
+  } catch(err){
+    trace = null;
+    showError(err);
+    setMode(true);
+    return;
+  }
+  var fin = trace.steps[trace.steps.length - 1].output;
+  var lines = fin.split('\n');
+  if(lines.length && lines[lines.length - 1] === '') lines.pop();
+  finalH = lines.length;
+  finalW = 0;
+  for(var i = 0; i < lines.length; i++) finalW = Math.max(finalW, lines[i].length);
+  buildViewer(src);
+  setMode(false);
+  cur = 0;
+  renderStep();
+});
+els.editBtn.addEventListener('click', function(){
+  stopTimer();
+  setMode(true);
+  els.stepDesc.textContent = '코드를 수정한 뒤 다시 실행하세요.';
+});
+els.homeBtn.addEventListener('click', function(){ stopTimer(); cur = 0; renderStep(); });
+els.prevBtn.addEventListener('click', function(){ stopTimer(); if(cur > 0){ cur--; renderStep(); } });
+els.nextBtn.addEventListener('click', function(){ stopTimer(); if(trace && cur < trace.steps.length - 1){ cur++; renderStep(); } });
+els.lineBtn.addEventListener('click', function(){
+  if(!trace) return;
+  stopTimer();
+  var target = countNl(trace.steps[cur].output) + 1;
+  while(cur < trace.steps.length - 1){
+    cur++;
+    if(countNl(trace.steps[cur].output) >= target) break;
+  }
+  renderStep();
+});
+els.endBtn.addEventListener('click', function(){ stopTimer(); if(trace){ cur = trace.steps.length - 1; renderStep(); } });
+els.playBtn.addEventListener('click', function(){
+  if(timer){ stopTimer(); return; }
+  if(trace && cur >= trace.steps.length - 1){ cur = 0; renderStep(); }
+  startTimer();
+});
+els.speedSel.addEventListener('change', function(){ if(timer) startTimer(); });
+
+/* ----- 초기 상태 ----- */
+els.code.value = PRESETS[0].code;
+refreshGutter();
+setMode(true);
+resetPanels();
+
+</script>
+</body>
+</html>
