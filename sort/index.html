@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파이썬 정렬 알고리즘 시각화 실습실 — 버블·선택·삽입·병합·퀵</title>
+<style>
+:root{
+  --bg:#0b1526; --panel:#12203a; --panel2:#0e1a30; --line:#1e3a5f;
+  --teal:#2dd4bf; --teal-dim:#14b8a6; --amber:#fbbf24; --red:#f87171;
+  --green:#4ade80; --violet:#a78bfa;
+  --text:#e2e8f0; --muted:#8aa3c4; --code-bg:#0a1322;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;min-height:100vh;}
+.wrap{max-width:1320px;margin:0 auto;padding:20px 18px 48px;}
+header{padding:22px 4px 18px;border-bottom:2px solid var(--line);margin-bottom:20px;display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;}
+header h1{font-size:1.5rem;letter-spacing:-0.5px;}
+header h1 span{color:var(--teal);}
+.badge{background:rgba(45,212,191,0.12);border:1px solid var(--teal-dim);color:var(--teal);font-size:0.78rem;padding:3px 10px;border-radius:999px;}
+.sub{color:var(--muted);font-size:0.88rem;width:100%;line-height:1.6;}
+.sub b{color:var(--text);}
+.grid{display:grid;grid-template-columns:minmax(430px,47%) 1fr;gap:18px;align-items:start;}
+@media(max-width:980px){.grid{grid-template-columns:1fr;}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.card h2{font-size:0.92rem;padding:11px 16px;border-bottom:1px solid var(--line);color:var(--teal);display:flex;align-items:center;gap:8px;font-weight:600;}
+.card h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block;}
+.card .body{padding:14px 16px;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel2);}
+.chips button{background:transparent;border:1px solid var(--line);color:var(--muted);font-size:0.8rem;padding:6px 12px;border-radius:999px;cursor:pointer;transition:all .15s;font-family:inherit;}
+.chips button:hover{border-color:var(--teal-dim);color:var(--teal);}
+.chips button.active{background:rgba(45,212,191,0.14);border-color:var(--teal);color:var(--teal);font-weight:700;}
+.viewer{background:var(--code-bg);height:430px;overflow:auto;padding:12px 0;font:12.5px/1.6 Consolas,'D2Coding',monospace;}
+.viewer .cline{display:flex;}
+.viewer .ln{width:42px;flex:none;text-align:right;padding-right:12px;color:#3d5878;user-select:none;}
+.viewer .txt{white-space:pre;flex:1;padding-right:14px;}
+.viewer .cline.cur{background:rgba(45,212,191,0.14);box-shadow:inset 3px 0 0 var(--teal);}
+.viewer .cline.cur .txt{color:#a7f3ea;}
+/* race panel (left) */
+.racePanel{display:none;background:var(--code-bg);min-height:430px;padding:18px 16px;}
+.rprow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:0.85rem;color:var(--muted);}
+.rprow select{background:#173052;border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:8px;font-family:inherit;font-size:0.85rem;}
+.vs{color:var(--amber);font-weight:800;font-size:0.95rem;}
+.rhint{margin-top:16px;font-size:0.84rem;color:var(--muted);line-height:1.75;}
+.rhint b{color:var(--text);}
+.raceBanner{display:none;margin-top:16px;background:rgba(251,191,36,0.1);border:1px solid var(--amber);color:#fde68a;border-radius:10px;padding:13px 15px;font-size:0.88rem;line-height:1.65;}
+.controls{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid var(--line);background:var(--panel2);align-items:center;}
+.controls button{background:#173052;border:1px solid var(--line);color:var(--text);font-size:0.83rem;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.controls button:hover:not(:disabled){border-color:var(--teal-dim);color:var(--teal);}
+.controls button:disabled{opacity:0.35;cursor:default;}
+.controls select{background:#173052;border:1px solid var(--line);color:var(--text);font-size:0.82rem;padding:6px 8px;border-radius:8px;font-family:inherit;}
+.stepbar{padding:11px 16px;border-top:1px solid var(--line);font-size:0.86rem;min-height:48px;display:flex;gap:10px;align-items:flex-start;}
+.stepbar .cnt{flex:none;background:rgba(45,212,191,0.12);color:var(--teal);border-radius:6px;padding:2px 9px;font-size:0.78rem;font-family:Consolas,monospace;margin-top:2px;}
+.stepbar .desc{color:var(--text);line-height:1.5;}
+.arrbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;font-size:0.83rem;color:var(--muted);}
+.arrbar input{background:var(--code-bg);border:1px solid var(--line);color:var(--text);font:13px Consolas,'D2Coding',monospace;padding:7px 10px;border-radius:8px;width:180px;}
+.arrbar button{background:#173052;border:1px solid var(--line);color:var(--text);font-size:0.8rem;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.arrbar button:hover{border-color:var(--teal-dim);color:var(--teal);}
+.arrbar .err{color:var(--red);font-size:0.78rem;}
+.stats{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.stat{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:5px 12px;font:600 12.5px Consolas,'D2Coding',monospace;}
+.stat.cmp{color:#7fe0d4;}
+.stat.mov{color:var(--amber);}
+.rangechip{display:none;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.5);color:#c4b5fd;font:600 12px Consolas,'D2Coding',monospace;border-radius:999px;padding:3px 11px;margin-bottom:10px;width:fit-content;}
+.bars{display:flex;align-items:flex-end;gap:8px;min-height:210px;padding:6px 2px 0;}
+.barw{display:flex;flex-direction:column;align-items:center;gap:5px;flex:none;width:47px;transition:opacity .2s;}
+.barw.dim{opacity:0.25;}
+.bar{width:100%;border-radius:7px 7px 3px 3px;background:#173052;border:1.5px solid var(--line);display:flex;align-items:flex-start;justify-content:center;font:700 13px Consolas,'D2Coding',monospace;color:var(--text);padding-top:4px;transition:height .25s ease,background .2s,border-color .2s;}
+.bidx{font:11px Consolas,monospace;color:var(--muted);}
+.bar.cmp{border-color:var(--teal);box-shadow:0 0 0 2px rgba(45,212,191,0.35);color:#a7f3ea;}
+.bar.mut{border-color:var(--amber);background:rgba(251,191,36,0.16);color:var(--amber);animation:pulse .45s ease;}
+.bar.fixed{background:rgba(74,222,128,0.13);border-color:rgba(74,222,128,0.6);color:var(--green);}
+.bar.mark{border-color:var(--violet);background:rgba(167,139,250,0.15);color:#c4b5fd;}
+@keyframes pulse{0%{transform:scale(1);}40%{transform:scale(1.1);}100%{transform:scale(1);}}
+.legend{display:flex;gap:13px;margin-top:12px;font-size:0.75rem;color:var(--muted);flex-wrap:wrap;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend .sw{width:13px;height:13px;border-radius:4px;display:inline-block;border:1.5px solid var(--line);background:#173052;}
+.tmpwrap{display:none;margin-top:14px;}
+.tmpname{font:600 12px Consolas,'D2Coding',monospace;color:var(--amber);margin-bottom:7px;}
+.tmpcells{display:flex;gap:6px;flex-wrap:wrap;}
+.tmpcell{width:47px;text-align:center;background:var(--code-bg);border:1.5px solid var(--line);border-radius:8px;padding:7px 4px;transition:all .2s;}
+.tmpcell .tv{font:700 14px Consolas,'D2Coding',monospace;}
+.tmpcell .tv.empty{color:#42597c;font-style:italic;font-weight:400;}
+.tmpcell .ti{font:10px Consolas,monospace;color:var(--muted);margin-top:2px;}
+.tmpcell.hit{border-color:var(--amber);background:rgba(251,191,36,0.1);animation:pulse .45s ease;}
+/* race panes (right) */
+#raceBox{display:none;}
+.racePane{border:1.5px solid var(--line);border-radius:10px;background:var(--code-bg);padding:12px;margin-bottom:12px;}
+.rhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-size:0.82rem;}
+.rname{font-weight:700;color:var(--teal);}
+.rstat{color:var(--muted);font:600 12px Consolas,'D2Coding',monospace;}
+.rprog{color:var(--muted);font:600 12px Consolas,'D2Coding',monospace;margin-left:auto;}
+.finish{display:none;background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.6);color:var(--green);border-radius:999px;padding:2px 10px;font-size:0.75rem;}
+.bars.mini{min-height:135px;gap:5px;}
+.bars.mini .barw{width:34px;}
+.bars.mini .bar{font-size:11px;padding-top:2px;border-radius:5px 5px 2px 2px;}
+.varchips{display:flex;flex-wrap:wrap;gap:8px;min-height:34px;}
+.varchip{background:var(--code-bg);border:1.5px solid var(--line);border-radius:8px;padding:7px 12px;font:600 13px Consolas,'D2Coding',monospace;transition:all .2s;}
+.tips{font-size:0.83rem;color:var(--muted);line-height:1.75;}
+.tips b{color:var(--teal);}
+.rightcol{display:flex;flex-direction:column;gap:16px;}
+.placeholder{color:var(--muted);font-size:0.85rem;padding:6px 0;}
+@media(prefers-reduced-motion:reduce){.bar.mut,.tmpcell.hit{animation:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1><span>파이썬</span> 정렬 알고리즘 시각화 실습실</h1>
+  <span class="badge">버블 · 선택 · 삽입 · 병합 · 퀵 + 경주 모드</span>
+  <p class="sub">알고리즘을 고르면 왼쪽에 파이썬 코드가, 오른쪽에 배열 막대가 나타납니다. 한 단계씩 진행하며 <b>어느 줄이 실행될 때 어떤 원소가 비교(청록)·이동(주황)·확정(초록)되는지</b>와 <b>비교·이동 횟수</b>를 확인하세요. 🏁 경주 모드에서는 두 알고리즘이 같은 배열로 나란히 달립니다.</p>
+</header>
+
+<div class="grid">
+  <!-- LEFT -->
+  <section class="card">
+    <h2><span class="dot"></span>파이썬 코드 · 단계 실행</h2>
+    <div class="chips">
+      <button id="modeStudy" class="active">학습 모드</button>
+      <button id="modeRace">&#127937; 경주 모드</button>
+    </div>
+    <div class="chips" id="algoChips"></div>
+    <div class="viewer" id="viewerWrap"></div>
+    <div class="racePanel" id="racePanel">
+      <div class="rprow">
+        <label for="selA">선수 A</label><select id="selA"></select>
+        <span class="vs">VS</span>
+        <label for="selB">선수 B</label><select id="selB"></select>
+      </div>
+      <p class="rhint">같은 배열을 놓고 <b>같은 속도로 한 단계씩</b> 경주합니다. 한 단계 = 비교·이동 같은 기본 작업 하나이므로, <b>단계 수가 적을수록 일을 적게 한 것</b>입니다.<br>작은 배열에서는 단순한 정렬이 이기기도 합니다 — 배열을 8개로 늘리거나 무작위 버튼으로 여러 번 겨뤄 보세요!</p>
+      <div class="raceBanner" id="raceBanner"></div>
+    </div>
+    <div class="controls">
+      <button id="homeBtn">&#9198;</button>
+      <button id="prevBtn">&#9664; 이전</button>
+      <button id="nextBtn">다음 &#9654;</button>
+      <button id="mutBtn">다음 변화 &#9654;&#9654;</button>
+      <button id="endBtn">끝 &#9197;</button>
+      <span style="flex:1"></span>
+      <button id="playBtn">자동 재생</button>
+      <select id="speedSel" aria-label="재생 속도">
+        <option value="1100">느리게</option>
+        <option value="600" selected>보통</option>
+        <option value="250">빠르게</option>
+        <option value="90">매우 빠르게</option>
+      </select>
+    </div>
+    <div class="stepbar">
+      <span class="cnt" id="stepCnt">- / -</span>
+      <span class="desc" id="stepDesc"></span>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <div class="rightcol">
+    <section class="card">
+      <h2><span class="dot"></span>배열 상태</h2>
+      <div class="body">
+        <div class="arrbar">
+          <label for="arrInput">배열:</label>
+          <input id="arrInput" value="5, 2, 9, 1, 7, 4" spellcheck="false">
+          <button id="applyBtn">적용</button>
+          <button id="randBtn">&#127922; 무작위</button>
+          <span class="err" id="arrErr"></span>
+        </div>
+        <div id="studyView">
+          <div class="stats">
+            <span class="stat cmp" id="statCmp">비교 0회</span>
+            <span class="stat mov" id="statMov">교환·이동 0회</span>
+          </div>
+          <div class="rangechip" id="rangeChip"></div>
+          <div class="bars" id="barsBox"></div>
+          <div class="legend">
+            <span><span class="sw" style="border-color:var(--teal);box-shadow:0 0 0 2px rgba(45,212,191,0.35);"></span>비교 중</span>
+            <span><span class="sw" style="border-color:var(--amber);background:rgba(251,191,36,0.16);"></span>이동·교환</span>
+            <span><span class="sw" style="border-color:rgba(74,222,128,0.6);background:rgba(74,222,128,0.13);"></span>자리 확정</span>
+            <span><span class="sw" style="border-color:var(--violet);background:rgba(167,139,250,0.15);"></span>피벗·최솟값·key</span>
+            <span><span class="sw" style="opacity:0.3;"></span>현재 구간 밖</span>
+          </div>
+          <div class="tmpwrap" id="tmpWrap">
+            <div class="tmpname">tmp 리스트 — 병합용 임시 공간</div>
+            <div class="tmpcells" id="tmpCells"></div>
+          </div>
+        </div>
+        <div id="raceBox">
+          <div class="racePane">
+            <div class="rhead">
+              <span class="rname" id="nameA"></span>
+              <span class="rstat" id="statA"></span>
+              <span class="rprog" id="progA"></span>
+              <span class="finish" id="finA">&#127937; 완주!</span>
+            </div>
+            <div class="bars mini" id="barsA"></div>
+          </div>
+          <div class="racePane">
+            <div class="rhead">
+              <span class="rname" id="nameB"></span>
+              <span class="rstat" id="statB"></span>
+              <span class="rprog" id="progB"></span>
+              <span class="finish" id="finB">&#127937; 완주!</span>
+            </div>
+            <div class="bars mini" id="barsB"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="card">
+      <h2><span class="dot"></span>변수</h2>
+      <div class="body"><div class="varchips" id="varsBox"><p class="placeholder">실행을 시작하면 변수가 표시됩니다.</p></div></div>
+    </section>
+    <section class="card">
+      <h2><span class="dot"></span>학습 포인트</h2>
+      <div class="body tips" id="tipsBox"></div>
+    </section>
+  </div>
+</div>
+</div>
+<script>
+/* ===================== 트레이스 생성기 (L: 언어별 줄번호 맵, cnt: 비교/이동 누적) ===================== */
+function traceBubble(a0, L){
+  var a = a0.slice(), steps = [], sorted = [], n = a.length, c = 0, m = 0;
+  function rec(line, desc, mk, vars){
+    steps.push({line:line, desc:desc, arr:a.slice(), marks:Object.assign({sorted:sorted.slice()}, mk||{}), vars:vars||{}, tmp:null, cnt:{c:c, m:m}});
+  }
+  rec(0, '실행 준비 완료 — [다음 \u25b6]으로 한 단계씩, [다음 변화 \u25b6\u25b6]로 교환 지점까지 이동하세요');
+  for(var i = 0; i < n - 1; i++){
+    rec(L.pass, '패스 ' + (i+1) + ' 시작 (i = ' + i + ') — 이웃끼리 비교하며 남은 구간의 최댓값을 맨 뒤로 보냅니다', null, {i:i});
+    for(var j = 0; j < n - 1 - i; j++){
+      var need = a[j] > a[j+1];
+      c++;
+      rec(L.cmp, '비교: arr[' + j + ']=' + a[j] + ' vs arr[' + (j+1) + ']=' + a[j+1] + ' \u2192 ' + (need ? '앞이 더 크므로 교환!' : '순서 유지'), {compare:[j, j+1]}, {i:i, j:j});
+      if(need){
+        var t = a[j]; a[j] = a[j+1]; a[j+1] = t;
+        m++;
+        rec(L.swap, '교환 완료: arr[' + j + '] \u2194 arr[' + (j+1) + ']', {swap:[j, j+1]}, {i:i, j:j});
+      }
+    }
+    sorted.push(n - 1 - i);
+    rec(L.pass, '패스 ' + (i+1) + ' 완료 — arr[' + (n-1-i) + '] = ' + a[n-1-i] + ' 자리 확정! (거품처럼 떠올랐습니다)', null, {i:i});
+  }
+  sorted.push(0);
+  rec(-1, '정렬 완료 \u2714 — 비교 ' + c + '회, 교환 ' + m + '회 (O(n\u00b2))');
+  return steps;
+}
+
+function traceSelection(a0, L){
+  var a = a0.slice(), steps = [], sorted = [], n = a.length, c = 0, m = 0;
+  function rec(line, desc, mk, vars){
+    steps.push({line:line, desc:desc, arr:a.slice(), marks:Object.assign({sorted:sorted.slice()}, mk||{}), vars:vars||{}, tmp:null, cnt:{c:c, m:m}});
+  }
+  rec(0, '실행 준비 완료 — 남은 구간에서 최솟값을 "선택"해 맨 앞과 교환합니다');
+  for(var i = 0; i < n - 1; i++){
+    var min = i;
+    rec(L.minInit, '패스 ' + (i+1) + ': min_idx = ' + i + ' — 일단 arr[' + i + ']=' + a[i] + '을(를) 최솟값 후보로', {min:min}, {i:i, min_idx:min});
+    for(var j = i + 1; j < n; j++){
+      var less = a[j] < a[min];
+      c++;
+      rec(L.cmp, '비교: arr[' + j + ']=' + a[j] + ' vs 현재 최솟값 arr[' + min + ']=' + a[min] + ' \u2192 ' + (less ? '더 작다! 후보 교체' : '유지'), {compare:[j, min], min:min}, {i:i, j:j, min_idx:min});
+      if(less){
+        min = j;
+        rec(L.minUpd, 'min_idx = ' + j + ' — 최솟값 후보가 arr[' + j + ']=' + a[j] + '(으)로 바뀌었습니다', {min:min}, {i:i, j:j, min_idx:min});
+      }
+    }
+    var t = a[i]; a[i] = a[min]; a[min] = t;
+    m++;
+    rec(L.swap, min === i
+      ? 'min_idx == i — 이미 제자리라 교환해도 변화 없음'
+      : '교환: arr[' + i + '] \u2194 arr[' + min + '] — 최솟값 ' + a[i] + '이(가) 맨 앞으로', {swap:[i, min]}, {i:i, min_idx:min});
+    sorted.push(i);
+    rec(L.pass, 'arr[' + i + '] = ' + a[i] + ' 자리 확정! 교환은 패스당 딱 1번', null, {i:i});
+  }
+  sorted.push(n - 1);
+  rec(-1, '정렬 완료 \u2714 — 비교 ' + c + '회는 많지만 교환은 ' + m + '회뿐 (O(n\u00b2), 불안정)');
+  return steps;
+}
+
+function traceInsertion(a0, L){
+  var a = a0.slice(), steps = [], n = a.length, c = 0, m = 0;
+  function region(i){ var r = []; for(var k = 0; k <= i; k++) r.push(k); return r; }
+  function rec(line, desc, mk, vars, srt){
+    steps.push({line:line, desc:desc, arr:a.slice(), marks:Object.assign({sorted:srt||[]}, mk||{}), vars:vars||{}, tmp:null, cnt:{c:c, m:m}});
+  }
+  rec(0, '실행 준비 완료 — 카드 정리하듯, 새 값을 정렬된 부분의 알맞은 자리에 끼워 넣습니다', null, null, [0]);
+  for(var i = 1; i < n; i++){
+    var key = a[i];
+    rec(L.key, 'key = arr[' + i + '] = ' + key + ' — 이 값을 왼쪽의 정렬된 부분(초록)에 끼워 넣을 차례', {key:i}, {i:i, key:key}, region(i-1));
+    var j = i - 1;
+    rec(L.jinit, 'j = ' + j + ' — key 바로 왼쪽부터 거꾸로 살펴봅니다', {key:i}, {i:i, j:j, key:key}, region(i-1));
+    while(j >= 0 && a[j] > key){
+      c++;
+      rec(L.cmp, '비교: arr[' + j + ']=' + a[j] + ' \u003e key(' + key + ') \u2192 참, 오른쪽으로 밀어야 함', {compare:[j]}, {i:i, j:j, key:key}, region(i-1));
+      a[j+1] = a[j];
+      m++;
+      rec(L.shift, 'arr[' + (j+1) + '] = arr[' + j + '] — 한 칸 밀기 (잠시 ' + a[j] + '이(가) 두 개!)', {write:[j+1]}, {i:i, j:j, key:key}, region(i-1));
+      j--;
+    }
+    if(j >= 0){
+      c++;
+      rec(L.cmp, '비교: arr[' + j + ']=' + a[j] + ' \u003e key(' + key + ') \u2192 거짓, 밀기 멈춤', {compare:[j]}, {i:i, j:j, key:key}, region(i-1));
+    } else {
+      rec(L.cmp, 'j = -1 — 맨 앞까지 왔으므로 멈춤', null, {i:i, j:j, key:key}, region(i-1));
+    }
+    a[j+1] = key;
+    m++;
+    rec(L.insert, 'arr[' + (j+1) + '] = key(' + key + ') — 빈 자리에 끼워 넣기 완료! 정렬된 부분이 한 칸 늘었습니다', {write:[j+1]}, {i:i, j:j, key:key}, region(i));
+  }
+  rec(-1, '정렬 완료 \u2714 — 비교 ' + c + '회, 이동 ' + m + '회. 거의 정렬된 데이터라면 훨씬 적어집니다 (최선 O(n), 안정)', null, null, region(n-1));
+  return steps;
+}
+
+function traceMerge(a0, L){
+  var a = a0.slice(), steps = [], n = a.length, c = 0, m = 0;
+  var tmp = new Array(n).fill(null);
+  function rec(line, desc, mk, vars, showTmp){
+    steps.push({line:line, desc:desc, arr:a.slice(), marks:Object.assign({sorted:[]}, mk||{}), vars:vars||{}, tmp:showTmp ? tmp.slice() : null, cnt:{c:c, m:m}});
+  }
+  rec(0, '실행 준비 완료 — "반으로 나눈 뒤(분할), 정렬하며 합칩니다(병합)". 흐린 막대는 지금 다루지 않는 구간입니다');
+  function msort(l, r, depth){
+    var pfx = '깊이 ' + depth + ' \u00b7 ';
+    if(l >= r){
+      rec(L.msCall, pfx + 'merge_sort(' + l + ', ' + r + ') — 원소가 1개뿐이라 이미 정렬됨, 즉시 반환', {range:[l, r]}, {left:l, right:r});
+      return;
+    }
+    rec(L.msCall, pfx + 'merge_sort(' + l + ', ' + r + ') 호출 — 구간 [' + l + '..' + r + ']', {range:[l, r]}, {left:l, right:r});
+    var mid = (l + r) >> 1;
+    rec(L.mid, pfx + 'mid = ' + mid + ' — [' + l + '..' + mid + ']와 [' + (mid + 1) + '..' + r + ']로 분할', {range:[l, r]}, {left:l, right:r, mid:mid});
+    msort(l, mid, depth + 1);
+    msort(mid + 1, r, depth + 1);
+    rec(L.mergeCall, pfx + '병합 시작: 정렬된 [' + l + '..' + mid + ']와 [' + (mid + 1) + '..' + r + ']를 하나로 합칩니다', {range:[l, r]}, {left:l, mid:mid, right:r}, true);
+    var i = l, j = mid + 1, k = l;
+    rec(L.init, pfx + 'i = ' + i + ', j = ' + j + ', k = ' + k + ' — 두 구간의 맨 앞에서부터 더 작은 값을 tmp에 담습니다', {range:[l, r], compare:[i, j]}, {i:i, j:j, k:k}, true);
+    while(i <= mid && j <= r){
+      c++;
+      if(a[i] <= a[j]){
+        tmp[k] = a[i];
+        m++;
+        rec(L.takeL, pfx + '비교: arr[' + i + ']=' + a[i] + ' \u2264 arr[' + j + ']=' + a[j] + ' \u2192 작은 ' + a[i] + '을(를) tmp[' + k + ']에', {range:[l, r], compare:[i, j], tmpWrite:k}, {i:i, j:j, k:k}, true);
+        i++;
+      } else {
+        tmp[k] = a[j];
+        m++;
+        rec(L.takeR, pfx + '비교: arr[' + i + ']=' + a[i] + ' \u003e arr[' + j + ']=' + a[j] + ' \u2192 작은 ' + a[j] + '을(를) tmp[' + k + ']에', {range:[l, r], compare:[i, j], tmpWrite:k}, {i:i, j:j, k:k}, true);
+        j++;
+      }
+      k++;
+    }
+    while(i <= mid){
+      tmp[k] = a[i];
+      m++;
+      rec(L.leftRest, pfx + '왼쪽 구간에 남은 ' + a[i] + ' \u2192 tmp[' + k + ']', {range:[l, r], tmpWrite:k}, {i:i, k:k}, true);
+      i++; k++;
+    }
+    while(j <= r){
+      tmp[k] = a[j];
+      m++;
+      rec(L.rightRest, pfx + '오른쪽 구간에 남은 ' + a[j] + ' \u2192 tmp[' + k + ']', {range:[l, r], tmpWrite:k}, {j:j, k:k}, true);
+      j++; k++;
+    }
+    for(k = l; k <= r; k++){
+      a[k] = tmp[k];
+      m++;
+      rec(L.copy, pfx + 'tmp[' + k + '] = ' + tmp[k] + ' \u2192 arr[' + k + ']에 복사', {range:[l, r], write:[k]}, {k:k}, true);
+    }
+    rec(L.mergeCall, pfx + '병합 완료 — 구간 [' + l + '..' + r + ']이 정렬되었습니다', {range:[l, r]}, {left:l, right:r}, true);
+  }
+  msort(0, n - 1, 0);
+  var all = [];
+  for(var q = 0; q < n; q++) all.push(q);
+  steps.push({line:-1, desc:'정렬 완료 \u2714 — 비교 ' + c + '회, 이동 ' + m + '회. 항상 O(n log n)이지만 tmp(추가 메모리 O(n))가 필요합니다 (안정)', arr:a.slice(), marks:{sorted:all}, vars:{}, tmp:null, cnt:{c:c, m:m}});
+  return steps;
+}
+
+function traceQuick(a0, L){
+  var a = a0.slice(), steps = [], sorted = [], n = a.length, c = 0, m = 0;
+  function rec(line, desc, mk, vars){
+    steps.push({line:line, desc:desc, arr:a.slice(), marks:Object.assign({sorted:sorted.slice()}, mk||{}), vars:vars||{}, tmp:null, cnt:{c:c, m:m}});
+  }
+  rec(0, '실행 준비 완료 — 피벗(보라)보다 작은 값은 왼쪽, 크거나 같은 값은 오른쪽으로 나눕니다');
+  function qsort(lo, hi, depth){
+    var pfx = '깊이 ' + depth + ' \u00b7 ';
+    if(lo > hi) return;
+    if(lo === hi){
+      sorted.push(lo);
+      rec(L.qsCall, pfx + 'quick_sort(' + lo + ', ' + hi + ') — 원소 1개, 그 자리가 곧 제자리 (확정!)', {range:[lo, hi]}, {low:lo, high:hi});
+      return;
+    }
+    rec(L.qsCall, pfx + 'quick_sort(' + lo + ', ' + hi + ') 호출 — 구간 [' + lo + '..' + hi + ']', {range:[lo, hi]}, {low:lo, high:hi});
+    var pivot = a[hi];
+    rec(L.pivot, pfx + '피벗 선택: 구간 맨 끝 arr[' + hi + '] = ' + pivot, {range:[lo, hi], pivot:hi}, {low:lo, high:hi, pivot:pivot});
+    var i = lo - 1;
+    rec(L.iInit, pfx + 'i = ' + i + ' — "피벗보다 작은 값 구역"의 오른쪽 끝 표시', {range:[lo, hi], pivot:hi}, {i:i, pivot:pivot});
+    for(var j = lo; j < hi; j++){
+      var less = a[j] < pivot;
+      c++;
+      rec(L.cmp, pfx + '비교: arr[' + j + ']=' + a[j] + ' vs 피벗 ' + pivot + ' \u2192 ' + (less ? '작다! 작은 구역으로 보냅니다' : '크거나 같음 — 그대로 통과'), {range:[lo, hi], pivot:hi, compare:[j]}, {i:i, j:j, pivot:pivot});
+      if(less){
+        i++;
+        var t = a[i]; a[i] = a[j]; a[j] = t;
+        m++;
+        rec(L.swap, (i === j)
+          ? pfx + 'i == j — 이미 작은 구역 바로 옆이라 교환해도 변화 없음'
+          : pfx + '교환: arr[' + i + '] \u2194 arr[' + j + '] — 작은 값 ' + a[i] + '을(를) 작은 구역 끝으로', {range:[lo, hi], pivot:hi, swap:[i, j]}, {i:i, j:j, pivot:pivot});
+      }
+    }
+    var t2 = a[i + 1]; a[i + 1] = a[hi]; a[hi] = t2;
+    m++;
+    rec(L.finalSwap, pfx + '피벗을 경계 자리로: arr[' + (i + 1) + '] \u2194 arr[' + hi + ']', {range:[lo, hi], swap:[i + 1, hi]}, {i:i, pivot:pivot});
+    sorted.push(i + 1);
+    rec(L.ret, pfx + '피벗 ' + a[i + 1] + ' 자리 확정! (arr[' + (i + 1) + ']) — 왼쪽은 전부 더 작고 오른쪽은 전부 크거나 같습니다', {range:[lo, hi]}, {p:i + 1});
+    qsort(lo, i, depth + 1);
+    qsort(i + 2, hi, depth + 1);
+  }
+  qsort(0, n - 1, 0);
+  rec(-1, '정렬 완료 \u2714 — 비교 ' + c + '회, 교환 ' + m + '회. 평균 O(n log n), 최악 O(n\u00b2) (불안정)');
+  return steps;
+}
+</script>
+<!--ALGOS_BLOCK_START-->
+<script>
+/* ===================== 알고리즘 정의 — 파이썬 (코드는 python3로 검증됨) ===================== */
+var ALGOS = [
+  {
+    name:'버블 정렬',
+    gen:traceBubble,
+    L:{pass:3, cmp:5, swap:6},
+    code:'def bubble_sort(arr):\n    n = len(arr)\n    for i in range(n - 1):\n        for j in range(n - 1 - i):\n            if arr[j] \u003e arr[j + 1]:\n                arr[j], arr[j + 1] = arr[j + 1], arr[j]',
+    tips:[
+      ['원리', '이웃한 두 값을 비교해 순서가 틀리면 교환 — 한 패스가 끝나면 최댓값이 거품처럼 맨 뒤로 떠오릅니다.'],
+      ['시간복잡도', '최선/평균/최악 모두 O(n\u00b2) 수준. 비교 횟수는 n(n-1)/2로 고정 — 카운터로 확인해 보세요.'],
+      ['특징', '안정 정렬. 파이썬은 arr[j], arr[j+1] = arr[j+1], arr[j] 한 줄로 교환합니다 — C처럼 tmp 변수가 필요 없습니다!']
+    ]
+  },
+  {
+    name:'선택 정렬',
+    gen:traceSelection,
+    L:{pass:3, minInit:4, cmp:6, minUpd:7, swap:8},
+    code:'def selection_sort(arr):\n    n = len(arr)\n    for i in range(n - 1):\n        min_idx = i\n        for j in range(i + 1, n):\n            if arr[j] \u003c arr[min_idx]:\n                min_idx = j\n        arr[i], arr[min_idx] = arr[min_idx], arr[i]',
+    tips:[
+      ['원리', '남은 구간에서 최솟값(보라)을 찾아 맨 앞과 교환 — 앞쪽부터 확정 구역이 자라납니다.'],
+      ['시간복잡도', '항상 O(n\u00b2) 비교. 대신 교환은 패스당 1번 — 버블과 카운터를 비교해 보세요.'],
+      ['특징', '불안정 정렬(멀리 떨어진 교환 때문). 튜플 교환 한 줄이 C의 tmp 세 줄을 대신합니다.']
+    ]
+  },
+  {
+    name:'삽입 정렬',
+    gen:traceInsertion,
+    L:{key:3, jinit:4, cmp:5, shift:6, insert:8},
+    code:'def insertion_sort(arr):\n    for i in range(1, len(arr)):\n        key = arr[i]\n        j = i - 1\n        while j \u003e= 0 and arr[j] \u003e key:\n            arr[j + 1] = arr[j]\n            j -= 1\n        arr[j + 1] = key',
+    tips:[
+      ['원리', '카드 정리처럼 — 새 값(key, 보라)을 왼쪽의 정렬된 부분(초록)에서 알맞은 자리까지 밀어 넣습니다.'],
+      ['시간복잡도', '최악/평균 O(n\u00b2), 그러나 거의 정렬된 데이터라면 최선 O(n)! 정렬된 배열을 입력해 카운터를 확인해 보세요.'],
+      ['특징', '안정 정렬. 파이썬 내장 sort(팀소트)도 작은 구간은 삽입 정렬로 마무리합니다.']
+    ]
+  },
+  {
+    name:'병합 정렬',
+    gen:traceMerge,
+    L:{msCall:24, mid:26, mergeCall:29, init:3, takeL:6, takeR:9, leftRest:13, rightRest:17, copy:21},
+    code:'def merge(arr, left, mid, right):\n    tmp = [0] * len(arr)\n    i, j, k = left, mid + 1, left\n    while i \u003c= mid and j \u003c= right:\n        if arr[i] \u003c= arr[j]:\n            tmp[k] = arr[i]\n            i += 1\n        else:\n            tmp[k] = arr[j]\n            j += 1\n        k += 1\n    while i \u003c= mid:\n        tmp[k] = arr[i]\n        i += 1\n        k += 1\n    while j \u003c= right:\n        tmp[k] = arr[j]\n        j += 1\n        k += 1\n    for k in range(left, right + 1):\n        arr[k] = tmp[k]\n\ndef merge_sort(arr, left, right):\n    if left \u003e= right:\n        return\n    mid = (left + right) // 2\n    merge_sort(arr, left, mid)\n    merge_sort(arr, mid + 1, right)\n    merge(arr, left, mid, right)',
+    tips:[
+      ['원리', '분할 정복 — 구간을 반으로 쪼개 각각 정렬한 뒤, 두 정렬된 구간을 tmp 리스트에 담으며 하나로 병합합니다. 흐린 막대는 현재 구간 밖입니다.'],
+      ['시간복잡도', '최선/평균/최악 모두 O(n log n) 보장 — 경주 모드에서 O(n\u00b2) 정렬과 겨뤄 보세요.'],
+      ['특징', '안정 정렬. tmp 리스트만큼 추가 메모리 O(n)이 필요합니다. // 는 정수 나눗셈(mid 계산)입니다.']
+    ]
+  },
+  {
+    name:'퀵 정렬',
+    gen:traceQuick,
+    L:{qsCall:12, pivot:2, iInit:3, cmp:5, swap:7, finalSwap:8, ret:9},
+    code:'def partition(arr, low, high):\n    pivot = arr[high]\n    i = low - 1\n    for j in range(low, high):\n        if arr[j] \u003c pivot:\n            i += 1\n            arr[i], arr[j] = arr[j], arr[i]\n    arr[i + 1], arr[high] = arr[high], arr[i + 1]\n    return i + 1\n\ndef quick_sort(arr, low, high):\n    if low \u003c high:\n        p = partition(arr, low, high)\n        quick_sort(arr, low, p - 1)\n        quick_sort(arr, p + 1, high)',
+    tips:[
+      ['원리', '피벗(보라)을 기준으로 작은 값 | 피벗 | 크거나 같은 값으로 분할 — 피벗은 그 즉시 자리 확정(초록), 좌우 구간을 재귀로 반복합니다.'],
+      ['시간복잡도', '평균 O(n log n), 최악 O(n\u00b2) (이미 정렬된 배열 + 끝 피벗 — 정렬된 배열을 입력해 카운터를 확인해 보세요).'],
+      ['특징', '불안정 정렬이지만 추가 메모리가 거의 없어(제자리) 빠릅니다. 튜플 교환으로 partition이 C보다 짧아집니다.']
+    ]
+  }
+];
+</script>
+<!--ALGOS_BLOCK_END-->
+<script>
+/* ===================== UI (학습 모드 + 경주 모드) ===================== */
+var els = {};
+['algoChips','viewerWrap','racePanel','raceBanner','selA','selB','modeStudy','modeRace',
+ 'homeBtn','prevBtn','nextBtn','mutBtn','endBtn','playBtn','speedSel','stepCnt','stepDesc',
+ 'arrInput','applyBtn','randBtn','arrErr','studyView','raceBox','statCmp','statMov','rangeChip',
+ 'barsBox','tmpWrap','tmpCells','varsBox','tipsBox','nameA','nameB','statA','statB','progA','progB','finA','finB','barsA','barsB'
+].forEach(function(id){ els[id] = document.getElementById(id); });
+
+var curArr = [5, 2, 9, 1, 7, 4];
+var algoIdx = 0, trace = [], cur = 0, timer = null;
+var raceMode = false, selAi = 0, selBi = 4, trA = [], trB = [], curA = 0, curB = 0;
+
+function buildViewer(src){
+  while(els.viewerWrap.firstChild) els.viewerWrap.removeChild(els.viewerWrap.firstChild);
+  var lines = src.split('\n');
+  for(var i = 0; i < lines.length; i++){
+    var row = document.createElement('div');
+    row.className = 'cline';
+    var ln = document.createElement('span');
+    ln.className = 'ln';
+    ln.textContent = String(i + 1);
+    var tx = document.createElement('span');
+    tx.className = 'txt';
+    tx.textContent = lines[i] === '' ? ' ' : lines[i];
+    row.appendChild(ln);
+    row.appendChild(tx);
+    els.viewerWrap.appendChild(row);
+  }
+}
+
+function renderTips(idx){
+  while(els.tipsBox.firstChild) els.tipsBox.removeChild(els.tipsBox.firstChild);
+  ALGOS[idx].tips.forEach(function(pair){
+    var b = document.createElement('b');
+    b.textContent = pair[0] + ' — ';
+    els.tipsBox.appendChild(b);
+    els.tipsBox.appendChild(document.createTextNode(pair[1]));
+    els.tipsBox.appendChild(document.createElement('br'));
+  });
+  var b2 = document.createElement('b');
+  b2.textContent = '한눈 비교 — ';
+  els.tipsBox.appendChild(b2);
+  els.tipsBox.appendChild(document.createTextNode('O(n\u00b2): 버블·선택·삽입 / O(n log n): 병합(항상)·퀵(평균). 안정: 버블·삽입·병합 / 불안정: 선택·퀵. 추가 메모리: 병합만 O(n).'));
+}
+
+function renderBarsInto(st, box, base, scale){
+  while(box.firstChild) box.removeChild(box.firstChild);
+  var maxV = 1;
+  st.arr.forEach(function(v){ if(v > maxV) maxV = v; });
+  st.arr.forEach(function(v, idx){
+    var w = document.createElement('div');
+    var dim = st.marks.range && (idx < st.marks.range[0] || idx > st.marks.range[1]);
+    w.className = 'barw' + (dim ? ' dim' : '');
+    var b = document.createElement('div');
+    var cls = 'bar';
+    if(st.marks.sorted && st.marks.sorted.indexOf(idx) >= 0) cls += ' fixed';
+    if(st.marks.pivot === idx || st.marks.min === idx || st.marks.key === idx) cls += ' mark';
+    if(st.marks.compare && st.marks.compare.indexOf(idx) >= 0) cls += ' cmp';
+    if((st.marks.swap && st.marks.swap.indexOf(idx) >= 0) || (st.marks.write && st.marks.write.indexOf(idx) >= 0)) cls += ' mut';
+    b.className = cls;
+    b.style.height = (base + Math.round(v / maxV * scale)) + 'px';
+    b.textContent = v;
+    var ix = document.createElement('div');
+    ix.className = 'bidx';
+    ix.textContent = '[' + idx + ']';
+    w.appendChild(b);
+    w.appendChild(ix);
+    box.appendChild(w);
+  });
+}
+
+function renderTmp(st){
+  if(!st.tmp){ els.tmpWrap.style.display = 'none'; return; }
+  els.tmpWrap.style.display = 'block';
+  while(els.tmpCells.firstChild) els.tmpCells.removeChild(els.tmpCells.firstChild);
+  st.tmp.forEach(function(v, idx){
+    var cell = document.createElement('div');
+    cell.className = 'tmpcell' + (('tmpWrite' in st.marks) && st.marks.tmpWrite === idx ? ' hit' : '');
+    var tv = document.createElement('div');
+    tv.className = (v === null) ? 'tv empty' : 'tv';
+    tv.textContent = (v === null) ? '?' : String(v);
+    var ti = document.createElement('div');
+    ti.className = 'ti';
+    ti.textContent = '[' + idx + ']';
+    cell.appendChild(tv);
+    cell.appendChild(ti);
+    els.tmpCells.appendChild(cell);
+  });
+}
+
+function renderVars(st){
+  while(els.varsBox.firstChild) els.varsBox.removeChild(els.varsBox.firstChild);
+  var names = Object.keys(st.vars);
+  if(names.length === 0){
+    var p = document.createElement('p');
+    p.className = 'placeholder';
+    p.textContent = raceMode ? '경주 모드에서는 변수 대신 카운터를 비교하세요.' : '이 단계에는 표시할 변수가 없습니다.';
+    els.varsBox.appendChild(p);
+    return;
+  }
+  names.forEach(function(name){
+    var chip = document.createElement('div');
+    chip.className = 'varchip';
+    chip.textContent = name + ' = ' + st.vars[name];
+    els.varsBox.appendChild(chip);
+  });
+}
+
+function renderStep(){
+  var st = trace[cur];
+  var rows = els.viewerWrap.children;
+  for(var i = 0; i < rows.length; i++) rows[i].classList.remove('cur');
+  if(st.line >= 1 && st.line <= rows.length){
+    rows[st.line - 1].classList.add('cur');
+    rows[st.line - 1].scrollIntoView({block:'nearest'});
+  }
+  els.stepCnt.textContent = (cur + 1) + ' / ' + trace.length;
+  els.stepDesc.textContent = st.desc;
+  els.statCmp.textContent = '비교 ' + st.cnt.c + '회';
+  els.statMov.textContent = '교환·이동 ' + st.cnt.m + '회';
+  if(st.marks.range){
+    els.rangeChip.style.display = 'block';
+    els.rangeChip.textContent = '현재 구간: arr[' + st.marks.range[0] + ' .. ' + st.marks.range[1] + ']';
+  } else {
+    els.rangeChip.style.display = 'none';
+  }
+  renderBarsInto(st, els.barsBox, 30, 150);
+  renderTmp(st);
+  renderVars(st);
+  els.homeBtn.disabled = (cur === 0);
+  els.prevBtn.disabled = (cur === 0);
+  els.nextBtn.disabled = (cur >= trace.length - 1);
+  els.mutBtn.disabled = (cur >= trace.length - 1);
+  els.endBtn.disabled = (cur >= trace.length - 1);
+  window.currentArr = st.arr.slice();
+}
+
+/* ----- 경주 모드 ----- */
+function buildRace(){
+  trA = ALGOS[selAi].gen(curArr, ALGOS[selAi].L);
+  trB = ALGOS[selBi].gen(curArr, ALGOS[selBi].L);
+  curA = 0; curB = 0;
+  renderRace();
+}
+function renderRace(){
+  var stA = trA[curA], stB = trB[curB];
+  els.nameA.textContent = 'A: ' + ALGOS[selAi].name;
+  els.nameB.textContent = 'B: ' + ALGOS[selBi].name;
+  els.statA.textContent = '비교 ' + stA.cnt.c + ' \u00b7 이동 ' + stA.cnt.m;
+  els.statB.textContent = '비교 ' + stB.cnt.c + ' \u00b7 이동 ' + stB.cnt.m;
+  els.progA.textContent = (curA + 1) + ' / ' + trA.length;
+  els.progB.textContent = (curB + 1) + ' / ' + trB.length;
+  var doneA = curA >= trA.length - 1, doneB = curB >= trB.length - 1;
+  els.finA.style.display = doneA ? 'inline-block' : 'none';
+  els.finB.style.display = doneB ? 'inline-block' : 'none';
+  renderBarsInto(stA, els.barsA, 20, 95);
+  renderBarsInto(stB, els.barsB, 20, 95);
+  els.stepCnt.textContent = '\ud83c\udfc1';
+  els.stepDesc.textContent = ALGOS[selAi].name + ' ' + (curA + 1) + '/' + trA.length + ' \u00b7 ' + ALGOS[selBi].name + ' ' + (curB + 1) + '/' + trB.length + ' — 같은 속도로 한 단계씩 경주 중!';
+  if(doneA && doneB){
+    var LA = trA.length, LB = trB.length;
+    var endA = trA[trA.length - 1].cnt, endB = trB[trB.length - 1].cnt;
+    var txt;
+    if(LA === LB){
+      txt = '\ud83c\udfc1 무승부! 두 알고리즘이 ' + (LA - 1) + '단계로 동시에 완주 — 비교 ' + endA.c + ' vs ' + endB.c + ', 이동 ' + endA.m + ' vs ' + endB.m;
+    } else {
+      var aw = LA < LB;
+      var wName = aw ? ALGOS[selAi].name : ALGOS[selBi].name;
+      var wS = (aw ? LA : LB) - 1, lS = (aw ? LB : LA) - 1;
+      txt = '\ud83c\udfc6 ' + wName + ' 승리! ' + wS + '단계 vs ' + lS + '단계 (비교 ' + endA.c + ' vs ' + endB.c + ' \u00b7 이동 ' + endA.m + ' vs ' + endB.m + '). 단계가 적다 = 일을 적게 했다!';
+    }
+    els.raceBanner.textContent = txt;
+    els.raceBanner.style.display = 'block';
+  } else {
+    els.raceBanner.style.display = 'none';
+  }
+  els.homeBtn.disabled = (curA === 0 && curB === 0);
+  els.prevBtn.disabled = (curA === 0 && curB === 0);
+  els.nextBtn.disabled = doneA && doneB;
+  els.endBtn.disabled = doneA && doneB;
+  els.mutBtn.disabled = true;
+  renderVars({vars:{}});
+}
+function raceFwd(){
+  var moved = false;
+  if(curA < trA.length - 1){ curA++; moved = true; }
+  if(curB < trB.length - 1){ curB++; moved = true; }
+  renderRace();
+  if(!moved) stopTimer();
+}
+
+/* ----- 재생 ----- */
+function stopTimer(){
+  if(timer){ clearInterval(timer); timer = null; }
+  els.playBtn.textContent = '자동 재생';
+}
+function startTimer(){
+  stopTimer();
+  els.playBtn.textContent = '\u23f8 정지';
+  timer = setInterval(function(){
+    if(raceMode){
+      if(curA < trA.length - 1 || curB < trB.length - 1) raceFwd();
+      else stopTimer();
+    } else {
+      if(cur < trace.length - 1){ cur++; renderStep(); }
+      else stopTimer();
+    }
+  }, parseInt(els.speedSel.value, 10));
+}
+function isMut(st){
+  return !!(st.marks.swap || st.marks.write || ('tmpWrite' in st.marks));
+}
+
+/* ----- 모드 전환 ----- */
+function setMode(race){
+  stopTimer();
+  raceMode = race;
+  els.modeStudy.className = race ? '' : 'active';
+  els.modeRace.className = race ? 'active' : '';
+  els.algoChips.style.display = race ? 'none' : 'flex';
+  els.viewerWrap.style.display = race ? 'none' : 'block';
+  els.racePanel.style.display = race ? 'block' : 'none';
+  els.studyView.style.display = race ? 'none' : 'block';
+  els.raceBox.style.display = race ? 'block' : 'none';
+  els.mutBtn.style.display = race ? 'none' : 'inline-block';
+  if(race) buildRace();
+  else loadAlgo(algoIdx);
+}
+
+function loadAlgo(idx){
+  stopTimer();
+  algoIdx = idx;
+  buildViewer(ALGOS[idx].code);
+  trace = ALGOS[idx].gen(curArr, ALGOS[idx].L);
+  cur = 0;
+  var chips = els.algoChips.children;
+  for(var i = 0; i < chips.length; i++) chips[i].className = (i === idx) ? 'active' : '';
+  renderTips(idx);
+  renderStep();
+}
+
+ALGOS.forEach(function(a, idx){
+  var b = document.createElement('button');
+  b.textContent = a.name;
+  b.addEventListener('click', function(){ loadAlgo(idx); });
+  els.algoChips.appendChild(b);
+  var oA = document.createElement('option');
+  oA.value = idx; oA.textContent = a.name;
+  els.selA.appendChild(oA);
+  var oB = document.createElement('option');
+  oB.value = idx; oB.textContent = a.name;
+  els.selB.appendChild(oB);
+});
+els.selA.value = String(selAi);
+els.selB.value = String(selBi);
+els.selA.addEventListener('change', function(){ selAi = parseInt(els.selA.value, 10); stopTimer(); buildRace(); });
+els.selB.addEventListener('change', function(){ selBi = parseInt(els.selB.value, 10); stopTimer(); buildRace(); });
+els.modeStudy.addEventListener('click', function(){ if(raceMode) setMode(false); });
+els.modeRace.addEventListener('click', function(){ if(!raceMode) setMode(true); });
+
+els.homeBtn.addEventListener('click', function(){
+  stopTimer();
+  if(raceMode){ curA = 0; curB = 0; renderRace(); }
+  else { cur = 0; renderStep(); }
+});
+els.prevBtn.addEventListener('click', function(){
+  stopTimer();
+  if(raceMode){ if(curA > 0) curA--; if(curB > 0) curB--; renderRace(); }
+  else if(cur > 0){ cur--; renderStep(); }
+});
+els.nextBtn.addEventListener('click', function(){
+  stopTimer();
+  if(raceMode) raceFwd();
+  else if(cur < trace.length - 1){ cur++; renderStep(); }
+});
+els.mutBtn.addEventListener('click', function(){
+  if(raceMode) return;
+  stopTimer();
+  var k = cur;
+  while(k < trace.length - 1){
+    k++;
+    if(isMut(trace[k])) break;
+  }
+  cur = k;
+  renderStep();
+});
+els.endBtn.addEventListener('click', function(){
+  stopTimer();
+  if(raceMode){ curA = trA.length - 1; curB = trB.length - 1; renderRace(); }
+  else { cur = trace.length - 1; renderStep(); }
+});
+els.playBtn.addEventListener('click', function(){
+  if(timer){ stopTimer(); return; }
+  if(raceMode){
+    if(curA >= trA.length - 1 && curB >= trB.length - 1){ curA = 0; curB = 0; renderRace(); }
+  } else {
+    if(cur >= trace.length - 1){ cur = 0; renderStep(); }
+  }
+  startTimer();
+});
+els.speedSel.addEventListener('change', function(){ if(timer) startTimer(); });
+
+/* ----- 배열 입력 ----- */
+function applyInput(){
+  var raw = els.arrInput.value.split(',');
+  var vals = [];
+  for(var i = 0; i < raw.length; i++){
+    var t = raw[i].trim();
+    if(t === '') continue;
+    if(!/^[0-9]+$/.test(t)){ els.arrErr.textContent = '숫자만 입력하세요 (쉼표 구분)'; return; }
+    var v = parseInt(t, 10);
+    if(v < 1 || v > 99){ els.arrErr.textContent = '값은 1~99 사이만 가능합니다'; return; }
+    vals.push(v);
+  }
+  if(vals.length < 2 || vals.length > 8){ els.arrErr.textContent = '원소는 2~8개로 입력하세요'; return; }
+  els.arrErr.textContent = '';
+  curArr = vals;
+  els.arrInput.value = vals.join(', ');
+  if(raceMode) buildRace();
+  else loadAlgo(algoIdx);
+}
+els.applyBtn.addEventListener('click', applyInput);
+els.arrInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') applyInput(); });
+els.randBtn.addEventListener('click', function(){
+  var vals = [];
+  for(var i = 0; i < 6; i++) vals.push(1 + Math.floor(Math.random() * 9));
+  els.arrInput.value = vals.join(', ');
+  applyInput();
+});
+
+loadAlgo(0);
+</script>
+</body>
+</html>
